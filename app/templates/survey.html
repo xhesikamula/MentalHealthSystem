@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey - Mental Health Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const moodInput = document.getElementById('mood_level');
+    const stressInput = document.getElementById('stress_level');
+    
+    // Real-time intensity display
+    function updateIntensity() {
+        const mood = parseInt(moodInput.value) || 0;
+        const stress = parseInt(stressInput.value) || 0;
+        
+        if (mood <= 2 || stress >= 9) {
+            alert("You're reporting very low mood or high stress. We'll prioritize crisis support.");
+        }
+    }
+    
+    moodInput.addEventListener('change', updateIntensity);
+    stressInput.addEventListener('change', updateIntensity);
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        const mood = parseInt(moodInput.value);
+        const stress = parseInt(stressInput.value);
+        
+        if (isNaN(mood) || isNaN(stress)) {
+            alert("Please enter valid numbers for mood and stress");
+            e.preventDefault();
+        }
+    });
+});
+</script>
+<body>
+    {% include 'header.html' %}
+
+    <section class="survey-section">
+        <div class="survey-container">
+            <h2>Complete the Survey</h2>
+            <form method="POST" action="{{ url_for('main.survey') }}">
+                {{ form.hidden_tag() }} <!-- CSRF token -->
+
+                <!-- Mood Level -->
+                <label for="mood_level">Mood Level (1-10):</label>
+                {{ form.mood_level(class="form-control", id="mood_level") }}
+
+                <!-- Stress Level -->
+                <label for="stress_level">Stress Level (1-10):</label>
+                {{ form.stress_level(class="form-control", id="stress_level") }}
+
+                <!-- Hours of Sleep -->
+                <label for="sleep_hours">Hours of Sleep:</label>
+                {{ form.sleep_hours(class="form-control", id="sleep_hours") }}
+
+                <!-- Energy Level -->
+                <label for="energy_level">Energy Level (1-10):</label>
+                {{ form.energy_level(class="form-control", id="energy_level") }}
+
+                <!-- Diet Quality -->
+                <label for="diet_quality">Diet Quality (1-10):</label>
+                {{ form.diet_quality(class="form-control", id="diet_quality") }}
+
+                <!-- Physical Activity -->
+                <label for="physical_activity">Physical Activity (1-10):</label>
+                {{ form.physical_activity(class="form-control", id="physical_activity") }}
+
+                <!-- Time with Someone -->
+                <label for="spent_time_with_someone">Did you spend time with someone today?</label>
+                {{ form.spent_time_with_someone(class="form-control", id="spent_time_with_someone") }}
+
+                <!-- Feelings Description -->
+                <label for="feelings_description">How are you feeling?</label>
+                {{ form.feelings_description(class="form-control", id="feelings_description", rows=4) }}
+
+                <button type="submit" class="submit-button">Submit Survey</button>
+            </form>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+    
+</body>
+</html>
