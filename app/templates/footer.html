@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        .social-icons {
+            display: flex;
+            gap: 20px; 
+            list-style-type: none; 
+            padding: 0; 
+        }
+
+        .social-icons li {
+            margin: 0; 
+        }
+
+        .social-icons i {
+            font-size: 18px;
+            color: white; 
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icons i:hover {
+            color: #010d04; 
+            transform: scale(1.1); 
+        }
+    </style>
+</head>
+<body>
+
+<footer>
+    <p>&copy; 2025 Mental Health Project</p>
+    <ul class="social-icons">
+        <li>Follow us on:</li>
+        <li><a href="https://twitter.com/yourhandle"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+        <li><a href="https://facebook.com/yourhandle"><i class="fa-brands fa-facebook" aria-hidden="true"></i></a></li>
+        <li><a href="https://instagram.com/yourhandle"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+    </ul>
+</footer>
+
+</body>
+</html>

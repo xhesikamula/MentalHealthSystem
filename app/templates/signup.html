@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Mental Health Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <section class="signup-section">
+        <img src="{{ url_for('static', filename='images/signup.svg') }}" alt="Signup Image" class="signup-image">
+     
+        <div class="signup-container">
+            <h2>Become Part of Our Wellness Family!</h2>
+            
+            <!-- Update the form to use Flask-WTF form handling -->
+            <form method="POST" action="{{ url_for('main.signup') }}">
+                <!-- CSRF Token for protection -->
+                {{ form.hidden_tag() }}
+                
+                <label for="name">Full Name:</label>
+                {{ form.name(class="form-control", id="name") }}  <!-- ✅ Use form.username -->
+                {% if form.name.errors %}
+                    <ul class="errors">
+                        {% for error in form.name.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
+                <label for="email">Email:</label>
+                {{ form.email(class="form-control", id="email") }}
+                {% if form.email.errors %}
+                    <ul class="errors">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+    
+                <label for="password">Password:</label>
+                {{ form.password(class="form-control", id="password") }}
+                {% if form.password.errors %}
+                    <ul class="errors">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+    
+                <label for="confirm-password">Confirm Password:</label>
+                {{ form.confirm_password(class="form-control", id="confirm-password") }}
+                {% if form.confirm_password.errors %}
+                    <ul class="errors">
+                        {% for error in form.confirm_password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+    
+                <button type="submit" class="signup-button">{{ form.submit(class="signup-button") }}
+                </button>
+
+
+                <p>Already have an account? <a href="{{ url_for('main.login') }}">Login</a></p>
+            </form>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+</body>
+</html>
