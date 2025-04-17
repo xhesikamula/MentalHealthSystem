@@ -43,6 +43,14 @@ class User(db.Model, UserMixin):
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+
+    def update_profile(self, name, email, preferences):
+        """Helper method to update profile"""
+        self.name = name
+        self.email = email
+        self.preferences = preferences
+        db.session.commit()
 
 class MoodSurvey(db.Model):
     __tablename__ = 'moodsurvey'
