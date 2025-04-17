@@ -5,9 +5,14 @@ import requests
 load_dotenv()  # Loads .env file
 
 class Config:
-    # Database Configuration
-    SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+    # SQL Server Configuration
+    SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?driver=ODBC+Driver+17+for+SQL+Server"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 3600,
+        'connect_args': {'timeout': 30}
+    }
 HF_TOKEN = os.getenv("HF_TOKEN")  # Ensure this is set in .env
 HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/facebook/blenderbot-400M-distill"
 
