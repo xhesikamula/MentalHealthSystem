@@ -1,7 +1,8 @@
+from sqlalchemy import text
 from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, url_for, flash, session
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
-
+from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
 from app.services.recommendations import generate_recommendations
 from .models import db, Recommendation, User, MoodSurvey
 from .forms import MoodSurveyForm, LoginForm, SignupForm
@@ -9,6 +10,7 @@ from datetime import date, timedelta
 from datetime import datetime
 from flask_limiter.util import get_remote_address
 import openai  # Add this with your other imports
+from app.db_operations import DBOperations
 
 #nuk osht ka i analizon mir tdhanat e survey , edhe po i jep tnjejtat rekomandime gjith mdoket, edhe po i printon keq vlerat qe pja jepi
 
@@ -32,6 +34,65 @@ def init_limiter(app):
 
 limiter = Limiter(key_func=get_remote_address)
 
+
+
+@main.route('/profile/update', methods=['POST'])
+@login_required
+def update_profile():
+    try:
+        name = request.form.get('name')
+        email = request.form.get('email')
+        preferences = request.form.get('preferences', '')
+        
+        # Check if email is being changed
+        if email != current_user.email:
+            # Verify email isn't already taken
+            existing = db.session.execute(
+                text("SELECT user_id FROM user WHERE email = :email"),
+                {"email": email}
+            ).fetchone()
+            
+            if existing and existing[0] != current_user.user_id:
+                flash("Email is already in use by another account", "error")
+                return redirect(url_for('main.profile'))
+        
+        # Update profile
+        DBOperations.call_procedure(
+            "UpdateUserProfile",
+            {
+                "p_user_id": current_user.user_id,
+                "p_name": name,
+                "p_email": email,
+                "p_preferences": preferences
+            }
+        )
+        
+        # Update Flask-Login's user object
+        current_user.name = name
+        current_user.email = email
+        current_user.preferences = preferences
+        
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('main.profile'))
+    
+    except Exception as e:
+        current_app.logger.error(f"Profile update failed: {str(e)}")
+        flash("Failed to update profile", "error")
+        return redirect(url_for('main.profile'))
+    
+
+@main.route('/profile')
+@login_required
+def profile():
+    # Get current user data to pre-fill the form
+    user_data = {
+        'name': current_user.name,
+        'email': current_user.email,
+        'preferences': current_user.preferences or ''
+    }
+    return render_template('profile.html', user=user_data)
+
+
 @main.route('/recommend', methods=['POST'])
 @limiter.limit("3 per minute") 
 def recommend():
@@ -40,6 +101,37 @@ def recommend():
     return jsonify(recommendations)
 
 # Login route
+# @main.route('/login', methods=['GET', 'POST'])
+# def login():
+#     form = LoginForm()
+#     if form.validate_on_submit():
+#         email = form.email.data
+#         password = form.password.data
+        
+#         user = User.query.filter_by(email=email).first()
+        
+#         if user and user.check_password(password):
+#             login_user(user)
+            
+#             # Check for surveys in last 24 hours
+#             twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+#             recent_survey = MoodSurvey.query.filter(
+#                 MoodSurvey.user_id == user.user_id,
+#                 MoodSurvey.survey_date >= twenty_four_hours_ago
+#             ).first()
+            
+#             if recent_survey:
+#                 return redirect(url_for('main.mainpage'))
+#             else:
+#                 return redirect(url_for('main.survey'))
+        
+#         flash("Invalid credentials", "error")
+        
+#     return render_template('login.html', form=form)
+
+
+from sqlalchemy import text
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -47,26 +139,52 @@ def login():
         email = form.email.data
         password = form.password.data
         
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            login_user(user)
-            
-            # Check for surveys in last 24 hours
-            twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-            recent_survey = MoodSurvey.query.filter(
-                MoodSurvey.user_id == user.user_id,
-                MoodSurvey.survey_date >= twenty_four_hours_ago
-            ).first()
-            
-            if recent_survey:
-                return redirect(url_for('main.mainpage'))
-            else:
-                return redirect(url_for('main.survey'))
-        
-        flash("Invalid credentials", "error")
-        
+        try:
+            # Call stored procedure to get user
+            with db.engine.connect() as conn:
+                result = conn.execute(
+                    text("CALL GetUserByEmail(:email)"),
+                    {"email": email}
+                )
+                user_row = result.fetchone()
+                result.close()
+
+            if user_row:
+                # You need to manually compare password if using stored procedures
+                stored_password_hash = user_row['password_hash']
+                from werkzeug.security import check_password_hash
+                
+                if check_password_hash(stored_password_hash, password):
+                    # Manually load user object for login_user
+                    user = User(
+                        user_id=user_row['user_id'],
+                        name=user_row['name'],
+                        email=user_row['email'],
+                        password_hash=stored_password_hash,
+                        role=user_row['role']
+                    )
+                    login_user(user)
+
+                    # Check for surveys in last 24 hours
+                    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+                    recent_survey = MoodSurvey.query.filter(
+                        MoodSurvey.user_id == user.user_id,
+                        MoodSurvey.survey_date >= twenty_four_hours_ago
+                    ).first()
+
+                    if recent_survey:
+                        return redirect(url_for('main.mainpage'))
+                    else:
+                        return redirect(url_for('main.survey'))
+
+            flash("Invalid credentials", "error")
+
+        except Exception as e:
+            print(f"CRITICAL ERROR: {str(e)}")
+            flash("Server error during login", "error")
+    
     return render_template('login.html', form=form)
+
 
 
 @main.route('/survey', methods=['GET', 'POST'])
@@ -239,29 +357,130 @@ def build_ai_prompt(analysis, survey_data):
     """
     return prompt
 
-# Signup route
+# @main.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     form = SignupForm()
+#     if form.validate_on_submit():
+#         try:
+#             # Correct way to create a user
+#             new_user = User(
+#                 name=str(form.name.data),  # Note the comma after each argument
+#                 email=str(form.email.data)  # No comma after last argument
+#             )
+#             new_user.set_password(str(form.password.data))  # Single closing parenthesis
+            
+#             db.session.add(new_user)
+#             db.session.commit()  # <-- THIS MUST SUCCEED
+            
+#             # Verify the user was actually saved
+#             test_user = User.query.filter_by(email=form.email.data).first()
+#             if not test_user:
+#                 raise Exception("User disappeared after commit!")
+                
+#             flash("Account created!")
+#             return redirect(url_for('main.login'))
+            
+#         except Exception as e:
+#             db.session.rollback()
+#             print(f"CRITICAL ERROR: {str(e)}")  # Check console
+#             flash("Failed to create account (server error)")
+    
+#     return render_template('signup.html', form=form)
+
+
+
+# from werkzeug.security import check_password_hash, generate_password_hash
+# @main.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     form = SignupForm()
+#     if form.validate_on_submit():
+#         try:
+#             # Get data from the form
+#             name = form.name.data
+#             email = form.email.data
+#             password = form.password.data  # Plain password from the form
+
+#             # Hash the password before passing it to the stored procedure
+#             password_hash = generate_password_hash(password)
+
+#             # Assuming 'user' is the default role for new users
+#             role = 'user'  # You can set this to 'admin' if you want an admin role
+
+#             # Use SQLAlchemy's engine to call the stored procedure with 4 parameters
+#             with db.engine.begin() as conn:
+#                 result = conn.execute(
+#                     text("CALL CreateUser(:name, :email, :password_hash, :role)"),
+#                     {"name": name, "email": email, "password_hash": password_hash, "role": role}
+#                 )
+
+#             # Check if the procedure executed and inserted data
+#             if result.rowcount == 0:
+#                 raise Exception("Stored procedure failed to insert user.")
+
+#             flash("Account created successfully!")
+#             return redirect(url_for('main.login'))  # Redirect to the login page
+
+#         except Exception as e:
+#             db.session.rollback()
+#             print(f"CRITICAL ERROR: {str(e)}")  # Log more details
+#             flash(f"Failed to create account: {str(e)}")  # Provide error details
+
+#     return render_template('signup.html', form=form)
+
+
+from werkzeug.security import  generate_password_hash
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignupForm()
     if form.validate_on_submit():
-        name = form.name.data  # This creates a tuple instead of a string
+        try:
+            name = form.name.data
+            email = form.email.data
+            password = form.password.data
+            password_hash = generate_password_hash(password)
+            role = 'user'
 
-        email = form.email.data
-        password = form.password.data
-        
-        # Check if user already exists
-        user = User.query.filter_by(email=email).first()
-        if user:
-            flash("Email already in use.", "error")
-            return redirect(url_for('main.signup'))
-        
-        # Create a new user
-        new_user = User(name=name, email=email)  # Make sure username is included here
-        new_user.set_password(password)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        flash("Account created successfully. Please log in.", "success")
-        return redirect(url_for('main.login'))
-    
+            # Check if user already exists
+            with db.engine.begin() as conn:
+                existing_user = conn.execute(
+                    text("CALL GetUserByEmail(:email)"),
+                    {"email": email}
+                ).fetchone()
+
+                if existing_user:
+                    flash("Email is already registered.")
+                    return render_template('signup.html', form=form)
+
+                # Call CreateUser stored procedure
+                result = conn.execute(
+                    text("CALL CreateUser(:name, :email, :password_hash, :role)"),
+                    {
+                        "name": name,
+                        "email": email,
+                        "password_hash": password_hash,
+                        "role": role
+                    }
+                )
+
+            flash("Account created successfully!")
+            return redirect(url_for('main.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"CRITICAL ERROR: {str(e)}")
+            flash(f"Failed to create account: {str(e)}")
+
     return render_template('signup.html', form=form)
+
+
+
+
+@main.route('/test-db-connection')
+def test_db_connection():
+    try:
+        # Test raw connection
+        with db.engine.connect() as conn:
+            result = conn.execute("SELECT 1")
+            return f"✓ Database connected! Result: {result.fetchone()}"
+    except Exception as e:
+        return f"❌ Connection failed: {str(e)}", 500

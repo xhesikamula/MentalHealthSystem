@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import pymysql
 
+
+
 # Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
@@ -15,7 +17,7 @@ login_manager = LoginManager()
 
 def load_environment():
     """Load environment variables with validation"""
-    env_path = Path(__file__).parent / '.env'
+    env_path = Path(__file__).resolve().parent.parent / '.env'
     if not env_path.exists():
         raise FileNotFoundError(f"Environment file not found at {env_path}")
     load_dotenv(dotenv_path=env_path)
@@ -66,6 +68,8 @@ def create_app():
         'DB_NAME': os.getenv('DB_NAME')
     }):
         raise RuntimeError("Failed to connect to database")
+    
+
 
     # Initialize extensions
     db.init_app(app)
