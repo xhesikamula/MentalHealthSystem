@@ -92,4 +92,67 @@ class DBOperations:
             current_app.logger.error(f"Profile update failed: {str(e)}")
             return False
         
+#so tu bo
+@staticmethod
+def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
+                     energy_level, diet_quality, physical_activity,
+                     spent_time_with_someone, feelings_description, recommendation_text):
+    """
+    Calls the CreateMoodSurvey stored procedure to save a mood survey
+    """
+    try:
+        # Verify database connection
+        db.session.execute(text("SELECT 1")).fetchone()
 
+        # Call stored procedure
+        db.session.execute(
+            text("CALL CreateMoodSurvey(:user_id, :mood_level, :stress_level, "
+                ":sleep_hours, :energy_level, :diet_quality, "
+                ":physical_activity, :spent_time, :feelings, :recommendation, @survey_id)"),
+            {
+                'user_id': user_id,
+                'mood_level': mood_level,
+                'stress_level': stress_level,
+                'sleep_hours': sleep_hours,
+                'energy_level': energy_level,
+                'diet_quality': diet_quality,
+                'physical_activity': physical_activity,
+                'spent_time': spent_time_with_someone,
+                'feelings': feelings_description,
+                'recommendation': recommendation_text
+            }
+        )
+
+        # Get the OUT parameter
+        survey_id = db.session.execute(text("SELECT @survey_id")).scalar()
+        db.session.commit()
+        
+        if survey_id:
+            current_app.logger.info(f"Successfully created survey {survey_id}")
+            return survey_id
+        return None
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Failed to create survey: {str(e)}", exc_info=True)
+        return None
+    
+# @staticmethod
+# def get_user_survey_history(user_id, limit=10):
+#     """
+#     Calls the GetUserSurveyHistory stored procedure
+#     """
+#     try:
+#         result = db.session.execute(
+#             text("CALL GetUserSurveyHistory(:p_user_id, :p_limit)"),
+#             {
+#                 'p_user_id': user_id,
+#                 'p_limit': limit
+#             }
+#         )
+#         # Get the result set
+#         surveys = result.fetchall()
+#         return surveys
+#     except Exception as e:
+#         current_app.logger.error(f"Failed to get survey history: {str(e)}")
+#         return []

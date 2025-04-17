@@ -44,6 +44,8 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    
+    
 
     def update_profile(self, name, email, preferences):
         """Helper method to update profile"""

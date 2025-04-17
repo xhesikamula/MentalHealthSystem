@@ -15,6 +15,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 
+
+
+
 def load_environment():
     """Load environment variables with validation"""
     env_path = Path(__file__).resolve().parent.parent / '.env'

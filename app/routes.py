@@ -12,6 +12,7 @@ from flask_limiter.util import get_remote_address
 import openai  # Add this with your other imports
 from app.db_operations import DBOperations
 
+
 #nuk osht ka i analizon mir tdhanat e survey , edhe po i jep tnjejtat rekomandime gjith mdoket, edhe po i printon keq vlerat qe pja jepi
 
 # Create a blueprint for the routes
@@ -88,6 +89,11 @@ from .db_operations import DBOperations
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+
+    if not current_user.is_authenticated:
+        flash('You need to log in to access the profile page', 'error')
+        return redirect(url_for('main.login'))  # Redirect to login explicitly if not authenticated
+    
     form = ProfileForm(obj=current_user)  # Auto-populate form with current user data
     
     if form.validate_on_submit():
@@ -305,6 +311,15 @@ def survey():
             flash("Error processing your survey. Please try again.", "error")
     
     return render_template('survey.html', form=form)
+
+
+
+# @main.route('/survey-history')
+# @login_required
+# def survey_history():
+#     surveys = DBOperations.get_user_survey_history(current_user.user_id)
+#     return render_template('survey_history.html', surveys=surveys)
+
 
 @main.route('/survey_complete')
 @login_required
