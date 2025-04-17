@@ -84,3 +84,24 @@ class SignupForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('That email is already taken. Please choose a different one.')
+        
+
+
+        # app/forms.py
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField
+from wtforms.validators import DataRequired, Email, Length
+
+class ProfileForm(FlaskForm):
+    name = StringField('Full Name', validators=[
+        DataRequired(),
+        Length(min=2, max=100)
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(),
+        Email(),
+        Length(max=100)
+    ])
+    preferences = TextAreaField('Preferences', validators=[
+        Length(max=500)
+    ])

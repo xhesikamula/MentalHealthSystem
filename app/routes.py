@@ -56,41 +56,67 @@ def update_profile():
                 flash("Email is already in use by another account", "error")
                 return redirect(url_for('main.profile'))
         
-        # Update profile
-        DBOperations.call_procedure(
-            "UpdateUserProfile",
-            {
-                "p_user_id": current_user.user_id,
-                "p_name": name,
-                "p_email": email,
-                "p_preferences": preferences
-            }
+        # Update profile using stored procedure
+        success = DBOperations.update_user_profile(
+            user_id=current_user.user_id,
+            name=name,
+            email=email,
+            preferences=preferences
         )
         
-        # Update Flask-Login's user object
-        current_user.name = name
-        current_user.email = email
-        current_user.preferences = preferences
+        if success:
+            # Update Flask-Login's user object
+            current_user.name = name
+            current_user.email = email
+            current_user.preferences = preferences
+            
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("Failed to update profile. Please try again.", "error")
         
-        flash("Profile updated successfully!", "success")
         return redirect(url_for('main.profile'))
     
     except Exception as e:
         current_app.logger.error(f"Profile update failed: {str(e)}")
         flash("Failed to update profile", "error")
         return redirect(url_for('main.profile'))
-    
 
-@main.route('/profile')
+
+from .forms import ProfileForm
+from .db_operations import DBOperations
+
+@main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    # Get current user data to pre-fill the form
-    user_data = {
-        'name': current_user.name,
-        'email': current_user.email,
-        'preferences': current_user.preferences or ''
-    }
-    return render_template('profile.html', user=user_data)
+    form = ProfileForm(obj=current_user)  # Auto-populate form with current user data
+    
+    if form.validate_on_submit():
+        # Check if email is being changed to one that already exists
+        if form.email.data != current_user.email:
+            existing_user = User.query.filter_by(email=form.email.data).first()
+            if existing_user:
+                flash('Email is already in use by another account', 'error')
+                return redirect(url_for('main.profile'))
+        
+        # Update profile using stored procedure
+        success = DBOperations.update_user_profile(
+            user_id=current_user.user_id,
+            name=form.name.data,
+            email=form.email.data,
+            preferences=form.preferences.data
+        )
+        
+        if success:
+            # Update the current_user object to reflect changes immediately
+            current_user.name = form.name.data
+            current_user.email = form.email.data
+            current_user.preferences = form.preferences.data
+            flash('Your profile has been updated!', 'success')
+            return redirect(url_for('main.profile'))
+        else:
+            flash('Failed to update profile. Please try again.', 'error')
+    
+    return render_template('profile.html', form=form)
 
 
 @main.route('/recommend', methods=['POST'])

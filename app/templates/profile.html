@@ -1,25 +1,80 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile</title>
+    <!-- Include Bootstrap for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Update Your Profile</h2>
+        
+        <!-- Display Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Profile Update Form -->
+        <form method="POST" action="{{ url_for('main.profile') }}">
+            {{ form.hidden_tag() }}
+            
+            <!-- Name Field -->
+            <div class="form-group">
+                <label for="name">{{ form.name.label }}</label>
+                {{ form.name(class="form-control", placeholder="Full Name") }}
+                {% if form.name.errors %}
+                    <ul class="text-danger">
+                        {% for error in form.name.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
 
-{% block content %}
-<div class="profile-container">
-    <h2>Update Your Profile</h2>
-    <form method="POST" action="{{ url_for('main.update_profile') }}">
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" value="{{ user.name }}" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="{{ user.email }}" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="preferences">Preferences (comma separated)</label>
-            <textarea id="preferences" name="preferences">{{ user.preferences }}</textarea>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Update Profile</button>
-    </form>
-</div>
-{% endblock %}
+            <!-- Email Field -->
+            <div class="form-group">
+                <label for="email">{{ form.email.label }}</label>
+                {{ form.email(class="form-control", placeholder="Email Address") }}
+                {% if form.email.errors %}
+                    <ul class="text-danger">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Preferences Field -->
+            <div class="form-group">
+                <label for="preferences">{{ form.preferences.label }}</label>
+                {{ form.preferences(class="form-control", placeholder="Your preferences...", rows="4") }}
+                {% if form.preferences.errors %}
+                    <ul class="text-danger">
+                        {% for error in form.preferences.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+    
+    <!-- Include necessary scripts for Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
