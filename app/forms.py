@@ -86,22 +86,24 @@ class SignupForm(FlaskForm):
             raise ValidationError('That email is already taken. Please choose a different one.')
         
 
-
-        # app/forms.py
+from wtforms.validators import DataRequired, EqualTo, Length, Email
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms import StringField, TextAreaField, PasswordField
+
 
 class ProfileForm(FlaskForm):
-    name = StringField('Full Name', validators=[
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    preferences = TextAreaField('Preferences')
+
+
+
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[
         DataRequired(),
-        Length(min=2, max=100)
+        Length(min=8),
+        EqualTo('confirm_password', message='Passwords must match')
     ])
-    email = StringField('Email', validators=[
-        DataRequired(),
-        Email(),
-        Length(max=100)
-    ])
-    preferences = TextAreaField('Preferences', validators=[
-        Length(max=500)
-    ])
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired()])

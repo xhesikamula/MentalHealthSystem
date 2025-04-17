@@ -5,7 +5,7 @@ from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
 from app.services.recommendations import generate_recommendations
 from .models import db, Recommendation, User, MoodSurvey
-from .forms import MoodSurveyForm, LoginForm, SignupForm
+from .forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta
 from datetime import datetime
 from flask_limiter.util import get_remote_address
@@ -117,6 +117,40 @@ def profile():
             flash('Failed to update profile. Please try again.', 'error')
     
     return render_template('profile.html', form=form)
+
+
+from app.forms import ProfileForm 
+@main.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+
+    if form.validate_on_submit():
+        current_password = form.current_password.data
+        new_password = form.new_password.data
+
+        # Check if the current password matches the one stored in the database
+        if not check_password_hash(current_user.password_hash, current_password):
+            flash('Incorrect current password', 'error')
+            return redirect(url_for('main.change_password'))
+
+        # Hash the new password
+        new_password_hash = generate_password_hash(new_password)
+
+        # Call the stored procedure to change the password
+        success = DBOperations.change_password(current_user.user_id, new_password_hash)
+
+        if success:
+            # Update the current_user object to reflect the new password
+            current_user.password_hash = new_password_hash
+            flash('Your password has been changed successfully', 'success')
+            return redirect(url_for('main.profile'))  # Or wherever you want to redirect
+        else:
+            flash('Failed to change password. Please try again.', 'error')
+
+    return render_template('change_password.html', form=form)
+
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @main.route('/recommend', methods=['POST'])
