@@ -11,6 +11,8 @@ from datetime import datetime
 from flask_limiter.util import get_remote_address
 import openai  # Add this with your other imports
 from app.db_operations import DBOperations
+from app.models import JournalEntry
+
 
 
 #nuk osht ka i analizon mir tdhanat e survey , edhe po i jep tnjejtat rekomandime gjith mdoket, edhe po i printon keq vlerat qe pja jepi
@@ -559,3 +561,60 @@ def test_db_connection():
             return f"✓ Database connected! Result: {result.fetchone()}"
     except Exception as e:
         return f"❌ Connection failed: {str(e)}", 500
+    
+
+
+
+    #qitu kom shtu palidhje 
+# @main.route('/upload-image', methods=['POST'])
+# @login_required
+# def upload_image():
+#     file = request.files.get('image')
+#     if file:
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join('static/uploads', filename)
+#         file.save(file_path)
+
+#         # Update user's image path (adjust depending on your model)
+#         current_user.image_url = filename  # Save only the filename, not the full path
+#         db.session.commit()
+
+#         flash("Profile image updated!", "success")
+#     else:
+#         flash("No file selected", "danger")
+    
+#     return redirect(url_for('main.profile'))
+from app.forms import JournalEntryForm
+
+
+# @main.route('/journal', methods=['GET', 'POST'])
+# @login_required
+# def journal_entries():
+#     form = JournalEntryForm()
+#     if form.validate_on_submit():
+#         new_entry = JournalEntry(user_id=current_user.user_id, content=form.content.data)
+#         db.session.add(new_entry)
+#         db.session.commit()
+#         flash('Journal entry saved.', 'success')
+#         return redirect(url_for('main.journal_entries'))
+
+#     entries = JournalEntry.query.filter_by(user_id=current_user.user_id).order_by(JournalEntry.created_at.desc()).all()
+#     return render_template('journal_entries.html', form=form, entries=entries)
+@main.route('/journal', methods=['GET', 'POST'])
+@login_required
+def journal_entries():
+    form = JournalEntryForm()
+    if form.validate_on_submit():
+        new_entry = JournalEntry(
+            content=form.content.data,
+            user_id=current_user.user_id
+        )
+        db.session.add(new_entry)
+        db.session.commit()
+
+        # Optional: Do sentiment analysis here, if set up
+        return redirect(url_for('main.mainpage'))  # 👈 redirect to main page after saving
+
+    entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
+        .order_by(JournalEntry.created_at.desc()).all()
+    return render_template('journal_entries.html', form=form, entries=entries)

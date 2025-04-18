@@ -3,19 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Main Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding-top: 2rem;
+        }
+
         .rectangle {
-            width: 200px;
-            height: 100px;
-            background-color: lightgray;
+            width: 220px;
+            height: 110px;
+            background-color: #ffffff;
+            border: 2px solid olive;
             margin: 10px;
             display: inline-block;
             text-align: center;
             vertical-align: middle;
-            line-height: 100px;
+            line-height: 110px;
+            font-weight: 500;
+            color: #333;
             cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .rectangle:hover {
+            transform: scale(1.05);
+            box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-spacer {
+            margin-top: 4rem;
         }
     </style>
 </head>
@@ -23,11 +45,14 @@
 
     {% include 'header.html' %}
 
-    <h1>Main Page</h1>
-    <div class="rectangle" onclick="window.location.href='/events'">Events</div>
-    <div class="rectangle" onclick="window.location.href='/podcasts'">Podcasts</div>
-    <div class="rectangle" onclick="window.location.href='/hotlines'">Hotlines</div>
-    
+    <h1 class="mb-4 text-primary">Main Page</h1>
+
+    <div class="rectangle" onclick="window.location.href='/events'">📅 Events</div>
+    <div class="rectangle" onclick="window.location.href='/podcasts'">🎧 Podcasts</div>
+    <div class="rectangle" onclick="window.location.href='/hotlines'">📞 Hotlines</div>
+    <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">✍️ Journal</div>
+
+    <div class="footer-spacer"></div>
     {% include 'footer.html' %}
 </body>
 </html>
