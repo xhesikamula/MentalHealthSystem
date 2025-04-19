@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -51,7 +52,8 @@
     <div class="rectangle" onclick="window.location.href='/podcasts'">🎧 Podcasts</div>
     <div class="rectangle" onclick="window.location.href='/hotlines'">📞 Hotlines</div>
     <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">✍️ Journal</div>
-
+    <a href="{{ url_for('main.history') }}">My History</a>
+    <!-- <a href="{{ url_for('main.user_charts', user_id=current_user.user_id) }}">My Trends</a> -->
     <div class="footer-spacer"></div>
     {% include 'footer.html' %}
 </body>

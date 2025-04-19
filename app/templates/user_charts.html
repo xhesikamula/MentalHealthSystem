@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Trends</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="chart-page">
+        <h2>Your Mental Health Trends</h2>
+        
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+            <p id="noDataMessage" style="display:none;">No survey data available</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Properly structured self-executing function
+        (function() {
+            // 1. Safely get data from Flask template
+            const surveyData = {{ surveys|tojson|safe if surveys else '[]' }};
+            
+            // 2. Validate data structure
+            if (!Array.isArray(surveyData)) {
+                console.error("Invalid survey data format");
+                document.getElementById('chartError').textContent = "Data format error";
+                document.getElementById('chartError').style.display = 'block';
+                return;
+            }
+            
+            // 3. Process data with error handling
+            try {
+                const ctx = document.getElementById('trendChart').getContext('2d');
+                const labels = [];
+                const moodData = [];
+                const stressData = [];
+                
+                surveyData.forEach(survey => {
+                    // Handle date formatting
+                    try {
+                        labels.push(survey.survey_date ? 
+                            new Date(survey.survey_date).toLocaleDateString() : 
+                            'No date');
+                    } catch (e) {
+                        labels.push('Invalid date');
+                    }
+                    
+                    // Handle numeric values
+                    moodData.push(Number(survey.mood_level) || 0);
+                    stressData.push(Number(survey.stress_level) || 0);
+                });
+                
+                // 4. Create chart
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Mood Level',
+                                data: moodData,
+                                borderColor: 'rgb(75, 192, 192)',
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Stress Level',
+                                data: stressData,
+                                borderColor: 'rgb(255, 99, 132)',
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 10,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Chart creation error:", error);
+                document.getElementById('chartError').textContent = 
+                    "Failed to create chart: " + error.message;
+                document.getElementById('chartError').style.display = 'block';
+            }
+        })();  // <-- Properly closed IIFE
+        </script>
+
+    {% include 'footer.html' %}
+</body>
+</html>

@@ -19,6 +19,7 @@
 
 
 # app/db_operations.py
+from datetime import datetime
 from flask import current_app
 from .models import db
 from sqlalchemy import text
@@ -105,26 +106,27 @@ def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
         db.session.execute(text("SELECT 1")).fetchone()
 
         # Call stored procedure
-        db.session.execute(
-            text("CALL CreateMoodSurvey(:user_id, :mood_level, :stress_level, "
-                ":sleep_hours, :energy_level, :diet_quality, "
-                ":physical_activity, :spent_time, :feelings, :recommendation, @survey_id)"),
+        result = db.session.execute(
+            text("CALL CreateMoodSurvey(:p_user_id, :p_mood_level, :p_stress_level, "
+                ":p_sleep_hours, :p_energy_level, :p_diet_quality, "
+                ":p_physical_activity, :p_spent_time_with_someone, :p_feelings_description, "
+                ":p_recommendation_text, @p_survey_id)"),
             {
-                'user_id': user_id,
-                'mood_level': mood_level,
-                'stress_level': stress_level,
-                'sleep_hours': sleep_hours,
-                'energy_level': energy_level,
-                'diet_quality': diet_quality,
-                'physical_activity': physical_activity,
-                'spent_time': spent_time_with_someone,
-                'feelings': feelings_description,
-                'recommendation': recommendation_text
+                'p_user_id': user_id,
+                'p_mood_level': mood_level,
+                'p_stress_level': stress_level,
+                'p_sleep_hours': sleep_hours,
+                'p_energy_level': energy_level,
+                'p_diet_quality': diet_quality,
+                'p_physical_activity': physical_activity,
+                'p_spent_time_with_someone': spent_time_with_someone,
+                'p_feelings_description': feelings_description,
+                'p_recommendation_text': recommendation_text
             }
         )
 
         # Get the OUT parameter
-        survey_id = db.session.execute(text("SELECT @survey_id")).scalar()
+        survey_id = db.session.execute(text("SELECT @p_survey_id")).scalar()
         db.session.commit()
         
         if survey_id:
@@ -137,22 +139,100 @@ def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
         current_app.logger.error(f"Failed to create survey: {str(e)}", exc_info=True)
         return None
     
+@staticmethod
+def get_user_survey_history(user_id, limit=10):
+    """Using your existing procedure"""
+    try:
+        result = db.session.execute(
+            text("CALL GetUserSurveyHistory(:user_id, :limit)"),
+            {'user_id': user_id, 'limit': limit}
+        )
+        return [dict(row) for row in result]
+    except Exception as e:
+        current_app.logger.error(f"Error getting history: {str(e)}")
+        return None
+    
+@staticmethod
+def create_journal_entry(user_id, content, sentiment_type, confidence_score):
+        """
+        Calls the CreateJournalEntry stored procedure to save a journal entry and its sentiment.
+        Returns:
+            The created entry_id if successful, None otherwise.
+        """
+        try:
+            db.session.execute(text("SELECT 1")).fetchone()  # Ensure DB connection is alive
+
+            db.session.execute(
+                text("CALL CreateJournalEntry(:p_user_id, :p_content, :p_sentiment_type, :p_confidence_score, @p_entry_id)"),
+                {
+                    'p_user_id': user_id,
+                    'p_content': content,
+                    'p_sentiment_type': sentiment_type,
+                    'p_confidence_score': confidence_score
+                }
+            )
+
+            entry_id = db.session.execute(text("SELECT @p_entry_id")).scalar()
+            db.session.commit()
+
+            if entry_id:
+                current_app.logger.info(f"Created journal entry with ID: {entry_id}")
+                return entry_id
+            return None
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Failed to create journal entry: {str(e)}", exc_info=True)
+            return None
+        
+
 # @staticmethod
-# def get_user_survey_history(user_id, limit=10):
-#     """
-#     Calls the GetUserSurveyHistory stored procedure
-#     """
+# def get_journal_entries_with_sentiment(user_id, start_date, end_date):
 #     try:
+#         # Execute the stored procedure
 #         result = db.session.execute(
-#             text("CALL GetUserSurveyHistory(:p_user_id, :p_limit)"),
-#             {
-#                 'p_user_id': user_id,
-#                 'p_limit': limit
-#             }
+#             text("CALL GetJournalEntries(:user_id, :start_date, :end_date)"),
+#             {'user_id': user_id, 'start_date': start_date, 'end_date': end_date}
 #         )
-#         # Get the result set
-#         surveys = result.fetchall()
-#         return surveys
+#         # Return the result as a list of dictionaries
+#         return [dict(row) for row in result]
 #     except Exception as e:
-#         current_app.logger.error(f"Failed to get survey history: {str(e)}")
-#         return []
+#         print(f"Error executing stored procedure: {e}")
+#         return None
+
+#nuk mka bo
+# @staticmethod
+# def get_journal_entries_with_sentiment(user_id, start_date=None, end_date=None):
+#         """Get journal entries with sentiment analysis using the stored procedure"""
+#         try:
+#             # Set default dates if not provided
+#             if not start_date:
+#                 start_date = datetime(2023, 1, 1).date()
+#             if not end_date:
+#                 end_date = datetime.today().date()
+            
+#             # Call the stored procedure
+#             result = db.session.execute(
+#                 text("CALL GetJournalEntries(:user_id, :start_date, :end_date)"),
+#                 {
+#                     'user_id': user_id,
+#                     'start_date': start_date,
+#                     'end_date': end_date
+#                 }
+#             )
+            
+#             # Convert to list of dictionaries
+#             entries = []
+#             for row in result:
+#                 entry = dict(row)
+#                 # Ensure datetime is properly formatted
+#                 if 'created_at' in entry and entry['created_at']:
+#                     if isinstance(entry['created_at'], str):
+#                         entry['created_at'] = datetime.fromisoformat(entry['created_at'])
+#                 entries.append(entry)
+            
+#             return entries
+            
+#         except Exception as e:
+#             current_app.logger.error(f"Error getting journal entries: {str(e)}")
+#             return None

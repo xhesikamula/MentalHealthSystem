@@ -6,7 +6,9 @@ from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import openai
 import pymysql
+from .db_operations import DBOperations
 
 
 
@@ -46,6 +48,11 @@ def create_app():
     load_environment()
     
     app = Flask(__name__)
+
+    openai.api_key = os.getenv('OPENAI_API_KEY')
+    if not openai.api_key:
+        raise ValueError("No OpenAI API key found. Please set OPENAI_API_KEY in .env file")
+    
     
     # Configuration with validation
     required_env_vars = ['SECRET_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']

@@ -48,7 +48,7 @@
             font-size: 0.85rem;
             color: #6c757d;
         }
-        .btn{
+        .btn {
             color: white;
             background-color: #808000;
         }
@@ -64,19 +64,35 @@
             “Journaling is like whispering to one’s self and listening at the same time.” – Mina Murray
         </div>
 
-        <!-- Form to add a new journal entry -->
+        <!-- Form to add a new journal entry and filter by date -->
         <form action="{{ url_for('main.journal_entries') }}" method="POST" class="entry-form mb-4">
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 {{ form.content.label(class="form-label") }}
                 {{ form.content(class="form-control", rows="4", placeholder="Write about your day...") }}
             </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        {{ form.start_date.label(class="form-label") }}
+                        {{ form.start_date(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        {{ form.end_date.label(class="form-label") }}
+                        {{ form.end_date(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-success">Save Entry</button>
         </form>
 
         <hr>
 
-        <!-- Existing journal entries -->
+        <!-- Filtered journal entries -->
         {% if entries %}
             {% for entry in entries %}
                 <div class="entry-card">

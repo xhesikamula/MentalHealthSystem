@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey History - Mental Health Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Add Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <h2>Your Survey History</h2>
+
+    <!-- Chart Container -->
+    <div class="chart-container">
+        <canvas id="moodChart"></canvas>
+    </div>
+
+    <!-- Existing Survey List -->
+    <div class="survey-history">
+        {% for survey in surveys %}
+        <div class="survey-card">
+            <h3>Survey from {{ survey.survey_date }}</h3>
+            <div class="survey-metrics">
+                <div>Mood: {{ survey.mood_level }}/10</div>
+                <div>Stress: {{ survey.stress_level }}/10</div>
+            </div>
+            <div class="recommendation">
+                <h4>Recommendation:</h4>
+                <p>{{ survey.recommendation_text }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p>No survey history found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prepare chart data from existing HTML content
+        const surveyCards = document.querySelectorAll('.survey-card');
+        const dates = [];
+        const moodLevels = [];
+        const stressLevels = [];
+        
+        surveyCards.forEach(card => {
+            dates.push(card.querySelector('h3').textContent.replace('Survey from ', ''));
+            moodLevels.push(parseInt(card.querySelector('.survey-metrics div:nth-child(1)').textContent.match(/\d+/)[0]));
+            stressLevels.push(parseInt(card.querySelector('.survey-metrics div:nth-child(2)').textContent.match(/\d+/)[0]));
+        });
+
+        // Create chart
+        const ctx = document.getElementById('moodChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Mood Level',
+                        data: moodLevels,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Stress Level',
+                        data: stressLevels,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Your Mood & Stress Trends'
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+
+    {% include 'footer.html' %}
+</body>
+</html>

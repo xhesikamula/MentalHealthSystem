@@ -3,15 +3,17 @@ from flask import Blueprint, current_app, json, jsonify, render_template, reques
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
-from app.services.recommendations import generate_recommendations
+from app.services.recommendations import generate_ai_recommendations
 from .models import db, Recommendation, User, MoodSurvey
 from .forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
-from datetime import date, timedelta
-from datetime import datetime
+from datetime import date, timedelta, datetime
 from flask_limiter.util import get_remote_address
 import openai  # Add this with your other imports
 from app.db_operations import DBOperations
 from app.models import JournalEntry
+import json
+from . import db_operations  # Make sure this import exists
+
 
 
 
@@ -162,7 +164,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 @limiter.limit("3 per minute") 
 def recommend():
     data = request.get_json()
-    recommendations = generate_recommendations(data)
+    recommendations = generate_ai_recommendations(data)
     return jsonify(recommendations)
 
 # Login route
@@ -252,15 +254,37 @@ def login():
 
 
 
+
+
 @main.route('/survey', methods=['GET', 'POST'])
 @login_required
 def survey():
+        # Check if user has completed a survey in the last 24 hours
+    last_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id)\
+                                .order_by(MoodSurvey.survey_date.desc())\
+                                .first()
+
+    if last_survey and last_survey.survey_date >= datetime.utcnow() - timedelta(hours=24):
+        #flash("You've already completed a survey in the last 24 hours.", "info")
+        return redirect(url_for('main.mainpage'))
     form = MoodSurveyForm()
     
     if form.validate_on_submit():
         try:
-            # Start transaction
-            survey = MoodSurvey(
+            # Generate recommendations first
+            recommendations = generate_ai_recommendations({
+                'mood_level': form.mood_level.data,
+                'stress_level': form.stress_level.data,
+                'sleep_hours': form.sleep_hours.data,  # Fixed typo from sleep_hours
+                'energy_level': form.energy_level.data,
+                'diet_quality': form.diet_quality.data,
+                'physical_activity': form.physical_activity.data,
+                'spent_time_with_someone': form.spent_time_with_someone.data,
+                'feelings_description': form.feelings_description.data
+            })
+
+            # Call the stored procedure through db_operations
+            survey_id = db_operations.create_mood_survey(
                 user_id=current_user.user_id,
                 mood_level=form.mood_level.data,
                 stress_level=form.stress_level.data,
@@ -270,56 +294,95 @@ def survey():
                 physical_activity=form.physical_activity.data,
                 spent_time_with_someone=form.spent_time_with_someone.data,
                 feelings_description=form.feelings_description.data,
-                survey_date=datetime.utcnow()
+                recommendation_text=json.dumps(recommendations)
             )
-            db.session.add(survey)
-            db.session.flush()  # Assigns ID without committing
-
-            # Generate recommendations
-            recommendations = generate_recommendations({
-                'mood_level': survey.mood_level,
-                'stress_level': survey.stress_level,
-                'sleep_hours': survey.sleep_hours,
-                'energy_level': survey.energy_level,
-                'diet_quality': survey.diet_quality,
-                'physical_activity': survey.physical_activity,
-                'spent_time_with_someone': survey.spent_time_with_someone,
-                'feelings_description': survey.feelings_description
-            })
-
-            # Save recommendations
-            rec = Recommendation(
-                survey_id=survey.survey_id,
-                recommendation_text=json.dumps(recommendations),
-                created_at=datetime.utcnow()
-            )
-            db.session.add(rec)
             
-            # Commit transaction
-            db.session.commit()
+            if survey_id:
+                # Store in session for immediate display
+                session['latest_recommendations'] = recommendations
+                session.modified = True
+                return redirect(url_for('main.survey_complete'))  # Fixed extra parenthesis
             
-            # Store in session for immediate display
-            session['latest_recommendations'] = recommendations
-            session.modified = True
-            
-            return redirect(url_for('main.survey_complete'))
+            flash("Error processing your survey. Please try again.", "error")
             
         except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Survey submission error: {str(e)}")
+            current_app.logger.error(f"Survey submission error: {str(e)}", exc_info=True)
             flash("Error processing your survey. Please try again.", "error")
     
     return render_template('survey.html', form=form)
 
+@main.route('/history')
+@login_required
+def history():
+    try:
+        # Call the stored procedure
+        result = db.session.execute(
+            text("CALL GetUserSurveyHistory(:user_id, :limit)"),
+            {'user_id': current_user.user_id, 'limit': 10}
+        )
+        
+        # Convert to list of dictionaries
+        surveys = [dict(row) for row in result]
+        
+        # Format dates for JavaScript
+        for survey in surveys:
+            survey['survey_date'] = survey['survey_date'].isoformat()
+            
+        return render_template('history.html', surveys=surveys)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error loading history: {str(e)}")
+        return render_template('history.html', surveys=[])
+
+@main.route('/history/chart-data')
+@login_required
+def chart_data():
+    try:
+        # Call the same stored procedure
+        surveys = db.session.execute(
+            text("CALL GetUserSurveyHistory(:user_id, :limit)"),
+            {'user_id': current_user.user_id, 'limit': 30}
+        ).fetchall()
+        
+        # Process data
+        chart_data = {
+            'dates': [row['survey_date'].strftime('%Y-%m-%d') for row in surveys],
+            'mood': [row['mood_level'] for row in surveys],
+            'stress': [row['stress_level'] for row in surveys]
+        }
+        return jsonify(chart_data)
+        
+    except Exception as e:
+        current_app.logger.error(f"Chart data error: {str(e)}")
+        return jsonify({'error': 'Could not load chart data'}), 500
 
 
-# @main.route('/survey-history')
-# @login_required
-# def survey_history():
-#     surveys = DBOperations.get_user_survey_history(current_user.user_id)
-#     return render_template('survey_history.html', surveys=surveys)
-
-
+@main.route('/user/<int:user_id>/charts')
+@login_required
+def user_charts(user_id):
+    try:
+        surveys = db.session.execute(
+            text("CALL GetUserSurveyHistory(:user_id, :limit)"),
+            {'user_id': user_id, 'limit': 30}
+        ).fetchall()
+        
+        # Convert Row objects to dictionaries
+        surveys = [dict(survey) for survey in surveys]
+        
+        # Ensure dates are serializable
+        for survey in surveys:
+            if 'survey_date' in survey and survey['survey_date']:
+                survey['survey_date'] = survey['survey_date'].isoformat()
+                
+        return render_template('user_charts.html', 
+                            user_id=user_id,
+                            surveys=surveys)
+    except Exception as e:
+        current_app.logger.error(f"Error loading charts: {str(e)}")
+        return render_template('user_charts.html', 
+                            user_id=user_id,
+                            surveys=[])
+    
 @main.route('/survey_complete')
 @login_required
 def survey_complete():
@@ -597,20 +660,49 @@ from app.forms import JournalEntryForm
 
 #     entries = JournalEntry.query.filter_by(user_id=current_user.user_id).order_by(JournalEntry.created_at.desc()).all()
 #     return render_template('journal_entries.html', form=form, entries=entries)
+
+# @main.route('/journal', methods=['GET', 'POST'])
+# @login_required
+# def journal_entries():
+#     form = JournalEntryForm()
+#     if form.validate_on_submit():
+#         new_entry = JournalEntry(
+#             content=form.content.data,
+#             user_id=current_user.user_id
+#         )
+#         db.session.add(new_entry)
+#         db.session.commit()
+
+#         # Optional: Do sentiment analysis here, if set up
+#         return redirect(url_for('main.mainpage'))  # 👈 redirect to main page after saving
+
+#     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
+#         .order_by(JournalEntry.created_at.desc()).all()
+#     return render_template('journal_entries.html', form=form, entries=entries)
+
+
+from app.db_operations import DBOperations
+from app.sentiment_utils import analyze_sentiment  # 👈 import the function
+
 @main.route('/journal', methods=['GET', 'POST'])
 @login_required
 def journal_entries():
     form = JournalEntryForm()
     if form.validate_on_submit():
-        new_entry = JournalEntry(
-            content=form.content.data,
-            user_id=current_user.user_id
-        )
-        db.session.add(new_entry)
-        db.session.commit()
+        # Run sentiment analysis
+        sentiment_type, confidence_score = analyze_sentiment(form.content.data)
 
-        # Optional: Do sentiment analysis here, if set up
-        return redirect(url_for('main.mainpage'))  # 👈 redirect to main page after saving
+        entry_id = DBOperations.create_journal_entry(
+            user_id=current_user.user_id,
+            content=form.content.data,
+            sentiment_type=sentiment_type,
+            confidence_score=confidence_score
+        )
+
+        if entry_id:
+            return redirect(url_for('main.mainpage'))
+        else:
+            flash("Failed to save journal entry.", "danger")
 
     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
         .order_by(JournalEntry.created_at.desc()).all()
@@ -654,3 +746,52 @@ def logout():
     logout_user()
     flash("You have been logged out.", "success")
     return redirect(url_for('main.login'))
+
+
+
+
+#qetu kom provu per stored procedure me emrin GetJournalEntry
+# @main.route('/journal', methods=['GET', 'POST'])
+# @login_required
+# def journal_entries():
+#     form = JournalEntryForm()
+    
+#     # Handle form submission
+#     if form.validate_on_submit():
+#         try:
+#             sentiment_type, confidence_score = analyze_sentiment(form.content.data)
+            
+#             entry_id = DBOperations.create_journal_entry(
+#                 user_id=current_user.user_id,
+#                 content=form.content.data,
+#                 sentiment_type=sentiment_type,
+#                 confidence_score=confidence_score
+#             )
+            
+#             if entry_id:
+#                 flash("Journal entry saved successfully", "success")
+#                 return redirect(url_for('main.journal_entries'))
+#             else:
+#                 flash("Failed to save journal entry", "danger")
+#         except Exception as e:
+#             current_app.logger.error(f"Error saving journal entry: {str(e)}")
+#             flash("An error occurred while saving your entry", "danger")
+    
+#     # Get date filters from form or use defaults
+#     start_date = form.start_date.data if form.start_date.data else None
+#     end_date = form.end_date.data if form.end_date.data else None
+    
+#     # Get journal entries
+#     entries = DBOperations.get_journal_entries_with_sentiment(
+#         user_id=current_user.user_id,
+#         start_date=start_date,
+#         end_date=end_date
+#     )
+    
+#     if entries is None:
+#         flash("Error loading journal entries", "danger")
+#         entries = []
+    
+#     return render_template('journal_entries.html', 
+#                          form=form, 
+#                          entries=entries)

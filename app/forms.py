@@ -19,9 +19,14 @@ class ImageUploadForm(FlaskForm):
 from wtforms import TextAreaField, SubmitField
 from wtforms.validators import DataRequired
 
+from wtforms import DateField
+
 class JournalEntryForm(FlaskForm):
     content = TextAreaField('New Journal Entry', validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d')
+    end_date = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Save Entry')
+
 
 
 class MoodSurveyForm(FlaskForm):
