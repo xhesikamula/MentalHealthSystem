@@ -84,38 +84,34 @@ def update_profile():
         flash("Failed to update profile", "error")
         return redirect(url_for('main.profile'))
 
-
-from .forms import ProfileForm
+from .forms import ProfileForm, ImageUploadForm
 from .db_operations import DBOperations
 
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-
     if not current_user.is_authenticated:
         flash('You need to log in to access the profile page', 'error')
-        return redirect(url_for('main.login'))  # Redirect to login explicitly if not authenticated
-    
-    form = ProfileForm(obj=current_user)  # Auto-populate form with current user data
-    
+        return redirect(url_for('main.login'))
+
+    form = ProfileForm(obj=current_user)
+    image_form = ImageUploadForm()  # ✅ Create the image upload form here
+
     if form.validate_on_submit():
-        # Check if email is being changed to one that already exists
         if form.email.data != current_user.email:
             existing_user = User.query.filter_by(email=form.email.data).first()
             if existing_user:
                 flash('Email is already in use by another account', 'error')
                 return redirect(url_for('main.profile'))
-        
-        # Update profile using stored procedure
+
         success = DBOperations.update_user_profile(
             user_id=current_user.user_id,
             name=form.name.data,
             email=form.email.data,
             preferences=form.preferences.data
         )
-        
+
         if success:
-            # Update the current_user object to reflect changes immediately
             current_user.name = form.name.data
             current_user.email = form.email.data
             current_user.preferences = form.preferences.data
@@ -123,8 +119,9 @@ def profile():
             return redirect(url_for('main.profile'))
         else:
             flash('Failed to update profile. Please try again.', 'error')
-    
-    return render_template('profile.html', form=form)
+
+    return render_template('profile.html', form=form, image_form=image_form)
+
 
 
 from app.forms import ProfileForm 
@@ -618,3 +615,42 @@ def journal_entries():
     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
         .order_by(JournalEntry.created_at.desc()).all()
     return render_template('journal_entries.html', form=form, entries=entries)
+
+
+
+#tpremten jon shtu
+from werkzeug.utils import secure_filename
+import os
+
+@main.route('/upload-image', methods=['POST'])
+@login_required
+def upload_image():
+    file = request.files.get('image')
+    if file:
+        filename = secure_filename(file.filename)
+        upload_folder = os.path.join(current_app.root_path, 'static/uploads')
+        os.makedirs(upload_folder, exist_ok=True)  # Ensure folder exists
+
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
+
+        # Update user's image path (adjust depending on your User model)
+        current_user.image_url = filename
+        db.session.commit()
+
+        flash("Profile image updated!", "success")
+    else:
+        flash("No file selected", "danger")
+    
+    return redirect(url_for('main.profile'))
+
+
+from flask import Blueprint, redirect, url_for, flash
+from flask_login import logout_user
+
+
+@main.route('/logout', methods=['POST'])
+def logout():
+    logout_user()
+    flash("You have been logged out.", "success")
+    return redirect(url_for('main.login'))

@@ -29,6 +29,8 @@ class User(db.Model, UserMixin):
     preferences = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     role = db.Column(db.Enum('admin', 'user'), nullable=False, default='user')
+    image_url = db.Column(db.String(255))  # or appropriate length
+
 
     # Relationships
     mood_surveys = db.relationship('MoodSurvey', back_populates='user', lazy='dynamic')
