@@ -4,7 +4,7 @@ from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
 from app.services.recommendations import generate_ai_recommendations
-from .models import db, Recommendation, User, MoodSurvey
+from .models import Notification, db, Recommendation, User, MoodSurvey
 from .forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta, datetime
 from flask_limiter.util import get_remote_address
@@ -15,7 +15,7 @@ import json
 from . import db_operations  # Make sure this import exists
 
 
-
+#stored procedures per evente i kam kriju po me i provu jo , se ni event api se kem hala
 
 #nuk osht ka i analizon mir tdhanat e survey , edhe po i jep tnjejtat rekomandime gjith mdoket, edhe po i printon keq vlerat qe pja jepi
 
@@ -89,6 +89,42 @@ def update_profile():
 from .forms import ProfileForm, ImageUploadForm
 from .db_operations import DBOperations
 
+# @main.route('/profile', methods=['GET', 'POST'])
+# @login_required
+# def profile():
+#     if not current_user.is_authenticated:
+#         flash('You need to log in to access the profile page', 'error')
+#         return redirect(url_for('main.login'))
+
+#     form = ProfileForm(obj=current_user)
+#     image_form = ImageUploadForm()  # ✅ Create the image upload form here
+
+#     if form.validate_on_submit():
+#         if form.email.data != current_user.email:
+#             existing_user = User.query.filter_by(email=form.email.data).first()
+#             if existing_user:
+#                 flash('Email is already in use by another account', 'error')
+#                 return redirect(url_for('main.profile'))
+
+#         success = DBOperations.update_user_profile(
+#             user_id=current_user.user_id,
+#             name=form.name.data,
+#             email=form.email.data,
+#             preferences=form.preferences.data
+#         )
+
+#         if success:
+#             current_user.name = form.name.data
+#             current_user.email = form.email.data
+#             current_user.preferences = form.preferences.data
+#             flash('Your profile has been updated!', 'success')
+#             return redirect(url_for('main.profile'))
+#         else:
+#             flash('Failed to update profile. Please try again.', 'error')
+#     user_notifications = Notification.query.filter_by(user_id=current_user.user_id).order_by(Notification.sent_at.desc()).all()
+
+#     return render_template('profile.html', form=form, image_form=image_form, notifications=user_notifications, survey_completed=False)
+
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -97,7 +133,7 @@ def profile():
         return redirect(url_for('main.login'))
 
     form = ProfileForm(obj=current_user)
-    image_form = ImageUploadForm()  # ✅ Create the image upload form here
+    image_form = ImageUploadForm()
 
     if form.validate_on_submit():
         if form.email.data != current_user.email:
@@ -122,8 +158,14 @@ def profile():
         else:
             flash('Failed to update profile. Please try again.', 'error')
 
-    return render_template('profile.html', form=form, image_form=image_form)
+    # ⚡ Correct ordering without NULLS LAST
+    from sqlalchemy import case
+    user_notifications = Notification.query.filter_by(user_id=current_user.user_id).order_by(
+        case((Notification.sent_at == None, 1), else_=0),
+        Notification.sent_at.desc()
+    ).all()
 
+    return render_template('profile.html', form=form, image_form=image_form, notifications=user_notifications, survey_completed=False)
 
 
 from app.forms import ProfileForm 
@@ -284,7 +326,7 @@ def survey():
             })
 
             # Call the stored procedure through db_operations
-            survey_id = db_operations.create_mood_survey(
+            survey_id = DBOperations.create_mood_survey(
                 user_id=current_user.user_id,
                 mood_level=form.mood_level.data,
                 stress_level=form.stress_level.data,
@@ -383,14 +425,70 @@ def user_charts(user_id):
                             user_id=user_id,
                             surveys=[])
     
+# @main.route('/survey_complete')
+# @login_required
+# def survey_complete():
+#     # Try to get from session first
+#     recommendations = session.get('latest_recommendations')
+#     source = 'ai'
+    
+#     # If not in session, get from database
+#     if not recommendations:
+#         latest_survey = MoodSurvey.query.filter_by(
+#             user_id=current_user.user_id
+#         ).order_by(MoodSurvey.survey_date.desc()).first()
+        
+#         if latest_survey:
+#             rec = Recommendation.query.filter_by(
+#                 survey_id=latest_survey.survey_id
+#             ).first()
+            
+#             if rec:
+#                 recommendations = rec.recommendation_text.split('\n')
+#                 source = 'database'
+    
+#     # Fallback recommendations
+#     if not recommendations:
+#         recommendations = [
+#             "Take three deep breaths to center yourself",
+#             "Drink a glass of water",
+#             "Step outside for fresh air"
+#         ]
+#         source = 'fallback'
+#         flash("We're preparing your personalized recommendations. Here are some general wellness tips.", "info")
+    
+#     # Format recommendations for display
+#     formatted_recs = []
+#     for rec in recommendations:
+#         if '•' in rec:
+#             parts = rec.split('•')[1].split('(')
+#             formatted_recs.append({
+#                 'category': parts[0].split(']')[0].strip(' ['),
+#                 'text': parts[0].split(']')[1].strip(),
+#                 'rationale': parts[1].strip(')') if len(parts) > 1 else ''
+#             })
+#         else:
+#             formatted_recs.append({
+#                 'category': 'General',
+#                 'text': rec,
+#                 'rationale': ''
+#             })
+    
+#     return render_template('survey_complete.html',
+#                         recommendations=formatted_recs,
+#                         source=source)
+
 @main.route('/survey_complete')
 @login_required
 def survey_complete():
-    # Try to get from session first
+    # Check if the user has completed the survey by checking the MoodSurvey table
+    survey_completed = bool(MoodSurvey.query.filter_by(user_id=current_user.user_id).first())
+
+    # Try to get recommendations from session first
     recommendations = session.get('latest_recommendations')
     source = 'ai'
-    
-    # If not in session, get from database
+
+    # If not in session, get from the database
     if not recommendations:
         latest_survey = MoodSurvey.query.filter_by(
             user_id=current_user.user_id
@@ -433,9 +531,9 @@ def survey_complete():
             })
     
     return render_template('survey_complete.html',
-                        recommendations=formatted_recs,
-                        source=source)
-
+                           recommendations=formatted_recs,
+                           source=source,
+                           survey_completed=survey_completed)  # Pass survey_completed to template
 
 @main.route('/healthcheck')
 def health_check():
@@ -795,3 +893,41 @@ def logout():
 #     return render_template('journal_entries.html', 
 #                          form=form, 
 #                          entries=entries)
+# in your routes file
+
+from app.db_operations import DBOperations
+
+@main.route('/notifications/create', methods=['POST'])
+@login_required
+def create_notification_route():
+    try:
+        message = request.form.get('message')
+        type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
+        
+        # Ensure the type is valid
+        if type_ not in ['survey', 'journal', 'mindfulness']:
+            flash('Invalid notification type', 'error')
+            return redirect(url_for('main.profile'))
+
+        if not message or not type_:
+            flash('Missing message or type', 'error')
+            return redirect(url_for('main.profile'))
+
+        # Call the DB operation to create a notification
+        success = DBOperations.create_notification(
+            user_id=current_user.user_id,
+            message=message,
+            type_=type_
+        )
+
+        if success:
+            flash('Notification created successfully!', 'success')
+        else:
+            flash('Failed to create notification.', 'error')
+
+        return redirect(url_for('main.profile'))
+
+    except Exception as e:
+        current_app.logger.error(f"Notification creation failed: {str(e)}")
+        flash('Failed to create notification', 'error')
+        return redirect(url_for('main.profile'))

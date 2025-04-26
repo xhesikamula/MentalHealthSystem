@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.Enum('admin', 'user'), nullable=False, default='user')
     image_url = db.Column(db.String(255))  # or appropriate length
 
-
+    
     # Relationships
     mood_surveys = db.relationship('MoodSurvey', back_populates='user', lazy='dynamic')
     journal_entries = db.relationship('JournalEntry', back_populates='user', lazy='dynamic')

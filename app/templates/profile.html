@@ -144,11 +144,9 @@
 <body>
     {% include 'header.html' %}
 
-    
-
     <section class="login-section">
         <div class="profile-wrapper">
-
+    
             <!-- Profile Picture on the Left -->
             <div class="profile-pic-section">
                 {% if current_user.image_url %}
@@ -158,25 +156,64 @@
                 {% else %}
                     <div class="default-avatar">👤</div>
                 {% endif %}
-
+    
                 <!-- Image Upload Form Below Picture -->
                 <form method="POST" action="{{ url_for('main.upload_image') }}" enctype="multipart/form-data" class="upload-form">
                     {{ image_form.hidden_tag() }}
                     {{ image_form.image() }}<br>
                     {{ image_form.submit(class="upload-button mt-2") }}
                 </form>
-
+    
                 <form method="POST" action="{{ url_for('main.logout') }}" class="mt-3">
                     <button type="submit" style="background: none; border: none; color: green; cursor: pointer; text-decoration: underline;">
                         Logout
                     </button>
                 </form>
             </div>
-
+    
             <!-- Form Section on the Right -->
             <div class="login-container">
+    
                 <h2>Update Your Profile</h2>
-
+                <div style="margin-top: 30px;">
+                    <h3>Notifications</h3>
+                    {% if notifications %}
+                        <ul style="list-style: none; padding: 0;">
+                        {% for notification in notifications %}
+                            <li style="background: #f4f4f4; margin-bottom: 10px; padding: 10px; border-radius: 5px;">
+                                <strong>{{ notification.type.capitalize() }}</strong>: {{ notification.message }}
+                                <br>
+                                <small style="color: #666;">
+                                    {% if notification.sent_at %}
+                                        {{ notification.sent_at.strftime('%Y-%m-%d %H:%M') }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </small>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No notifications yet.</p>
+                    {% endif %}
+                </div>
+                <h3>Create a Notification</h3>
+                <form method="POST" action="{{ url_for('main.create_notification_route') }}">
+    
+                    <label for="message">Message:</label><br>
+                    <input type="text" name="message" class="form-control" required><br>
+                
+                    <label for="type">Type:</label><br>
+                    <select name="type" class="form-control" required>
+                        <option value="survey">Survey</option>
+                        <option value="journal">Journal</option>
+                        <option value="mindfulness">Mindfulness</option>
+                    </select><br>
+                
+                    <button type="submit" class="login-button mt-2">Create Notification</button>
+                </form>
+                                
+    
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         <div class="alert-container">
@@ -188,10 +225,10 @@
                         </div>
                     {% endif %}
                 {% endwith %}
-
+    
                 <form method="POST" action="{{ url_for('main.profile') }}">
                     {{ form.hidden_tag() }}
-
+    
                     <label for="name">{{ form.name.label }}</label>
                     {{ form.name(class="form-control", placeholder="Full Name") }}
                     {% if form.name.errors %}
@@ -201,7 +238,7 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
-
+    
                     <label for="email">{{ form.email.label }}</label>
                     {{ form.email(class="form-control", placeholder="Email Address") }}
                     {% if form.email.errors %}
@@ -211,7 +248,7 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
-
+    
                     <label for="preferences">{{ form.preferences.label }}</label>
                     {{ form.preferences(class="form-control", placeholder="Your preferences...", rows="4") }}
                     {% if form.preferences.errors %}
@@ -221,10 +258,10 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
-
+    
                     <button type="submit" class="login-button">Update Profile</button>
                 </form>
-
+    
                 <p class="mt-3">
                     Want to change your password?
                     <a href="{{ url_for('main.change_password') }}" class="text-warning">Change Password</a>
@@ -232,7 +269,43 @@
             </div>
         </div>
     </section>
-
+    
+    <!-- Smooth Notification Box -->
+    <div id="survey-notification" style="
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ffcc00;
+    color: #333;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+    font-size: 16px;
+    z-index: 9999;
+    ">
+    ⏰ Please complete your survey!
+    </div>
+    
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var surveyCompleted = JSON.parse('{{ survey_completed | tojson | safe }}');
+                console.log(surveyCompleted);
+    
+                if (!surveyCompleted) {
+                    var notification = document.getElementById('survey-notification');
+                    notification.style.display = 'block';
+    
+                    setTimeout(function() {
+                        notification.style.display = 'none';
+                    }, 10000);
+                }
+            }, 120000);
+        });
+    </script>
+    
     {% include 'footer.html' %}
+    
 </body>
 </html>
