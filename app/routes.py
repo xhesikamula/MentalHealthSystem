@@ -901,4 +901,121 @@ def logout():
     
 #     return render_template('journal_entries.html', 
 #                          form=form, 
+#    
+#                       entries=entries)
+# 
+# 
+
+@main.route('/events')
+@login_required
+def events_page():
+    # Renders the frontend page that will ask for geolocation
+    return render_template('events.html')
+
+from flask import request, jsonify
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+@main.route('/api/events', methods=['POST'])
+@login_required
+def api_events():
+    data = request.get_json() or {}
+    lat = data.get('lat')
+    lon = data.get('lon')
+    keyword = data.get('keyword')  # optional
+
+    if not (lat and lon):
+        return jsonify(error='Missing location data'), 400
+
+    API_KEY = os.getenv('GEOAPIFY_API_KEY')  # safer way
+    url = 'https://api.geoapify.com/v2/places'
+
+    categories = 'entertainment,leisure'  # or use more specific ones if needed
+
+    params = {
+        'categories': categories,
+        'filter': f'circle:{lon},{lat},10000',  # 10km search radius
+        'limit': 20,
+        'apiKey': API_KEY
+    }
+
+    if keyword and keyword.strip():
+        params['name'] = keyword.strip()
+
+    try:
+        resp = requests.get(url, params=params)
+        resp.raise_for_status()
+        payload = resp.json()
+    except requests.RequestException:
+        return jsonify(error='Failed to fetch events.'), 503
+
+    events = []
+    for feature in payload.get('features', []):
+        prop = feature.get('properties', {})
+        if not prop.get('name'):
+            continue
+
+        # build a Google Maps URL
+        lat_prop = prop.get('lat')
+        lon_prop = prop.get('lon')
+        google_maps_url = f'https://www.google.com/maps?q={lat_prop},{lon_prop}' if lat_prop and lon_prop else ''
+
+        website = prop.get('website', '').strip()
+
+        # If no website, use a Google search for the event's name and location
+        search_url = f'https://www.google.com/search?q={prop["name"]}+{prop.get("address_line2", "")}+{lat_prop},{lon_prop}'
+
+        link = website if website else search_url
+
+        events.append({
+            'name':        prop['name'],
+            'date':        'TBD',  # Geoapify doesn’t give event dates, just places
+            'venue':       prop.get('address_line2', 'Location TBA'),
+            'url':         link,  # Use website or Google search link
+            'is_map_link': not bool(website)  # Label for Google search or Website
+        })
+
+    return jsonify(events)
+
 #                          entries=entries)
+# in your routes file
+
+from app.db_operations import DBOperations
+
+@main.route('/notifications/create', methods=['POST'])
+@login_required
+def create_notification_route():
+    try:
+        message = request.form.get('message')
+        type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
+        
+        # Ensure the type is valid
+        if type_ not in ['survey', 'journal', 'mindfulness']:
+            flash('Invalid notification type', 'error')
+            return redirect(url_for('main.profile'))
+
+        if not message or not type_:
+            flash('Missing message or type', 'error')
+            return redirect(url_for('main.profile'))
+
+        # Call the DB operation to create a notification
+        success = DBOperations.create_notification(
+            user_id=current_user.user_id,
+            message=message,
+            type_=type_
+        )
+
+        if success:
+            flash('Notification created successfully!', 'success')
+        else:
+            flash('Failed to create notification.', 'error')
+
+        return redirect(url_for('main.profile'))
+
+    except Exception as e:
+        current_app.logger.error(f"Notification creation failed: {str(e)}")
+        flash('Failed to create notification', 'error')
+        return redirect(url_for('main.profile'))

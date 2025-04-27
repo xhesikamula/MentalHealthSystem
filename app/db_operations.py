@@ -132,8 +132,8 @@ class DBOperations:
                 return survey_id
             return None
 
-    except Exception as e:
-        db.session.rollback()
+        except Exception as e:
+            db.session.rollback()
         current_app.logger.error(f"Failed to create survey: {str(e)}", exc_info=True)
         return None
     
