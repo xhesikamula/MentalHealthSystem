@@ -1,7 +1,11 @@
 import openai
 import json
 from flask import current_app
+from app.config import Config  # Make sure the OpenAI API key is loaded here
 from datetime import datetime
+
+# Set OpenAI API Key
+openai.api_key = Config.OPENAI_API_KEY
 
 def analyze_survey_data(survey_data):
     """Enhanced analysis of survey data with additional insights"""
@@ -98,17 +102,15 @@ def generate_ai_recommendations(survey_data):
         
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": """You're a compassionate mental health advisor. Provide:
-                    1. 3-5 prioritized recommendations
-                    2. Each with clear rationale
-                    3. Practical implementation steps
-                    4. Categorized by urgency"""
-                },
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{
+                "role": "system", 
+                "content": """You're a compassionate mental health advisor. Provide:
+                1. 3-5 prioritized recommendations
+                2. Each with clear rationale
+                3. Practical implementation steps
+                4. Categorized by urgency"""
+            },
+            {"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=350
         )
@@ -153,6 +155,7 @@ def build_ai_prompt(analysis, survey_data):
     - "rationale"
     - "when_to_implement"
     """
+
 
 def format_ai_response(content, analysis):
     """Convert AI response to structured format with fallback handling"""

@@ -92,47 +92,45 @@ class DBOperations:
             db.session.rollback()
             current_app.logger.error(f"Profile update failed: {str(e)}")
             return False
-        
-#so tu bo
-@staticmethod
-def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
-                     energy_level, diet_quality, physical_activity,
-                     spent_time_with_someone, feelings_description, recommendation_text):
-    """
-    Calls the CreateMoodSurvey stored procedure to save a mood survey
-    """
-    try:
-        # Verify database connection
-        db.session.execute(text("SELECT 1")).fetchone()
+    @staticmethod
+    def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
+                        energy_level, diet_quality, physical_activity,
+                        spent_time_with_someone, feelings_description, recommendation_text):
+        """
+        Calls the CreateMoodSurvey stored procedure to save a mood survey
+        """
+        try:
+            # Verify database connection
+            db.session.execute(text("SELECT 1")).fetchone()
 
-        # Call stored procedure
-        result = db.session.execute(
-            text("CALL CreateMoodSurvey(:p_user_id, :p_mood_level, :p_stress_level, "
-                ":p_sleep_hours, :p_energy_level, :p_diet_quality, "
-                ":p_physical_activity, :p_spent_time_with_someone, :p_feelings_description, "
-                ":p_recommendation_text, @p_survey_id)"),
-            {
-                'p_user_id': user_id,
-                'p_mood_level': mood_level,
-                'p_stress_level': stress_level,
-                'p_sleep_hours': sleep_hours,
-                'p_energy_level': energy_level,
-                'p_diet_quality': diet_quality,
-                'p_physical_activity': physical_activity,
-                'p_spent_time_with_someone': spent_time_with_someone,
-                'p_feelings_description': feelings_description,
-                'p_recommendation_text': recommendation_text
-            }
-        )
+            # Call stored procedure
+            result = db.session.execute(
+                text("CALL CreateMoodSurvey(:p_user_id, :p_mood_level, :p_stress_level, "
+                    ":p_sleep_hours, :p_energy_level, :p_diet_quality, "
+                    ":p_physical_activity, :p_spent_time_with_someone, :p_feelings_description, "
+                    ":p_recommendation_text, @p_survey_id)"),
+                {
+                    'p_user_id': user_id,
+                    'p_mood_level': mood_level,
+                    'p_stress_level': stress_level,
+                    'p_sleep_hours': sleep_hours,
+                    'p_energy_level': energy_level,
+                    'p_diet_quality': diet_quality,
+                    'p_physical_activity': physical_activity,
+                    'p_spent_time_with_someone': spent_time_with_someone,
+                    'p_feelings_description': feelings_description,
+                    'p_recommendation_text': recommendation_text
+                }
+            )
 
-        # Get the OUT parameter
-        survey_id = db.session.execute(text("SELECT @p_survey_id")).scalar()
-        db.session.commit()
-        
-        if survey_id:
-            current_app.logger.info(f"Successfully created survey {survey_id}")
-            return survey_id
-        return None
+            # Get the OUT parameter
+            survey_id = db.session.execute(text("SELECT @p_survey_id")).scalar()
+            db.session.commit()
+
+            if survey_id:
+                current_app.logger.info(f"Successfully created survey {survey_id}")
+                return survey_id
+            return None
 
     except Exception as e:
         db.session.rollback()
@@ -151,10 +149,9 @@ def get_user_survey_history(user_id, limit=10):
     except Exception as e:
         current_app.logger.error(f"Error getting history: {str(e)}")
         return None
-
-class DBOperations:  
-    @staticmethod
-    def create_journal_entry(user_id, content, sentiment_type, confidence_score):
+    
+@staticmethod
+def create_journal_entry(user_id, content, sentiment_type, confidence_score):
         """
         Calls the CreateJournalEntry stored procedure to save a journal entry and its sentiment.
         Returns:
@@ -185,6 +182,7 @@ class DBOperations:
             db.session.rollback()
             current_app.logger.error(f"Failed to create journal entry: {str(e)}", exc_info=True)
             return None
+        
 
 # @staticmethod
 # def get_journal_entries_with_sentiment(user_id, start_date, end_date):
@@ -236,26 +234,3 @@ class DBOperations:
 #         except Exception as e:
 #             current_app.logger.error(f"Error getting journal entries: {str(e)}")
 #             return None
-
-#NUK BON
-# class DBOperations:
-
-#     @staticmethod
-#     def create_journal_entry(user_id, content, sentiment_type=None, confidence_score=None):
-#         from app import db
-#         from app.models import JournalEntry, SentimentAnalysis
-
-#         new_entry = JournalEntry(user_id=user_id, content=content)
-#         db.session.add(new_entry)
-#         db.session.commit()
-
-#         if sentiment_type and confidence_score:
-#             new_sentiment = SentimentAnalysis(
-#                 entry_id=new_entry.id,
-#                 sentiment_type=sentiment_type,
-#                 confidence_score=confidence_score
-#             )
-#             db.session.add(new_sentiment)
-#             db.session.commit()
-
-#         return new_entry.id
