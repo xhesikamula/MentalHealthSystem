@@ -64,27 +64,12 @@
             “Journaling is like whispering to one’s self and listening at the same time.” – Mina Murray
         </div>
 
-        <!-- Form to add a new journal entry and filter by date -->
+        <!-- Form to add a new journal entry -->
         <form action="{{ url_for('main.journal_entries') }}" method="POST" class="entry-form mb-4">
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 {{ form.content.label(class="form-label") }}
                 {{ form.content(class="form-control", rows="4", placeholder="Write about your day...") }}
-            </div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="mb-3">
-                        {{ form.start_date.label(class="form-label") }}
-                        {{ form.start_date(class="form-control") }}
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                        {{ form.end_date.label(class="form-label") }}
-                        {{ form.end_date(class="form-control") }}
-                    </div>
-                </div>
             </div>
 
             <button type="submit" class="btn btn-success">Save Entry</button>

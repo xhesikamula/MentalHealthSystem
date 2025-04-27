@@ -21,7 +21,7 @@
 # app/db_operations.py
 from datetime import datetime
 from flask import current_app
-from .models import db
+from .models import JournalEntry, SentimentAnalysis, db
 from sqlalchemy import text
 
 class DBOperations:
@@ -151,9 +151,10 @@ def get_user_survey_history(user_id, limit=10):
     except Exception as e:
         current_app.logger.error(f"Error getting history: {str(e)}")
         return None
-    
-@staticmethod
-def create_journal_entry(user_id, content, sentiment_type, confidence_score):
+
+class DBOperations:  
+    @staticmethod
+    def create_journal_entry(user_id, content, sentiment_type, confidence_score):
         """
         Calls the CreateJournalEntry stored procedure to save a journal entry and its sentiment.
         Returns:
@@ -184,7 +185,6 @@ def create_journal_entry(user_id, content, sentiment_type, confidence_score):
             db.session.rollback()
             current_app.logger.error(f"Failed to create journal entry: {str(e)}", exc_info=True)
             return None
-        
 
 # @staticmethod
 # def get_journal_entries_with_sentiment(user_id, start_date, end_date):
@@ -236,3 +236,26 @@ def create_journal_entry(user_id, content, sentiment_type, confidence_score):
 #         except Exception as e:
 #             current_app.logger.error(f"Error getting journal entries: {str(e)}")
 #             return None
+
+#NUK BON
+# class DBOperations:
+
+#     @staticmethod
+#     def create_journal_entry(user_id, content, sentiment_type=None, confidence_score=None):
+#         from app import db
+#         from app.models import JournalEntry, SentimentAnalysis
+
+#         new_entry = JournalEntry(user_id=user_id, content=content)
+#         db.session.add(new_entry)
+#         db.session.commit()
+
+#         if sentiment_type and confidence_score:
+#             new_sentiment = SentimentAnalysis(
+#                 entry_id=new_entry.id,
+#                 sentiment_type=sentiment_type,
+#                 confidence_score=confidence_score
+#             )
+#             db.session.add(new_sentiment)
+#             db.session.commit()
+
+#         return new_entry.id
