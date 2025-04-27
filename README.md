@@ -43,7 +43,7 @@ In today's fast-paced world, managing mental health is more important than ever.
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Python (Flask), PHP (partial integration)
+- **Backend**: Python (Flask)
 - **Frontend**: HTML5, CSS3 (Bootstrap 5.3), JavaScript
 - **Database**: MySQL
 - **Visualization**: Chart.js
@@ -56,7 +56,6 @@ In today's fast-paced world, managing mental health is more important than ever.
 ## 🗂️ Database Schema
 
 - `user`
-- `admin`
 - `moodsurvey`
 - `journalentry`
 - `sentimentanalysis`
