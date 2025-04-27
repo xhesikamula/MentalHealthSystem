@@ -146,7 +146,37 @@ def get_user_survey_history(user_id, limit=10):
         current_app.logger.error(f"Error getting history: {str(e)}")
         return None
 
-class DBOperations:  
+class DBOperations:
+    @staticmethod
+    def create_mood_survey(user_id, mood_level, stress_level, sleep_hours,
+                        energy_level, diet_quality, physical_activity,
+                        spent_time_with_someone, feelings_description, recommendation_text):
+        """
+        Calls the CreateMoodSurvey stored procedure to save a mood survey
+        """
+        try:
+            db.session.execute(
+                text("CALL CreateMoodSurvey(:p_user_id, :p_mood_level, :p_stress_level, "
+                    ":p_sleep_hours, :p_energy_level, :p_diet_quality, "
+                    ":p_physical_activity, :p_spent_time_with_someone, "
+                    ":p_feelings_description, :p_recommendation_text, @p_survey_id)"),
+                {
+                    'p_user_id': user_id,
+                    'p_mood_level': mood_level,
+                    'p_stress_level': stress_level,
+                    'p_sleep_hours': sleep_hours,
+                    'p_energy_level': energy_level,
+                    'p_diet_quality': diet_quality,
+                    'p_physical_activity': physical_activity,
+                    'p_spent_time_with_someone': spent_time_with_someone,
+                    'p_feelings_description': feelings_description,
+                    'p_recommendation_text': recommendation_text
+                }
+            )
+
+            survey_id = db.session.execute(text("SELECT @p_survey_id")).scalar()
+            db.session.commit()
+
             if survey_id:
                 current_app.logger.info(f"Successfully created survey {survey_id}")
                 return survey_id
@@ -156,6 +186,7 @@ class DBOperations:
             db.session.rollback()
             current_app.logger.error(f"Failed to create survey: {str(e)}", exc_info=True)
             return None
+
 
     @staticmethod
     def get_user_survey_history(user_id, limit=10):
