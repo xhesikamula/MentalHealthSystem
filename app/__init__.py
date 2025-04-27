@@ -52,8 +52,8 @@ def create_app():
     openai.api_key = os.getenv('OPENAI_API_KEY')
     if not openai.api_key:
         raise ValueError("No OpenAI API key found. Please set OPENAI_API_KEY in .env file")
-    
-    
+    from app.admin_routes import admin_bp
+    app.register_blueprint(admin_bp)
     # Configuration with validation
     required_env_vars = ['SECRET_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']
     for var in required_env_vars:

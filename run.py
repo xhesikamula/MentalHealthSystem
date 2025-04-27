@@ -5,15 +5,15 @@ import os
 # Load environment variables FIRST
 load_dotenv()
 
-
-
-
-
 # Initialize the Flask app
 app = create_app()
  # Register Blueprints
 from app.routes import main
 app.register_blueprint(main, url_prefix='/main')
+
+from app.admin_routes import admin_bp
+app.register_blueprint(admin_bp)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

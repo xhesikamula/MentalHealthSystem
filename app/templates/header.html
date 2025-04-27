@@ -14,14 +14,19 @@
                 <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
-
+                
                 {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>  <!-- Admin Dashboard link -->
+                    {% else %}
+                        <li><a href="{{ url_for('main.no_permission') }}">Dashboard</a></li>  <!-- Regular user "no permission" page -->
+                    {% endif %}
                     <li><a href="{{ url_for('main.profile') }}">Profile</a></li>
                 {% else %}
                     <li><a href="{{ url_for('main.login') }}">Login</a></li>
                 {% endif %}
+                
+                <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>

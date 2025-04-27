@@ -95,43 +95,7 @@ def update_profile():
         return redirect(url_for('main.profile'))
 
 from .forms import ProfileForm, ImageUploadForm
-from .db_operations import DBOperations
-
-# @main.route('/profile', methods=['GET', 'POST'])
-# @login_required
-# def profile():
-#     if not current_user.is_authenticated:
-#         flash('You need to log in to access the profile page', 'error')
-#         return redirect(url_for('main.login'))
-
-#     form = ProfileForm(obj=current_user)
-#     image_form = ImageUploadForm()  # ✅ Create the image upload form here
-
-#     if form.validate_on_submit():
-#         if form.email.data != current_user.email:
-#             existing_user = User.query.filter_by(email=form.email.data).first()
-#             if existing_user:
-#                 flash('Email is already in use by another account', 'error')
-#                 return redirect(url_for('main.profile'))
-
-#         success = DBOperations.update_user_profile(
-#             user_id=current_user.user_id,
-#             name=form.name.data,
-#             email=form.email.data,
-#             preferences=form.preferences.data
-#         )
-
-#         if success:
-#             current_user.name = form.name.data
-#             current_user.email = form.email.data
-#             current_user.preferences = form.preferences.data
-#             flash('Your profile has been updated!', 'success')
-#             return redirect(url_for('main.profile'))
-#         else:
-#             flash('Failed to update profile. Please try again.', 'error')
-#     user_notifications = Notification.query.filter_by(user_id=current_user.user_id).order_by(Notification.sent_at.desc()).all()
-
-#     return render_template('profile.html', form=form, image_form=image_form, notifications=user_notifications, survey_completed=False)
+from app.db_operations import DBOperations
 
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -220,7 +184,10 @@ def recommend():
     recommendations = generate_ai_recommendations(data)
     return jsonify(recommendations)
 
-# Login route
+
+from sqlalchemy import text
+
+#qeky punon
 # @main.route('/login', methods=['GET', 'POST'])
 # def login():
 #     form = LoginForm()
@@ -228,29 +195,52 @@ def recommend():
 #         email = form.email.data
 #         password = form.password.data
         
-#         user = User.query.filter_by(email=email).first()
-        
-#         if user and user.check_password(password):
-#             login_user(user)
-            
-#             # Check for surveys in last 24 hours
-#             twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-#             recent_survey = MoodSurvey.query.filter(
-#                 MoodSurvey.user_id == user.user_id,
-#                 MoodSurvey.survey_date >= twenty_four_hours_ago
-#             ).first()
-            
-#             if recent_survey:
-#                 return redirect(url_for('main.mainpage'))
-#             else:
-#                 return redirect(url_for('main.survey'))
-        
-#         flash("Invalid credentials", "error")
-        
+#         try:
+#             # Call stored procedure to get user
+#             with db.engine.connect() as conn:
+#                 result = conn.execute(
+#                     text("CALL GetUserByEmail(:email)"),
+#                     {"email": email}
+#                 )
+#                 user_row = result.fetchone()
+#                 result.close()
+
+#             if user_row:
+#                 # You need to manually compare password if using stored procedures
+#                 stored_password_hash = user_row['password_hash']
+#                 from werkzeug.security import check_password_hash
+                
+#                 if check_password_hash(stored_password_hash, password):
+#                     # Manually load user object for login_user
+#                     user = User(
+#                         user_id=user_row['user_id'],
+#                         name=user_row['name'],
+#                         email=user_row['email'],
+#                         password_hash=stored_password_hash,
+#                         role=user_row['role']
+#                     )
+#                     login_user(user)
+
+#                     # Check for surveys in last 24 hours
+#                     twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+#                     recent_survey = MoodSurvey.query.filter(
+#                         MoodSurvey.user_id == user.user_id,
+#                         MoodSurvey.survey_date >= twenty_four_hours_ago
+#                     ).first()
+
+#                     if recent_survey:
+#                         return redirect(url_for('main.mainpage'))
+#                     else:
+#                         return redirect(url_for('main.survey'))
+
+#             flash("Invalid credentials", "error")
+
+#         except Exception as e:
+#             print(f"CRITICAL ERROR: {str(e)}")
+#             flash("Server error during login", "error")
+    
 #     return render_template('login.html', form=form)
 
-
-from sqlalchemy import text
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -258,56 +248,42 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
-        
+
         try:
-            # Call stored procedure to get user
-            with db.engine.connect() as conn:
-                result = conn.execute(
-                    text("CALL GetUserByEmail(:email)"),
-                    {"email": email}
-                )
-                user_row = result.fetchone()
-                result.close()
+            # Retrieve user by email
+            user = User.query.filter_by(email=email).first()
 
-            if user_row:
-                # You need to manually compare password if using stored procedures
-                stored_password_hash = user_row['password_hash']
-                from werkzeug.security import check_password_hash
-                
-                if check_password_hash(stored_password_hash, password):
-                    # Manually load user object for login_user
-                    user = User(
-                        user_id=user_row['user_id'],
-                        name=user_row['name'],
-                        email=user_row['email'],
-                        password_hash=stored_password_hash,
-                        role=user_row['role']
-                    )
-                    login_user(user)
+            if user and check_password_hash(user.password_hash, password):
+                login_user(user)  # Let Flask-Login manage the session
 
-                    # Check for surveys in last 24 hours
-                    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-                    recent_survey = MoodSurvey.query.filter(
-                        MoodSurvey.user_id == user.user_id,
-                        MoodSurvey.survey_date >= twenty_four_hours_ago
-                    ).first()
+                # Check user role first - admin should go to admin dashboard
+                if user.role == 'admin':
+                    return redirect(url_for('admin.dashboard'))
 
-                    if recent_survey:
-                        return redirect(url_for('main.mainpage'))
-                    else:
-                        return redirect(url_for('main.survey'))
+                # Check for recent surveys in the last 24 hours (only for regular users)
+                twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+                recent_survey = MoodSurvey.query.filter(
+                    MoodSurvey.user_id == user.user_id,
+                    MoodSurvey.survey_date >= twenty_four_hours_ago
+                ).first()
+
+                if recent_survey:
+                    return redirect(url_for('main.mainpage'))
+                else:
+                    return redirect(url_for('main.survey'))
 
             flash("Invalid credentials", "error")
-
         except Exception as e:
             print(f"CRITICAL ERROR: {str(e)}")
             flash("Server error during login", "error")
-    
+
     return render_template('login.html', form=form)
 
 
 
-
+@main.route('/no_permission')
+def no_permission():
+    return render_template('no_permission.html')
 
 @main.route('/survey', methods=['GET', 'POST'])
 @login_required
@@ -436,58 +412,7 @@ def user_charts(user_id):
                             user_id=user_id,
                             surveys=[])
     
-# @main.route('/survey_complete')
-# @login_required
-# def survey_complete():
-#     # Try to get from session first
-#     recommendations = session.get('latest_recommendations')
-#     source = 'ai'
-    
-#     # If not in session, get from database
-#     if not recommendations:
-#         latest_survey = MoodSurvey.query.filter_by(
-#             user_id=current_user.user_id
-#         ).order_by(MoodSurvey.survey_date.desc()).first()
-        
-#         if latest_survey:
-#             rec = Recommendation.query.filter_by(
-#                 survey_id=latest_survey.survey_id
-#             ).first()
-            
-#             if rec:
-#                 recommendations = rec.recommendation_text.split('\n')
-#                 source = 'database'
-    
-#     # Fallback recommendations
-#     if not recommendations:
-#         recommendations = [
-#             "Take three deep breaths to center yourself",
-#             "Drink a glass of water",
-#             "Step outside for fresh air"
-#         ]
-#         source = 'fallback'
-#         flash("We're preparing your personalized recommendations. Here are some general wellness tips.", "info")
-    
-#     # Format recommendations for display
-#     formatted_recs = []
-#     for rec in recommendations:
-#         if '•' in rec:
-#             parts = rec.split('•')[1].split('(')
-#             formatted_recs.append({
-#                 'category': parts[0].split(']')[0].strip(' ['),
-#                 'text': parts[0].split(']')[1].strip(),
-#                 'rationale': parts[1].strip(')') if len(parts) > 1 else ''
-#             })
-#         else:
-#             formatted_recs.append({
-#                 'category': 'General',
-#                 'text': rec,
-#                 'rationale': ''
-#             })
-    
-#     return render_template('survey_complete.html',
-#                         recommendations=formatted_recs,
-#                         source=source)
+
 
 @main.route('/survey_complete')
 @login_required
@@ -603,76 +528,6 @@ def build_ai_prompt(analysis, survey_data):
     """
     return prompt
 
-# @main.route('/signup', methods=['GET', 'POST'])
-# def signup():
-#     form = SignupForm()
-#     if form.validate_on_submit():
-#         try:
-#             # Correct way to create a user
-#             new_user = User(
-#                 name=str(form.name.data),  # Note the comma after each argument
-#                 email=str(form.email.data)  # No comma after last argument
-#             )
-#             new_user.set_password(str(form.password.data))  # Single closing parenthesis
-            
-#             db.session.add(new_user)
-#             db.session.commit()  # <-- THIS MUST SUCCEED
-            
-#             # Verify the user was actually saved
-#             test_user = User.query.filter_by(email=form.email.data).first()
-#             if not test_user:
-#                 raise Exception("User disappeared after commit!")
-                
-#             flash("Account created!")
-#             return redirect(url_for('main.login'))
-            
-#         except Exception as e:
-#             db.session.rollback()
-#             print(f"CRITICAL ERROR: {str(e)}")  # Check console
-#             flash("Failed to create account (server error)")
-    
-#     return render_template('signup.html', form=form)
-
-
-
-# from werkzeug.security import check_password_hash, generate_password_hash
-# @main.route('/signup', methods=['GET', 'POST'])
-# def signup():
-#     form = SignupForm()
-#     if form.validate_on_submit():
-#         try:
-#             # Get data from the form
-#             name = form.name.data
-#             email = form.email.data
-#             password = form.password.data  # Plain password from the form
-
-#             # Hash the password before passing it to the stored procedure
-#             password_hash = generate_password_hash(password)
-
-#             # Assuming 'user' is the default role for new users
-#             role = 'user'  # You can set this to 'admin' if you want an admin role
-
-#             # Use SQLAlchemy's engine to call the stored procedure with 4 parameters
-#             with db.engine.begin() as conn:
-#                 result = conn.execute(
-#                     text("CALL CreateUser(:name, :email, :password_hash, :role)"),
-#                     {"name": name, "email": email, "password_hash": password_hash, "role": role}
-#                 )
-
-#             # Check if the procedure executed and inserted data
-#             if result.rowcount == 0:
-#                 raise Exception("Stored procedure failed to insert user.")
-
-#             flash("Account created successfully!")
-#             return redirect(url_for('main.login'))  # Redirect to the login page
-
-#         except Exception as e:
-#             db.session.rollback()
-#             print(f"CRITICAL ERROR: {str(e)}")  # Log more details
-#             flash(f"Failed to create account: {str(e)}")  # Provide error details
-
-#     return render_template('signup.html', form=form)
-
 
 from werkzeug.security import  generate_password_hash
 @main.route('/signup', methods=['GET', 'POST'])
@@ -731,63 +586,6 @@ def test_db_connection():
     except Exception as e:
         return f"❌ Connection failed: {str(e)}", 500
     
-
-
-
-    #qitu kom shtu palidhje 
-# @main.route('/upload-image', methods=['POST'])
-# @login_required
-# def upload_image():
-#     file = request.files.get('image')
-#     if file:
-#         filename = secure_filename(file.filename)
-#         file_path = os.path.join('static/uploads', filename)
-#         file.save(file_path)
-
-#         # Update user's image path (adjust depending on your model)
-#         current_user.image_url = filename  # Save only the filename, not the full path
-#         db.session.commit()
-
-#         flash("Profile image updated!", "success")
-#     else:
-#         flash("No file selected", "danger")
-    
-#     return redirect(url_for('main.profile'))
-from app.forms import JournalEntryForm
-
-
-# @main.route('/journal', methods=['GET', 'POST'])
-# @login_required
-# def journal_entries():
-#     form = JournalEntryForm()
-#     if form.validate_on_submit():
-#         new_entry = JournalEntry(user_id=current_user.user_id, content=form.content.data)
-#         db.session.add(new_entry)
-#         db.session.commit()
-#         flash('Journal entry saved.', 'success')
-#         return redirect(url_for('main.journal_entries'))
-
-#     entries = JournalEntry.query.filter_by(user_id=current_user.user_id).order_by(JournalEntry.created_at.desc()).all()
-#     return render_template('journal_entries.html', form=form, entries=entries)
-
-# @main.route('/journal', methods=['GET', 'POST'])
-# @login_required
-# def journal_entries():
-#     form = JournalEntryForm()
-#     if form.validate_on_submit():
-#         new_entry = JournalEntry(
-#             content=form.content.data,
-#             user_id=current_user.user_id
-#         )
-#         db.session.add(new_entry)
-#         db.session.commit()
-
-#         # Optional: Do sentiment analysis here, if set up
-#         return redirect(url_for('main.mainpage'))  # 👈 redirect to main page after saving
-
-#     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
-#         .order_by(JournalEntry.created_at.desc()).all()
-#     return render_template('journal_entries.html', form=form, entries=entries)
 
 
 from app.db_operations import DBOperations
@@ -858,56 +656,6 @@ def logout():
     return redirect(url_for('main.login'))
 
 
-
-
-#qetu kom provu per stored procedure me emrin GetJournalEntry
-# @main.route('/journal', methods=['GET', 'POST'])
-# @login_required
-# def journal_entries():
-#     form = JournalEntryForm()
-    
-#     # Handle form submission
-#     if form.validate_on_submit():
-#         try:
-#             sentiment_type, confidence_score = analyze_sentiment(form.content.data)
-            
-#             entry_id = DBOperations.create_journal_entry(
-#                 user_id=current_user.user_id,
-#                 content=form.content.data,
-#                 sentiment_type=sentiment_type,
-#                 confidence_score=confidence_score
-#             )
-            
-#             if entry_id:
-#                 flash("Journal entry saved successfully", "success")
-#                 return redirect(url_for('main.journal_entries'))
-#             else:
-#                 flash("Failed to save journal entry", "danger")
-#         except Exception as e:
-#             current_app.logger.error(f"Error saving journal entry: {str(e)}")
-#             flash("An error occurred while saving your entry", "danger")
-    
-#     # Get date filters from form or use defaults
-#     start_date = form.start_date.data if form.start_date.data else None
-#     end_date = form.end_date.data if form.end_date.data else None
-    
-#     # Get journal entries
-#     entries = DBOperations.get_journal_entries_with_sentiment(
-#         user_id=current_user.user_id,
-#         start_date=start_date,
-#         end_date=end_date
-#     )
-    
-#     if entries is None:
-#         flash("Error loading journal entries", "danger")
-#         entries = []
-    
-#     return render_template('journal_entries.html', 
-#                          form=form, 
-#    
-#                       entries=entries)
-# 
-# 
 
 @main.route('/events')
 @login_required
@@ -983,8 +731,6 @@ def api_events():
 
     return jsonify(events)
 
-#                          entries=entries)
-# in your routes file
 
 from app.db_operations import DBOperations
 

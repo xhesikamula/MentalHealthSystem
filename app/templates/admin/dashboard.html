@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    {% block content %}
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, {{ current_user.name }}!</p>
+  
+    <h2>Recent Activity</h2>
+    <ul>
+      <li>Recent Mood Surveys (last 5):
+        <ul>
+          {% for survey in surveys %}
+            <li>{{ survey.created_at }} - {{ survey.survey_title }}</li>
+          {% endfor %}
+        </ul>
+      </li>
+      <li>Recent Events:
+        <ul>
+          {% for event in events %}
+            <li>{{ event.date_time }} - {{ event.title }}</li>
+          {% endfor %}
+        </ul>
+      </li>
+    </ul>
+  
+    <!-- Admin Management Links -->
+    <h3>Admin Management</h3>
+    <ul>
+      <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
+      <li><a href="{{ url_for('admin.manage_events') }}">Manage Events</a></li>
+    </ul>
+  
+  {% endblock %}
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

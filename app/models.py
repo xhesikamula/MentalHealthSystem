@@ -28,7 +28,8 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
     preferences = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    role = db.Column(db.Enum('admin', 'user'), nullable=False, default='user')
+    # role = db.Column(db.Enum('admin', 'user'), nullable=False, default='user')
+    role = db.Column(db.Enum('admin', 'user', name='role_enum'), nullable=False, default='user')
     image_url = db.Column(db.String(255))  # or appropriate length
 
     
