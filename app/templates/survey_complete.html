@@ -73,69 +73,44 @@
     <div class="recommendations-container">
         <h2>Your Personalized Suggestions</h2>
         
+       
         {% if recommendations %}
-            {% if recommendations is string %}
-                <!-- Handle case where recommendations is a string -->
-                <div class="recommendations-list">
-                    <div class="recommendation-card">
-                        <h4>General</h4>
-                        <p>{{ recommendations }}</p>
-                    </div>
+        <div class="recommendations-list">
+            {% for rec in recommendations %}
+                <div class="recommendation-card">
+                    <h4>{{ rec.get('category', 'General') }}</h4>
+                    <p>{{ rec.get('text', '') }}</p>
+                    {% if rec.get('rationale') %}
+                        <p class="rationale"><small>{{ rec.get('rationale') }}</small></p>
+                    {% endif %}
                 </div>
-            {% elif recommendations is mapping %}
-                <!-- Handle case where single recommendation is a dictionary -->
-                <div class="recommendations-list">
-                    <div class="recommendation-card">
-                        <h4>{{ recommendations.category }}</h4>
-                        <p>{{ recommendations.text }}</p>
-                        {% if recommendations.rationale %}
-                        <p class="rationale"><small>{{ recommendations.rationale }}</small></p>
-                        {% endif %}
-                    </div>
-                </div>
-            {% else %}
-                <!-- Normal list of recommendations -->
-                <div class="recommendations-list">
-                    {% for rec in recommendations %}
-                    <div class="recommendation-card">
-                        {% if rec is string %}
-                            <h4>General</h4>
-                            <p>{{ rec }}</p>
-                        {% else %}
-                            <h4>{{ rec.get('category', 'General') }}</h4>
-                            <p>{{ rec.get('text', '') }}</p>
-                            {% if rec.get('rationale') %}
-                            <p class="rationale"><small>{{ rec.rationale }}</small></p>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% else %}
-            <div class="processing-message">
-                <p>We're preparing your personalized suggestions...</p>
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-            <div class="fallback-recommendations mt-4">
-                <p class="text-muted">Try these general wellness tips while you wait:</p>
-                <ul class="list-group">
-                    <li class="list-group-item">Take three deep breaths</li>
-                    <li class="list-group-item">Drink a glass of water</li>
-                    <li class="list-group-item">Step outside for fresh air</li>
-                </ul>
-            </div>
-        {% endif %}
-        <div class="text-end mt-4">
-            <a href="{{ url_for('main.journal_entries') }}" class="btn btn-outline-primary">
-                ✍️ Write a Journal Entry
-            </a>
+            {% endfor %}
         </div>
-        
+    {% else %}
+        <div class="processing-message">
+            <p>We're preparing your personalized suggestions...</p>
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div class="fallback-recommendations mt-4">
+            <p class="text-muted">Try these general wellness tips while you wait:</p>
+            <ul class="list-group">
+                <li class="list-group-item">Take three deep breaths</li>
+                <li class="list-group-item">Drink a glass of water</li>
+                <li class="list-group-item">Step outside for fresh air</li>
+            </ul>
+        </div>
+    {% endif %}
+    <div class="text-end mt-4">
+        <a href="{{ url_for('main.journal_entries') }}" class="btn btn-outline-primary">
+            ✍️ Write a Journal Entry
+        </a>
     </div>
+
+</div>
 </main>
+
 
 <!-- Refresh meta tag for auto-reload -->
 <meta http-equiv="refresh" content="5;url={{ url_for('main.survey_complete') }}">

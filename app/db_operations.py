@@ -251,41 +251,55 @@ class DBOperations:
 #         return None
 
 #nuk mka bo
-# @staticmethod
-# def get_journal_entries_with_sentiment(user_id, start_date=None, end_date=None):
-#         """Get journal entries with sentiment analysis using the stored procedure"""
-#         try:
-#             # Set default dates if not provided
-#             if not start_date:
-#                 start_date = datetime(2023, 1, 1).date()
-#             if not end_date:
-#                 end_date = datetime.today().date()
+    @staticmethod
+    def get_journal_entries_with_sentiment(user_id, start_date=None, end_date=None):
+        """Get journal entries with sentiment analysis using the stored procedure"""
+        try:
+            # Set default dates if not provided
+            if not start_date:
+                start_date = datetime(2023, 1, 1).date()
+            if not end_date:
+                end_date = datetime.today().date()
             
-#             # Call the stored procedure
-#             result = db.session.execute(
-#                 text("CALL GetJournalEntries(:user_id, :start_date, :end_date)"),
-#                 {
-#                     'user_id': user_id,
-#                     'start_date': start_date,
-#                     'end_date': end_date
-#                 }
-#             )
+            # Call the stored procedure
+            result = db.session.execute(
+                text("CALL GetJournalEntries(:user_id, :start_date, :end_date)"),
+                {
+                    'user_id': user_id,
+                    'start_date': start_date,
+                    'end_date': end_date
+                }
+            )
             
-#             # Convert to list of dictionaries
-#             entries = []
-#             for row in result:
-#                 entry = dict(row)
-#                 # Ensure datetime is properly formatted
-#                 if 'created_at' in entry and entry['created_at']:
-#                     if isinstance(entry['created_at'], str):
-#                         entry['created_at'] = datetime.fromisoformat(entry['created_at'])
-#                 entries.append(entry)
+            # Convert to list of dictionaries
+            entries = []
+            for row in result:
+                entry = dict(row)
+                # Ensure datetime is properly formatted
+                if 'created_at' in entry and entry['created_at']:
+                    if isinstance(entry['created_at'], str):
+                        entry['created_at'] = datetime.fromisoformat(entry['created_at'])
+                entries.append(entry)
             
-#             return entries
+            return entries
             
-#         except Exception as e:
-#             current_app.logger.error(f"Error getting journal entries: {str(e)}")
-#             return None
+
+        except Exception as e:
+            current_app.logger.error(f"Error getting journal entries: {str(e)}")
+            return None
+    @staticmethod
+    def create_notification(user_id, message, type_):
+        """
+        Calls CreateNotification stored procedure
+        """
+        try:
+            current_app.logger.info(f"Calling CreateNotification with user_id={user_id}, message={message}, type={type_}")
+            
+            db.session.execute(
+                text("CALL CreateNotification(:p_user_id, :p_message, :p_type_)"),
+                {'p_user_id': user_id, 'p_message': message, 'p_type_': type_}
+            )
+
 
 
 #NUK BON

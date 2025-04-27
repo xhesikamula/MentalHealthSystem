@@ -5,7 +5,7 @@ from flask import Blueprint, current_app, json, jsonify, render_template, reques
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
-from app.services.recommendations import generate_ai_recommendations
+from app.services.recommendations import format_recommendations_for_display, generate_ai_recommendations
 from .models import Notification, db, Recommendation, User, MoodSurvey
 from .forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta, datetime
@@ -209,6 +209,9 @@ def change_password():
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+@main.route('/test_recommend')
+def test_recommend_page():
+    return render_template('test_recommend.html')
 
 @main.route('/recommend', methods=['POST'])
 @limiter.limit("3 per minute") 
@@ -344,7 +347,7 @@ def survey():
                 physical_activity=form.physical_activity.data,
                 spent_time_with_someone=form.spent_time_with_someone.data,
                 feelings_description=form.feelings_description.data,
-                recommendation_text=json.dumps(recommendations)
+                recommendation_text = format_recommendations_for_display(recommendations)  # ✅
             )
             
             if survey_id:
