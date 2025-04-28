@@ -5,34 +5,31 @@ from sqlalchemy import text
 from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, url_for, flash, session
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
-from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy  
 from app.services.recommendations import format_recommendations_for_display, generate_ai_recommendations
 from .models import Notification, db, Recommendation, User, MoodSurvey
 from .forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta, datetime
 from flask_limiter.util import get_remote_address
-import openai  # Add this with your other imports
+import openai  
 from app.db_operations import DBOperations
 from app.models import JournalEntry
 import json
-from . import db_operations  # Make sure this import exists
+from . import db_operations 
 #per api
 from dotenv import load_dotenv
 import os
 from app.forms import JournalEntryForm
-
 import app
 
 
 load_dotenv()  # Load environment variables from .env file
 
-API_KEY = os.getenv('GEOAPIFY_API_KEY')  # Now the key is safely loaded
-
-#stored procedures per evente i kam kriju po me i provu jo , se ni event api se kem hala
+API_KEY = os.getenv('GEOAPIFY_API_KEY')  
 
 #nuk osht ka i analizon mir tdhanat e survey , edhe po i jep tnjejtat rekomandime gjith mdoket, edhe po i printon keq vlerat qe pja jepi
 
-# Create a blueprint for the routes
+#This groups our user-related routes 
 main = Blueprint('main', __name__)
 
 # Home route
@@ -40,8 +37,7 @@ main = Blueprint('main', __name__)
 def home():
     return render_template('index.html')
 
-
-# Initialize Limiter with app context
+#we created a limiter so users don't spam the server
 def init_limiter(app):
     limiter = Limiter(
         app=app,
@@ -57,10 +53,9 @@ from app.models import Event
 @main.route('/events/list')
 @login_required
 def list_events():
-    # Fetch only events with type 'event'
+    #I bon fetch veq eventet te tipit event
     events = Event.query.filter_by(type='event').all()
     return render_template('events_list.html', events=events)
-
 
 @main.route('/podcasts')
 @login_required
@@ -82,9 +77,9 @@ def update_profile():
         email = request.form.get('email')
         preferences = request.form.get('preferences', '')
         
-        # Check if email is being changed
+        # check if email is being changed
         if email != current_user.email:
-            # Verify email isn't already taken
+            # verify email isn't already taken
             existing = db.session.execute(
                 text("SELECT user_id FROM user WHERE email = :email"),
                 {"email": email}
@@ -94,7 +89,6 @@ def update_profile():
                 flash("Email is already in use by another account", "error")
                 return redirect(url_for('main.profile'))
         
-        # Update profile using stored procedure
         success = DBOperations.update_user_profile(
             user_id=current_user.user_id,
             name=name,
@@ -103,7 +97,6 @@ def update_profile():
         )
         
         if success:
-            # Update Flask-Login's user object
             current_user.name = name
             current_user.email = email
             current_user.preferences = preferences
@@ -155,7 +148,6 @@ def profile():
         else:
             flash('Failed to update profile. Please try again.', 'error')
 
-    # ⚡ Correct ordering without NULLS LAST
     from sqlalchemy import case
     user_notifications = Notification.query.filter_by(user_id=current_user.user_id).order_by(
         case((Notification.sent_at == None, 1), else_=0),
@@ -183,14 +175,13 @@ def change_password():
         # Hash the new password
         new_password_hash = generate_password_hash(new_password)
 
-        # Call the stored procedure to change the password
         success = DBOperations.change_password(current_user.user_id, new_password_hash)
 
         if success:
             # Update the current_user object to reflect the new password
             current_user.password_hash = new_password_hash
             flash('Your password has been changed successfully', 'success')
-            return redirect(url_for('main.profile'))  # Or wherever you want to redirect
+            return redirect(url_for('main.profile'))  
         else:
             flash('Failed to change password. Please try again.', 'error')
 
@@ -209,64 +200,6 @@ def recommend():
     recommendations = generate_ai_recommendations(data)
     return jsonify(recommendations)
 
-
-from sqlalchemy import text
-
-#qeky punon
-# @main.route('/login', methods=['GET', 'POST'])
-# def login():
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         email = form.email.data
-#         password = form.password.data
-        
-#         try:
-#             # Call stored procedure to get user
-#             with db.engine.connect() as conn:
-#                 result = conn.execute(
-#                     text("CALL GetUserByEmail(:email)"),
-#                     {"email": email}
-#                 )
-#                 user_row = result.fetchone()
-#                 result.close()
-
-#             if user_row:
-#                 # You need to manually compare password if using stored procedures
-#                 stored_password_hash = user_row['password_hash']
-#                 from werkzeug.security import check_password_hash
-                
-#                 if check_password_hash(stored_password_hash, password):
-#                     # Manually load user object for login_user
-#                     user = User(
-#                         user_id=user_row['user_id'],
-#                         name=user_row['name'],
-#                         email=user_row['email'],
-#                         password_hash=stored_password_hash,
-#                         role=user_row['role']
-#                     )
-#                     login_user(user)
-
-#                     # Check for surveys in last 24 hours
-#                     twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-#                     recent_survey = MoodSurvey.query.filter(
-#                         MoodSurvey.user_id == user.user_id,
-#                         MoodSurvey.survey_date >= twenty_four_hours_ago
-#                     ).first()
-
-#                     if recent_survey:
-#                         return redirect(url_for('main.mainpage'))
-#                     else:
-#                         return redirect(url_for('main.survey'))
-
-#             flash("Invalid credentials", "error")
-
-#         except Exception as e:
-#             print(f"CRITICAL ERROR: {str(e)}")
-#             flash("Server error during login", "error")
-    
-#     return render_template('login.html', form=form)
-
-
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -279,7 +212,7 @@ def login():
             user = User.query.filter_by(email=email).first()
 
             if user and check_password_hash(user.password_hash, password):
-                login_user(user)  # Let Flask-Login manage the session
+                login_user(user)  
 
                 # Check user role first - admin should go to admin dashboard
                 if user.role == 'admin':
@@ -304,8 +237,7 @@ def login():
 
     return render_template('login.html', form=form)
 
-
-
+#Only for regular users
 @main.route('/no_permission')
 def no_permission():
     return render_template('no_permission.html')
@@ -319,17 +251,15 @@ def survey():
                                 .first()
 
     if last_survey and last_survey.survey_date >= datetime.utcnow() - timedelta(hours=24):
-        #flash("You've already completed a survey in the last 24 hours.", "info")
         return redirect(url_for('main.mainpage'))
     form = MoodSurveyForm()
     
     if form.validate_on_submit():
         try:
-            # Generate recommendations first
             recommendations = generate_ai_recommendations({
                 'mood_level': form.mood_level.data,
                 'stress_level': form.stress_level.data,
-                'sleep_hours': form.sleep_hours.data,  # Fixed typo from sleep_hours
+                'sleep_hours': form.sleep_hours.data,  
                 'energy_level': form.energy_level.data,
                 'diet_quality': form.diet_quality.data,
                 'physical_activity': form.physical_activity.data,
@@ -337,7 +267,6 @@ def survey():
                 'feelings_description': form.feelings_description.data
             })
 
-            # Call the stored procedure through db_operations
             survey_id = DBOperations.create_mood_survey(
                 user_id=current_user.user_id,
                 mood_level=form.mood_level.data,
@@ -352,10 +281,9 @@ def survey():
             )
             
             if survey_id:
-                # Store in session for immediate display
                 session['latest_recommendations'] = recommendations
                 session.modified = True
-                return redirect(url_for('main.survey_complete'))  # Fixed extra parenthesis
+                return redirect(url_for('main.survey_complete')) 
             
             flash("Error processing your survey. Please try again.", "error")
             
@@ -369,7 +297,6 @@ def survey():
 @login_required
 def history():
     try:
-        # Call the stored procedure
         result = db.session.execute(
             text("CALL GetUserSurveyHistory(:user_id, :limit)"),
             {'user_id': current_user.user_id, 'limit': 10}
@@ -392,13 +319,11 @@ def history():
 @login_required
 def chart_data():
     try:
-        # Call the same stored procedure
         surveys = db.session.execute(
             text("CALL GetUserSurveyHistory(:user_id, :limit)"),
             {'user_id': current_user.user_id, 'limit': 30}
         ).fetchall()
         
-        # Process data
         chart_data = {
             'dates': [row['survey_date'].strftime('%Y-%m-%d') for row in surveys],
             'mood': [row['mood_level'] for row in surveys],
@@ -473,25 +398,23 @@ def survey_complete():
         source = 'fallback'
         flash("We're preparing your personalized recommendations. Here are some general wellness tips.", "info")
     
-    # Format the recommendations more precisely
     formatted_recs = []
     for rec in recommendations:
         if '•' in rec:
             # Split by '•' if there's a category and rationale
             parts = rec.split('•')[1].split('(')
             formatted_recs.append({
-                'category': parts[0].split(']')[0].strip(' ['),  # Extract the category from the first part
-                'text': parts[0].split(']')[1].strip(),  # Extract the text
-                'rationale': parts[1].strip(')') if len(parts) > 1 else ''  # Extract the rationale if available
+                'category': parts[0].split(']')[0].strip(' ['),
+                'text': parts[0].split(']')[1].strip(), 
+                'rationale': parts[1].strip(')') if len(parts) > 1 else '' 
             })
         else:
             formatted_recs.append({
                 'category': 'General',  # Default category if no specific one
                 'text': rec,
-                'rationale': ''  # No rationale for general recommendations
+                'rationale': ''  
             })
 
-    # Send the formatted recommendations to the template
     return render_template('survey_complete.html',
                         recommendations=formatted_recs,
                         source=source,
@@ -511,11 +434,10 @@ def health_check():
 @main.route('/mainpage')
 @login_required
 def mainpage():
-    return render_template('mainpage.html')  # Make sure this template exists
+    return render_template('mainpage.html')  
 
 def build_ai_prompt(analysis, survey_data):
     """Builds a prompt that definitely includes all survey factors"""
-    # Safely get all values with defaults
     factors = {
         'Mood': str(survey_data.get('mood_level', '?')) + '/10',
         'Stress': str(survey_data.get('stress_level', '?')) + '/10',
@@ -579,7 +501,6 @@ def signup():
                     flash("Email is already registered.")
                     return render_template('signup.html', form=form)
 
-                # Call CreateUser stored procedure
                 result = conn.execute(
                     text("CALL CreateUser(:name, :email, :password_hash, :role)"),
                     {
@@ -601,8 +522,6 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-
-
 @main.route('/test-db-connection')
 def test_db_connection():
     try:
@@ -613,13 +532,8 @@ def test_db_connection():
     except Exception as e:
         return f"❌ Connection failed: {str(e)}", 500
     
-
-
 from app.db_operations import DBOperations
-from app.sentiment_utils import analyze_sentiment  # 👈 import the function
-
-from app.db_operations import DBOperations
-from app.sentiment_utils import analyze_sentiment  # 👈 import the function
+from app.sentiment_utils import analyze_sentiment 
 
 @main.route('/journal', methods=['GET', 'POST'])
 @login_required
@@ -656,12 +570,12 @@ def upload_image():
     if file:
         filename = secure_filename(file.filename)
         upload_folder = os.path.join(current_app.root_path, 'static/uploads')
-        os.makedirs(upload_folder, exist_ok=True)  # Ensure folder exists
+        os.makedirs(upload_folder, exist_ok=True)  
 
         file_path = os.path.join(upload_folder, filename)
         file.save(file_path)
 
-        # Update user's image path (adjust depending on your User model)
+        # Update user's image path 
         current_user.image_url = filename
         db.session.commit()
 
@@ -675,19 +589,15 @@ def upload_image():
 from flask import Blueprint, redirect, url_for, flash
 from flask_login import logout_user
 
-
 @main.route('/logout', methods=['POST'])
 def logout():
     logout_user()
     flash("You have been logged out.", "success")
     return redirect(url_for('main.login'))
 
-
-
 @main.route('/events')
 @login_required
 def events_page():
-    # Renders the frontend page that will ask for geolocation
     return render_template('events.html')
 
 from flask import request, jsonify
@@ -752,7 +662,7 @@ def api_events():
             'name':        prop['name'],
             'date':        'TBD',  # Geoapify doesn’t give event dates, just places
             'venue':       prop.get('address_line2', 'Location TBA'),
-            'url':         link,  # Use website or Google search link
+            'url':         link, 
             'is_map_link': not bool(website)  # Label for Google search or Website
         })
 
@@ -768,7 +678,6 @@ def create_notification_route():
         message = request.form.get('message')
         type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
         
-        # Ensure the type is valid
         if type_ not in ['survey', 'journal', 'mindfulness']:
             flash('Invalid notification type', 'error')
             return redirect(url_for('main.profile'))
@@ -777,7 +686,6 @@ def create_notification_route():
             flash('Missing message or type', 'error')
             return redirect(url_for('main.profile'))
 
-        # Call the DB operation to create a notification
         success = DBOperations.create_notification(
             user_id=current_user.user_id,
             message=message,

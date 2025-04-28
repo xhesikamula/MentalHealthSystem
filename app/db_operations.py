@@ -8,7 +8,7 @@ class DBOperations:
     @staticmethod
     def CreateUser(name, email, password_hash):
         try:
-            # Use raw SQL to call the stored procedure
+            # Used raw SQL to call the stored procedure
             result = db.session.execute(
                 "CALL CreateUser(:name, :email, :password_hash)",
                 {'name': name, 'email': email, 'password_hash': password_hash}
@@ -82,10 +82,9 @@ class DBOperations:
         Calls the CreateMoodSurvey stored procedure to save a mood survey
         """
         try:
-            # Verify database connection
+            # Verify database connection (it returns 1 if the database is alive)
             db.session.execute(text("SELECT 1")).fetchone()
 
-            # Call stored procedure
             result = db.session.execute(
                 text("CALL CreateMoodSurvey(:p_user_id, :p_mood_level, :p_stress_level, "
                     ":p_sleep_hours, :p_energy_level, :p_diet_quality, "
@@ -105,9 +104,10 @@ class DBOperations:
                 }
             )
 
-            # Get the OUT parameter
+            #@p_survey_id will be filled by the database with the ID of the newly created survey.
+            # retrieve the OUT parameter
             survey_id = db.session.execute(text("SELECT @p_survey_id")).scalar()
-            db.session.commit()
+            db.session.commit() # i bon commit ndryshimet
 
             if survey_id:
                 current_app.logger.info(f"Successfully created survey {survey_id}")
@@ -139,7 +139,7 @@ class DBOperations:
             The created entry_id if successful, None otherwise.
         """
         try:
-            db.session.execute(text("SELECT 1")).fetchone()  # Ensure DB connection is alive
+            db.session.execute(text("SELECT 1")).fetchone() 
 
             db.session.execute(
                 text("CALL CreateJournalEntry(:p_user_id, :p_content, :p_sentiment_type, :p_confidence_score, @p_entry_id)"),
@@ -173,7 +173,6 @@ class DBOperations:
             if not end_date:
                 end_date = datetime.today().date()
             
-            # Call the stored procedure
             result = db.session.execute(
                 text("CALL GetJournalEntries(:user_id, :start_date, :end_date)"),
                 {
@@ -187,7 +186,6 @@ class DBOperations:
             entries = []
             for row in result:
                 entry = dict(row)
-                # Ensure datetime is properly formatted
                 if 'created_at' in entry and entry['created_at']:
                     if isinstance(entry['created_at'], str):
                         entry['created_at'] = datetime.fromisoformat(entry['created_at'])

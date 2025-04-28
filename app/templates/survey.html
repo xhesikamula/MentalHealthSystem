@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="survey-container">
             <h2>Complete the Survey</h2>
             <form method="POST" action="{{ url_for('main.survey') }}">
-                {{ form.hidden_tag() }} <!-- CSRF token -->
+                {{ form.hidden_tag() }} 
 
                 <div class="form-group">
                     <label for="mood_level">Mood Level (1-10):</label>
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <div class="form-group">
-                    <label for="physical_activity">Physical Activity (1-10):</label>
+                    <label for="physical_activity">Physical Activity (0-10):</label>
                     {{ form.physical_activity(class="form-control", id="physical_activity") }}
                 </div>
 

@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
+#eshte bo set up databaza
 db = SQLAlchemy()
 
 class Event(db.Model):
@@ -30,32 +31,29 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     # role = db.Column(db.Enum('admin', 'user'), nullable=False, default='user')
     role = db.Column(db.Enum('admin', 'user', name='role_enum'), nullable=False, default='user')
-    image_url = db.Column(db.String(255))  # or appropriate length
+    image_url = db.Column(db.String(255))  
 
-    
     # Relationships
     mood_surveys = db.relationship('MoodSurvey', back_populates='user', lazy='dynamic')
     journal_entries = db.relationship('JournalEntry', back_populates='user', lazy='dynamic')
     notifications = db.relationship('Notification', back_populates='user', lazy='dynamic')
 
     def get_id(self):
-        return str(self.user_id)  # Must return a string
+        return str(self.user_id)  
     
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    #i bona koment se i kom te db_operations.py tash stored procedures
+    # def set_password(self, password):
+    #     self.password_hash = generate_password_hash(password)
     
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    # def check_password(self, password):
+    #     return check_password_hash(self.password_hash, password)
     
-    
-    
-
-    def update_profile(self, name, email, preferences):
-        """Helper method to update profile"""
-        self.name = name
-        self.email = email
-        self.preferences = preferences
-        db.session.commit()
+    # def update_profile(self, name, email, preferences):
+    #     """Helper method to update profile"""
+    #     self.name = name
+    #     self.email = email
+    #     self.preferences = preferences
+    #     db.session.commit()
 
 class MoodSurvey(db.Model):
     __tablename__ = 'moodsurvey'
@@ -76,9 +74,9 @@ class MoodSurvey(db.Model):
     user = db.relationship('User', back_populates='mood_surveys')
     recommendation = db.relationship(
         'Recommendation', 
-        uselist=False, 
-        back_populates='mood_survey',  # Changed from 'survey'
-        cascade='all, delete-orphan'
+        uselist=False, #one survey has only ONE recommendation
+        back_populates='mood_survey', 
+        cascade='all, delete-orphan' #if a MoodSurvey gets deleted, automatically delete the linked Recommendation too
     )
 
 class Recommendation(db.Model):
@@ -89,7 +87,6 @@ class Recommendation(db.Model):
     survey_id = db.Column(db.Integer, db.ForeignKey('moodsurvey.survey_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     
-    # Add this relationship
     mood_survey = db.relationship('MoodSurvey', back_populates='recommendation')
 
 class JournalEntry(db.Model):

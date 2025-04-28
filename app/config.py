@@ -2,11 +2,9 @@ import os
 from dotenv import load_dotenv
 import requests
 
-# Load environment variables from the .env file
 load_dotenv()
 
 class Config:
-    # SQL Server Configuration
     SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?driver=ODBC+Driver+17+for+SQL+Server"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
@@ -15,21 +13,19 @@ class Config:
         'connect_args': {'timeout': 30}
     }
 
-    # OpenAI Configuration
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     OPENAI_MODEL = 'gpt-3.5-turbo'
     OPENAI_TEMPERATURE = 0.7
     OPENAI_MAX_TOKENS = 150
 
-    # Hugging Face Configuration
-    HF_TOKEN = os.getenv("HF_TOKEN")  # Ensure this is set in .env
+    #sna vyn sen se nuk mka funksionu
+    HF_TOKEN = os.getenv("HF_TOKEN")  
     HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/facebook/blenderbot-400M-distill"
     
     headers = {
         "Authorization": f"Bearer {HF_TOKEN}"
     }
 
-    # Security
     SECRET_KEY = os.getenv('SECRET_KEY')
 
     @classmethod

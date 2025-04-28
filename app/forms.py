@@ -4,20 +4,16 @@ from wtforms import (IntegerField, TextAreaField, SelectField, FloatField,
 from wtforms.validators import (DataRequired, NumberRange, Email, Length, 
                             EqualTo, ValidationError)
 from app.models import User
-
 from flask_wtf.file import FileField, FileAllowed
 
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import SubmitField
+
+#Same form can be used for multiple pages
 
 class ImageUploadForm(FlaskForm):
     image = FileField('Upload Profile Image', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
     ])
     submit = SubmitField('Upload Image')
-
-from wtforms import TextAreaField, SubmitField
-from wtforms.validators import DataRequired
 
 from wtforms import DateField
 
@@ -26,7 +22,6 @@ class JournalEntryForm(FlaskForm):
     start_date = DateField('Start Date', format='%Y-%m-%d')
     end_date = DateField('End Date', format='%Y-%m-%d')
     submit = SubmitField('Save Entry')
-
 
 
 class MoodSurveyForm(FlaskForm):
@@ -114,15 +109,10 @@ from wtforms.validators import DataRequired, EqualTo, Length, Email
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, PasswordField
 
-
 class ProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     preferences = TextAreaField('Preferences')
-
-
-
-
 
 
 class ChangePasswordForm(FlaskForm):
@@ -149,14 +139,13 @@ class EventForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# Example: PodcastForm (similar to EventForm)
 class PodcastForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     link = StringField('Link', validators=[DataRequired()])
     submit = SubmitField('Add Podcast')
 
-# Example: HotlineForm (similar to EventForm)
+
 class HotlineForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     phone_number = StringField('Phone Number', validators=[DataRequired()])

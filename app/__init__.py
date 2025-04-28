@@ -10,15 +10,9 @@ import openai
 import pymysql
 from .db_operations import DBOperations
 
-
-
-# Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
-
-
-
 
 def load_environment():
     """Load environment variables with validation"""
@@ -54,7 +48,6 @@ def create_app():
         raise ValueError("No OpenAI API key found. Please set OPENAI_API_KEY in .env file")
     from app.admin_routes import admin_bp
     app.register_blueprint(admin_bp)
-    # Configuration with validation
     required_env_vars = ['SECRET_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']
     for var in required_env_vars:
         if not os.getenv(var):
@@ -70,7 +63,6 @@ def create_app():
         }
     })
 
-    # Verify database connection
     if not test_database_connection({
         'DB_HOST': os.getenv('DB_HOST'),
         'DB_USER': os.getenv('DB_USER'),
@@ -79,9 +71,6 @@ def create_app():
     }):
         raise RuntimeError("Failed to connect to database")
     
-
-
-    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
@@ -99,7 +88,6 @@ def create_app():
     from app.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    # Configure user loader
     from app.models import User
     @login_manager.user_loader
     def load_user(user_id):
