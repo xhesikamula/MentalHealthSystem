@@ -9,9 +9,17 @@
         body {
             background-color: #f0f4f8;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
         }
 
+        .mb-4.text-primary {
+            color: #808000; /* Olive Green */
+        }
         .journal-container {
+            flex: 1;
             margin-top: 2rem;
         }
 
@@ -48,9 +56,26 @@
             font-size: 0.85rem;
             color: #6c757d;
         }
+
         .btn {
             color: white;
             background-color: #808000;
+        }
+
+        /* Footer stays at the bottom */
+        footer {
+            margin-top: auto;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .quote-box {
+                font-size: 1.2rem;
+            }
+
+            .entry-form button {
+                width: 100%;
+            }
         }
     </style>
 </head>
