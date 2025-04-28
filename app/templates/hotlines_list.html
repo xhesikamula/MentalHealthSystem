@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotlines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <h1 class="mb-4 text-primary">Hotlines</h1>
+
+    {% if hotlines %}
+        <ul>
+            {% for hotline in hotlines %}
+            <li>
+                <strong>{{ hotline.title }}</strong><br>
+                Description: {{ hotline.description }}<br>
+                Phone: {{ hotline.phone_number }}
+            </li>
+            <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hotlines available.</p>
+    {% endif %}
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

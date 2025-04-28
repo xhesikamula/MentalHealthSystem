@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add {{ resource_type.capitalize() }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    {% block content %}
+    <h1>Add {{ resource_type.capitalize() }}</h1>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="title">Title</label>
+            {{ form.title() }}
+        </div>
+
+        <div>
+            <label for="description">Description</label>
+            {{ form.description() }}
+        </div>
+
+        <div>
+            <label for="link">Link</label>
+            {{ form.link() }}
+        </div>
+
+        <button type="submit">Add {{ resource_type.capitalize() }}</button>
+    </form>
+    {% endblock %}
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

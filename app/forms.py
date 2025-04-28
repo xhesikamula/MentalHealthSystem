@@ -123,6 +123,8 @@ class ProfileForm(FlaskForm):
 
 
 
+
+
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[
@@ -131,3 +133,33 @@ class ChangePasswordForm(FlaskForm):
         EqualTo('confirm_password', message='Passwords must match')
     ])
     confirm_password = PasswordField('Confirm New Password', validators=[DataRequired()])
+
+
+# app/forms.py
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, DateTimeField, SelectField, SubmitField
+from wtforms.validators import DataRequired
+
+class EventForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    date_time = DateTimeField('Date and Time', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
+    link = StringField('Link')
+    submit = SubmitField('Submit')
+
+
+# Example: PodcastForm (similar to EventForm)
+class PodcastForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    link = StringField('Link', validators=[DataRequired()])
+    submit = SubmitField('Add Podcast')
+
+# Example: HotlineForm (similar to EventForm)
+class HotlineForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    phone_number = StringField('Phone Number', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    submit = SubmitField('Add Hotline')
+

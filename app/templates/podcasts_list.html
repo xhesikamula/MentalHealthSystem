@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcasts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <h1 class="mb-4 text-primary">Podcasts</h1>
+
+    {% if podcasts %}
+        <ul>
+            {% for podcast in podcasts %}
+            <li>
+                <strong>{{ podcast.title }}</strong><br>
+                Description: {{ podcast.description }}<br>
+                <a href="{{ podcast.link }}" target="_blank">Listen</a>
+            </li>
+            <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No podcasts available.</p>
+    {% endif %}
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

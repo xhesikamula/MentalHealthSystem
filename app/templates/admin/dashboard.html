@@ -37,9 +37,11 @@
     <ul>
       <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
       <li><a href="{{ url_for('admin.manage_events') }}">Manage Events</a></li>
+      <li><a href="{{ url_for('admin.manage_podcasts') }}">Manage Podcasts</a></li>  <!-- Add Manage Podcasts -->
+      <li><a href="{{ url_for('admin.manage_hotlines') }}">Manage Hotlines</a></li>   <!-- Add Manage Hotlines -->
     </ul>
   
-  {% endblock %}
+    {% endblock %}
 
     {% include 'footer.html' %}
 

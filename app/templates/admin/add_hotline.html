@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Hotline</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <h1>Add Hotline</h1>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div>
+            <label for="title">Title</label>
+            {{ form.title() }}
+        </div>
+
+        <div>
+            <label for="phone_number">Phone Number</label>
+            {{ form.phone_number() }}
+        </div>
+
+        <div>
+            <label for="description">Description</label>
+            {{ form.description() }}
+        </div>
+
+        <button type="submit">Add Hotline</button>
+    </form>
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

@@ -48,13 +48,21 @@
 
     <h1 class="mb-4 text-primary">Main Page</h1>
 
-    <div class="rectangle" onclick="window.location.href='/events'">📅 Places to visit</div>
+    <!-- Existing rectangles -->
+    <div class="rectangle" onclick="window.location.href='/events'">🌐 Places to visit</div>
     <div class="rectangle" onclick="window.location.href='/podcasts'">🎧 Podcasts</div>
     <div class="rectangle" onclick="window.location.href='/hotlines'">📞 Hotlines</div>
     <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">✍️ Journal</div>
+
+    
+    <div class="rectangle" onclick="window.location.href='/events/list'">📅 Events</div>
+
     <a href="{{ url_for('main.history') }}">My History</a>
     <!-- <a href="{{ url_for('main.user_charts', user_id=current_user.user_id) }}">My Trends</a> -->
+
     <div class="footer-spacer"></div>
+
     {% include 'footer.html' %}
+
 </body>
 </html>

@@ -1,3 +1,4 @@
+from asyncio import Event
 from wsgiref import headers
 import requests
 from sqlalchemy import text
@@ -47,7 +48,27 @@ def init_limiter(app):
 
 limiter = Limiter(key_func=get_remote_address)
 
+from app.models import Event
 
+@main.route('/events/list')
+@login_required
+def list_events():
+    # Fetch only events with type 'event'
+    events = Event.query.filter_by(type='event').all()
+    return render_template('events_list.html', events=events)
+
+
+@main.route('/podcasts')
+@login_required
+def podcasts():
+    podcasts = Event.query.filter(Event.type == 'podcast').all()
+    return render_template('podcasts_list.html', podcasts=podcasts)
+
+@main.route('/hotlines')
+@login_required
+def hotlines():
+    hotlines = Event.query.filter(Event.type == 'hotline').all()
+    return render_template('hotlines_list.html', hotlines=hotlines)
 
 @main.route('/profile/update', methods=['POST'])
 @login_required
