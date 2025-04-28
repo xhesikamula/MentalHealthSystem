@@ -19,6 +19,8 @@ from . import db_operations  # Make sure this import exists
 #per api
 from dotenv import load_dotenv
 import os
+from app.forms import JournalEntryForm
+
 
 load_dotenv()  # Load environment variables from .env file
 
