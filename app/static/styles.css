@@ -421,3 +421,95 @@ input[type="submit"]:hover {
 .delete-button:hover {
     background-color: #d32f2f;
 }
+/* Per survey */
+/* Survey Form Container */
+.survey-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.survey-container h2 {
+    text-align: center;
+    color: #636B2F;
+    margin-bottom: 20px;
+}
+
+/* Form Fields */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #636B2F;
+    display: block;
+}
+
+input[type="number"],
+input[type="text"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #A3B77A; /* Focus color */
+    outline: none;
+}
+
+/* Button */
+.submit-button {
+    background-color: #A3B77A;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #8A9A54;
+    transform: translateY(-2px);
+}
+
+/* Form Focus/Active Field */
+input[type="number"]:focus,
+input[type="text"]:focus,
+textarea:focus {
+    border: 2px solid #A3B77A; /* Focus state border color */
+}
+
+/* Responsive Styles for Mobile */
+@media screen and (max-width: 768px) {
+    .survey-container {
+        padding: 20px;
+    }
+
+    .survey-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .submit-button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+

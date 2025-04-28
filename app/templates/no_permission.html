@@ -1,19 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Mental Health Project</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Denied - Mental Health Project</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Ensure full-height layout and footer at bottom */
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fbfd;
+    }
+    /* Offset content from fixed header and allow scrolling */
+    main {
+      flex: 1;
+      padding-top: 70px; /* adjust to header height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    /* Olive text for heading and paragraph */
+    .access-denied-container h1,
+    .access-denied-container p {
+      color: olive;
+    }
+    .access-denied-container h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    .access-denied-container p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    /* Footer push to bottom */
+    footer {
+      margin-top: auto;
+    }
+  </style>
 </head>
 <body>
-    {% include 'header.html' %}
-    
-{% block content %}
-  <h1>You don't have permission to view this page!</h1>
-  <p>If you believe this is a mistake, please contact an admin.</p>
-{% endblock %}
+  {% include 'header.html' %}
 
-{% include 'footer.html' %}
+  <main>
+    <div class="access-denied-container">
+      <h1>You don't have permission to view this page!</h1>
+      <p>If you believe this is a mistake, please contact an admin.</p>
+    </div>
+  </main>
+
+  {% include 'footer.html' %}
 </body>
 </html>
