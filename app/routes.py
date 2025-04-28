@@ -21,6 +21,8 @@ from dotenv import load_dotenv
 import os
 from app.forms import JournalEntryForm
 
+import app
+
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -436,7 +438,6 @@ def user_charts(user_id):
                             surveys=[])
     
 
-
 @main.route('/survey_complete')
 @login_required
 def survey_complete():
@@ -472,27 +473,30 @@ def survey_complete():
         source = 'fallback'
         flash("We're preparing your personalized recommendations. Here are some general wellness tips.", "info")
     
-    # Format recommendations for display
+    # Format the recommendations more precisely
     formatted_recs = []
     for rec in recommendations:
         if '•' in rec:
+            # Split by '•' if there's a category and rationale
             parts = rec.split('•')[1].split('(')
             formatted_recs.append({
-                'category': parts[0].split(']')[0].strip(' ['),
-                'text': parts[0].split(']')[1].strip(),
-                'rationale': parts[1].strip(')') if len(parts) > 1 else ''
+                'category': parts[0].split(']')[0].strip(' ['),  # Extract the category from the first part
+                'text': parts[0].split(']')[1].strip(),  # Extract the text
+                'rationale': parts[1].strip(')') if len(parts) > 1 else ''  # Extract the rationale if available
             })
         else:
             formatted_recs.append({
-                'category': 'General',
+                'category': 'General',  # Default category if no specific one
                 'text': rec,
-                'rationale': ''
+                'rationale': ''  # No rationale for general recommendations
             })
-    
+
+    # Send the formatted recommendations to the template
     return render_template('survey_complete.html',
-                           recommendations=formatted_recs,
-                           source=source,
-                           survey_completed=survey_completed)  # Pass survey_completed to template
+                        recommendations=formatted_recs,
+                        source=source,
+                        survey_completed=survey_completed)
+
 
 @main.route('/healthcheck')
 def health_check():
