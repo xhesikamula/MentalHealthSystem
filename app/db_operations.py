@@ -251,3 +251,42 @@ class DBOperations:
             db.session.rollback()
             print("DB Error (MarkNotificationsSent):", e)
             return False
+
+
+#PER PJESEN E ADMINIT
+from app.models import User, Event, MoodSurvey, db
+
+# --- USERS ---
+def get_all_users():
+    return User.query.all()
+
+def delete_user_and_surveys(user_id):
+    try:
+        MoodSurvey.query.filter_by(user_id=user_id).delete()
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+
+# --- EVENTS ---
+def get_recent_events(limit=5):
+    return Event.query.order_by(Event.date_time.desc()).limit(limit).all()
+
+def get_events_by_type(event_type):
+    return Event.query.filter(Event.type == event_type).all()
+
+def delete_event_by_id(event_id):
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+
+def add_new_event(event):
+    db.session.add(event)
+    db.session.commit()
+
+# --- SURVEYS ---
+def get_recent_surveys(limit=5):
+    return MoodSurvey.query.order_by(MoodSurvey.created_at.desc()).limit(limit).all()

@@ -16,7 +16,7 @@ class Event(db.Model):
     source = db.Column(db.String(100))
     type = db.Column(db.Enum('event', 'hotline', 'article', 'podcast', 'video'), nullable=False, default='event')
     link = db.Column(db.String(255))
-    
+    phone_number = db.Column(db.String(20))  # Added phone number field
     users = db.relationship('User', secondary='userevents', backref='events', lazy='dynamic')
 
 class User(db.Model, UserMixin):
