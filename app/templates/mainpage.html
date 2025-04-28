@@ -3,33 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
+    <title>Main Page - ClarityWave</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f5f5f5;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
+            color: #333;
             padding-top: 2rem;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #556b2f; /* Olive Green */
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            flex-grow: 1; /* Ensures content area grows to take available space */
+            margin-top: 2rem;
+            margin-top: 100px;
         }
 
         .rectangle {
             width: 220px;
             height: 110px;
             background-color: #ffffff;
-            border: 2px solid olive;
-            margin: 10px;
+            border: 2px solid #556b2f; /* Olive Green */
+            margin: 15px;
             display: inline-block;
             text-align: center;
             vertical-align: middle;
             line-height: 110px;
             font-weight: 500;
-            color: #333;
+            color: #556b2f; /* Olive Green */
             cursor: pointer;
             border-radius: 12px;
             box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            font-size: 1.2rem;
         }
 
         .rectangle:hover {
@@ -37,8 +59,60 @@
             box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .footer-spacer {
-            margin-top: 4rem;
+        .rectangle:active {
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        .rectangle i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .my-history {
+            width: 220px;
+            height: 220px;
+            background-color: #ffffff;
+            border: 2px solid #556b2f; /* Olive Green */
+            color: #556b2f; /* Olive Green */
+            display: inline-block;
+            text-align: center;
+            line-height: 220px;
+            font-weight: 500;
+            font-size: 1.4rem;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .my-history:hover {
+            transform: scale(1.05);
+            box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .my-history:active {
+            transform: scale(1);
+            box-shadow: none;
+        }
+
+        .main-content a {
+        /* only links inside .main-content get this */
+        display: inline-block;
+        margin-top: 2rem;
+        font-size: 1.2rem;
+        color: #556b2f;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+        }
+
+        .main-content a:hover {
+        color: #3b542b;
+        }
+
+
+        footer {
+            margin-top: auto; /* Ensure footer stays at the bottom */
         }
     </style>
 </head>
@@ -46,23 +120,36 @@
 
     {% include 'header.html' %}
 
-    <h1 class="mb-4 text-primary">Main Page</h1>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Rectangles for navigation -->
+        <div class="rectangle" onclick="window.location.href='/events'">
+            <i class="fas fa-map-marker-alt"></i> <br>🌐 Places to visit
+        </div>
+        <div class="rectangle" onclick="window.location.href='/podcasts'">
+            <i class="fas fa-headphones"></i> <br>🎧 Podcasts
+        </div>
+        <div class="rectangle" onclick="window.location.href='/hotlines'">
+            <i class="fas fa-phone-alt"></i> <br>📞 Hotlines
+        </div>
+        <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">
+            <i class="fas fa-pencil-alt"></i> <br>✍️ Journal
+        </div>
+        <div class="rectangle" onclick="window.location.href='/events/list'">
+            <i class="fas fa-calendar-day"></i> <br>📅 Events
+        </div>
 
-    <!-- Existing rectangles -->
-    <div class="rectangle" onclick="window.location.href='/events'">🌐 Places to visit</div>
-    <div class="rectangle" onclick="window.location.href='/podcasts'">🎧 Podcasts</div>
-    <div class="rectangle" onclick="window.location.href='/hotlines'">📞 Hotlines</div>
-    <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">✍️ Journal</div>
-
-    
-    <div class="rectangle" onclick="window.location.href='/events/list'">📅 Events</div>
-
-    <a href="{{ url_for('main.history') }}">My History</a>
-    <!-- <a href="{{ url_for('main.user_charts', user_id=current_user.user_id) }}">My Trends</a> -->
+        <!-- My History Square -->
+        <div class="my-history" onclick="window.location.href='{{ url_for('main.history') }}'">
+            📝 My History
+        </div>
+    </div>
 
     <div class="footer-spacer"></div>
 
     {% include 'footer.html' %}
 
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

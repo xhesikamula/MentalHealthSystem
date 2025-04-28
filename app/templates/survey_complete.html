@@ -73,7 +73,7 @@
     <div class="recommendations-container">
         <h2>Your Personalized Suggestions</h2>
         
-       
+    
         {% if recommendations %}
         <div class="recommendations-list">
             {% for rec in recommendations %}
@@ -115,7 +115,7 @@
 <!-- Refresh meta tag for auto-reload -->
 <meta http-equiv="refresh" content="5;url={{ url_for('main.survey_complete') }}">
 
-     {% include 'footer.html' %}
+    {% include 'footer.html' %}
 
     <!-- Bootstrap JS and Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
