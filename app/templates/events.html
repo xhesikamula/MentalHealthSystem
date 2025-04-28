@@ -50,10 +50,21 @@
         }
         input {
             padding: 8px;
-            width: 160px;
+            width: 180px;
             margin: 5px;
             border-radius: 4px;
             border: 1px solid #808000;
+            text-align: center;
+        }
+        .input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #d9534f; /* Red for errors */
+            font-size: 0.9rem;
         }
         #loading {
             margin-top: 20px;
@@ -103,17 +114,18 @@
         <h1>Mental-Wellbeing Events Near You 📍</h1>
 
         <!-- Manual location entry -->
-        <div>
-            <input id="latitude" type="text" placeholder="Latitude">
-            <input id="longitude" type="text" placeholder="Longitude">
-            <button onclick="manualLocationFetch()">Submit Location</button>
+        <div class="input-container">
+            <input id="latitude" type="text" placeholder="Latitude (e.g., 40.7128)">
+            <input id="longitude" type="text" placeholder="Longitude (e.g., -74.0060)">
         </div>
+        <button onclick="manualLocationFetch()">Submit Location</button>
 
         <!-- Automatic geolocation -->
         <button onclick="getLocationAndFetch()">Use My Location</button>
 
         <div id="loading" style="display:none;">Loading events...</div>
         <div id="events-list"></div>
+        <div id="error-message" class="error" style="display:none;">Please enter valid coordinates.</div>
     </main>
 
     <!-- Fixed footer inclusion -->
@@ -177,10 +189,13 @@
         function manualLocationFetch() {
             const lat = parseFloat(document.getElementById('latitude').value);
             const lon = parseFloat(document.getElementById('longitude').value);
-            if (!lat || !lon) {
-                document.getElementById('events-list').textContent = "⚠️ Please enter valid coordinates.";
+
+            // Validate the input to ensure it's a proper latitude and longitude
+            if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                document.getElementById('error-message').style.display = 'block';
                 return;
             }
+            document.getElementById('error-message').style.display = 'none';
             fetchEvents(lat, lon);
         }
 
