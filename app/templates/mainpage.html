@@ -24,6 +24,12 @@
             font-size: 2.5rem;
             font-weight: 600;
         }
+            h1.mb-4.text-primary {
+        color: #556b2f;
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        }
 
         .main-content {
             display: flex;
@@ -132,9 +138,11 @@
         <div class="rectangle" onclick="window.location.href='/hotlines'">
             <i class="fas fa-phone-alt"></i> <br>📞 Hotlines
         </div>
+
         <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">
             <i class="fas fa-pencil-alt"></i> <br>✍️ Journal
         </div>
+        
         <div class="rectangle" onclick="window.location.href='/events/list'">
             <i class="fas fa-calendar-day"></i> <br>📅 Events
         </div>
