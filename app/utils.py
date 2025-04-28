@@ -6,6 +6,6 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != 'admin':
-            return redirect(url_for('main.index'))  # or redirect to any non-admin page
+            return redirect(url_for('main.login'))# or redirect to any non-admin page
         return f(*args, **kwargs)
     return decorated_function

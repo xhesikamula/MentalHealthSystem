@@ -1,36 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Podcasts</title>
+    <title>Manage Hotlines</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+    <style>
+        html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9fbfd;
+        }
 
+        main {
+        flex: 1;
+        }
+
+        h1 {
+        text-align: center;
+        margin: 100px 0 20px 0;
+        color: #333;
+        }
+
+        .add-button {
+        display: block;
+        width: fit-content;
+        margin: 0 auto 20px auto;
+        padding: 10px 20px;
+        background-color: olive;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+        }
+
+        .add-button:hover {
+        background-color: olive;
+        }
+
+        h2 {
+        text-align: center;
+        color: #555;
+        margin-bottom: 20px;
+        }
+
+        ul.hotline-list {
+        max-width: 90%;
+        margin: 0 auto 40px auto;
+        padding: 0;
+        list-style: none;
+        }
+
+        .hotline-list li {
+        background-color: white;
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hotline-list li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .hotline-list strong {
+        font-size: 20px;
+        color: #333;
+        }
+
+        .hotline-list p {
+        margin: 8px 0;
+        color: #555;
+        }
+
+        .hotline-list span.phone {
+        font-weight: 600;
+        color: olive;
+        }
+
+        button.delete-button {
+        background-color: #932b1f;
+        border: none;
+        padding: 8px 16px;
+        color: white;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 10px;
+        }
+
+        button.delete-button:hover {
+        background-color: #881e12;
+        }
+
+        @media (max-width: 768px) {
+        h1 { font-size: 28px; }
+        ul.hotline-list { width: 95%; }
+        .hotline-list li { padding: 15px; }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this hotline?')) {
+                e.preventDefault();
+            }
+            });
+        });
+        });
+    </script>
+    </head>
+    <body>
     {% include 'header.html' %}
 
-    <h1>Manage Podcasts</h1>
-    <a href="{{ url_for('admin.add_resource', resource_type='podcast') }}">Add New Podcast</a>
+    <main>
+        <h1>Manage Hotlines</h1>
+        <a href="{{ url_for('admin.add_resource', resource_type='hotline') }}" class="add-button">➕ Add New Hotline</a>
 
-    <h2>All Podcasts</h2>
-    <ul>
-        {% for podcast in podcasts %}
-            <li>
-                <strong>{{ podcast.title }}</strong><br>
-                {{ podcast.description }}<br>
-                <a href="{{ podcast.link }}" target="_blank">Listen</a><br>
-                <form method="POST" action="{{ url_for('admin.delete_podcast', event_id=podcast.event_id) }}" style="display:inline;">
-                   
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this podcast?')">Delete</button>
-                </form>
-            </li>
+        <h2>All Hotlines</h2>
+        <ul class="hotline-list">
+        {% for hotline in hotlines %}
+        <li>
+            <strong>{{ hotline.title }}</strong>
+            <p>{{ hotline.description }}</p>
+            <span class="phone">Phone: {{ hotline.phone_number }}</span>
+            <form method="POST" action="{{ url_for('admin.delete_hotline', event_id=hotline.event_id) }}">
+            <button type="submit" class="delete-button">Delete</button>
+            </form>
+        </li>
         {% else %}
-            <li>No podcasts found.</li>
+        <li>No hotlines found.</li>
         {% endfor %}
-    </ul>
+        </ul>
+    </main>
 
     {% include 'footer.html' %}
-
-</body>
-</html>
+    </body>
+    </html>

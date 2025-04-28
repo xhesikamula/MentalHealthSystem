@@ -1,49 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mental Health Project</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mental Health Project</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .dashboard-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      color: olive;
+      margin-bottom: 20px;
+    }
+    .welcome-msg {
+      color: #555;
+      margin-bottom: 30px;
+    }
+    .management-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .management-buttons a {
+      background-color: olive;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    .management-buttons a:hover {
+      background-color: rgb(100, 50, 4);
+    }
+    .dashboard-section {
+      margin-top: 40px;
+    }
+    .activity-block {
+      margin-bottom: 30px;
+    }
+    .activity-list {
+      list-style: none;
+      padding: 0;
+    }
+    .activity-list li {
+      background: #f0f4f8;
+      margin-bottom: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #333;
+    }
+    .activity-date {
+      font-weight: bold;
+      color: olivedrab;
+    }
+  </style>
 </head>
 <body>
 
-    {% include 'header.html' %}
+  {% include 'header.html' %}
 
-    {% block content %}
+  {% block content %}
+  <div class="dashboard-container">
     <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ current_user.name }}!</p>
-  
-    <h2>Recent Activity</h2>
-    <ul>
-      <li>Recent Mood Surveys (last 5):
-        <ul>
-          {% for survey in surveys %}
-            <li>{{ survey.created_at }} - {{ survey.survey_title }}</li>
-          {% endfor %}
-        </ul>
-      </li>
-      <li>Recent Events:
-        <ul>
-          {% for event in events %}
-            <li>{{ event.date_time }} - {{ event.title }}</li>
-          {% endfor %}
-        </ul>
-      </li>
-    </ul>
-  
-    <!-- Admin Management Links -->
-    <h3>Admin Management</h3>
-    <ul>
-      <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
-      <li><a href="{{ url_for('admin.manage_events') }}">Manage Events</a></li>
-      <li><a href="{{ url_for('admin.manage_podcasts') }}">Manage Podcasts</a></li>  <!-- Add Manage Podcasts -->
-      <li><a href="{{ url_for('admin.manage_hotlines') }}">Manage Hotlines</a></li>   <!-- Add Manage Hotlines -->
-    </ul>
-  
-    {% endblock %}
+    <p class="welcome-msg">Welcome, <strong>{{ current_user.name }}</strong>!</p>
 
-    {% include 'footer.html' %}
+    <div class="management-buttons">
+      <a href="{{ url_for('admin.manage_users') }}">Manage Users</a>
+      <a href="{{ url_for('admin.manage_events') }}">Manage Events</a>
+      <a href="{{ url_for('admin.manage_podcasts') }}">Manage Podcasts</a>
+      <a href="{{ url_for('admin.manage_hotlines') }}">Manage Hotlines</a>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Recent Activity</h2>
+
+      <div class="activity-block">
+        <h3>Recent Mood Surveys (Last 5)</h3>
+        <ul class="activity-list">
+          {% for survey in surveys %}
+            <li>
+              <span class="activity-date">{{ survey.created_at }}</span>
+              — {{ survey.survey_title }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="activity-block">
+        <h3>Recent Events</h3>
+        <ul class="activity-list">
+          {% for event in events %}
+            <li>
+              <span class="activity-date">{{ event.date_time }}</span>
+              — {{ event.title }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+  {% include 'footer.html' %}
 
 </body>
 </html>
