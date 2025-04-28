@@ -4,28 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Podcasts</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f9fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container Styling */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heading Styling */
+        h1 {
+            font-size: 2.5rem;
+            color: olivedrab;  
+            text-align: center;
+            margin: 100px 0 20px 0;
+        }
+
+        /* Podcast List Styling */
+        .podcast-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Individual Podcast Card */
+        .podcast-card {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .podcast-card h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .podcast-card p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .podcast-card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: olive; /* Soft Blue */
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .podcast-card a:hover {
+            background-color: olive;
+        }
+
+        /* "No Podcasts" Message */
+        .no-podcasts {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #888;
+            margin-top: 50px;
+        }
+
+        /* Responsiveness */
+        @media screen and (max-width: 768px) {
+            .podcast-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .podcast-list {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
     {% include 'header.html' %}
 
-    <h1 class="mb-4 text-primary">Podcasts</h1>
+    <div class="container">
+        <h1 class="mb-4 text-primary">Mental Health Podcasts 🎧</h1>
 
-    {% if podcasts %}
-        <ul>
-            {% for podcast in podcasts %}
-            <li>
-                <strong>{{ podcast.title }}</strong><br>
-                Description: {{ podcast.description }}<br>
-                <a href="{{ podcast.link }}" target="_blank">Listen</a>
-            </li>
-            <hr>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No podcasts available.</p>
-    {% endif %}
+        {% if podcasts %}
+            <div class="podcast-list">
+                {% for podcast in podcasts %}
+                    <div class="podcast-card">
+                        <h2>{{ podcast.title }}</h2>
+                        <p><strong>Description:</strong> {{ podcast.description }}</p>
+                        <a href="{{ podcast.link }}" target="_blank" class="btn-listen">Listen Now</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-podcasts">No podcasts available at the moment. Check back later!</p>
+        {% endif %}
+    </div>
 
     {% include 'footer.html' %}
 
