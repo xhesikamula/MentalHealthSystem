@@ -1,163 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page - ClarityWave</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            background-color: #f5f5f5;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            padding-top: 2rem;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Main Page - ClarityWave</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to bottom right, #f0f5f1, #e2eee2);
+        color: #333;
+        padding-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
-        h1 {
-            color: #556b2f; /* Olive Green */
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-            font-weight: 600;
-        }
-            h1.mb-4.text-primary {
-        color: #556b2f;
-        text-align: center;
+    h1 {
+        color: #3C552D;
         font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        }
+        font-weight: 600;
+        text-align: center;
+        margin-top: 1rem;
+    }
 
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            flex-grow: 1; /* Ensures content area grows to take available space */
-            margin-top: 2rem;
-            margin-top: 100px;
-        }
+    .main-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        padding: 3rem;
+        justify-items: center;
+        align-items: start;
+        overflow: visible; 
+    }
 
-        .rectangle {
-            width: 220px;
-            height: 110px;
-            background-color: #ffffff;
-            border: 2px solid #556b2f; /* Olive Green */
-            margin: 15px;
-            display: inline-block;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 110px;
-            font-weight: 500;
-            color: #556b2f; /* Olive Green */
-            cursor: pointer;
-            border-radius: 12px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            font-size: 1.2rem;
-        }
+    .card {
+    width: 300px;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.3rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease-in-out;
+    opacity: 0;
+    animation: slideUp 0.6s ease forwards;
+    z-index: 1;
+}
 
-        .rectangle:hover {
-            transform: scale(1.05);
-            box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
-        }
+.card:hover {
+    transform: scale(1.35); /* Increased from 1.2 to 1.35 */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35); /* More prominent shadow */
+    z-index: 3; /* Higher to make sure it overlays surrounding elements */
+}
 
-        .rectangle:active {
-            transform: scale(1);
-            box-shadow: none;
-        }
 
-        .rectangle i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
 
-        .my-history {
-            width: 220px;
-            height: 220px;
-            background-color: #ffffff;
-            border: 2px solid #556b2f; /* Olive Green */
-            color: #556b2f; /* Olive Green */
-            display: inline-block;
-            text-align: center;
-            line-height: 220px;
-            font-weight: 500;
-            font-size: 1.4rem;
-            cursor: pointer;
-            border-radius: 12px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
+    .card:nth-child(1) { animation-delay: 0.1s; background-image: url('/static/images/places.png'); }
+    .card:nth-child(2) { animation-delay: 0.2s; background-image: url('/static/images/podcasts.png'); }
+    .card:nth-child(3) { animation-delay: 0.3s; background-image: url('/static/images/hotlines.png'); }
+    .card:nth-child(4) { animation-delay: 0.4s; background-image: url('/static/images/journal.png'); }
+    .card:nth-child(5) { animation-delay: 0.5s; background-image: url('/static/images/events.png'); }
+    .card:nth-child(6) { animation-delay: 0.6s; background-image: url('/static/images/history.png'); }
 
-        .my-history:hover {
-            transform: scale(1.05);
-            box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
-        }
 
-        .my-history:active {
-            transform: scale(1);
-            box-shadow: none;
-        }
 
-        .main-content a {
-        /* only links inside .main-content get this */
-        display: inline-block;
-        margin-top: 2rem;
+    .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 16px;
+    }
+
+    .card span {
+        position: relative;
+        z-index: 3;
         font-size: 1.2rem;
-        color: #556b2f;
-        text-decoration: none;
-        transition: color 0.2s ease-in-out;
-        }
+    }
 
-        .main-content a:hover {
-        color: #3b542b;
+    @keyframes slideUp {
+        0% {
+            transform: translateY(30px);
+            opacity: 0;
         }
-
-
-        footer {
-            margin-top: auto; /* Ensure footer stays at the bottom */
+        100% {
+            transform: translateY(0);
+            opacity: 1;
         }
-    </style>
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    footer {
+        margin-top: auto;
+    }
+
+    @media (max-width: 1000px) {
+        .main-content {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 </head>
 <body>
 
-    {% include 'header.html' %}
+{% include 'header.html' %}
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Rectangles for navigation -->
-        <div class="rectangle" onclick="window.location.href='/events'">
-            <i class="fas fa-map-marker-alt"></i> <br>🌐 Places to visit
-        </div>
-        <div class="rectangle" onclick="window.location.href='/podcasts'">
-            <i class="fas fa-headphones"></i> <br>🎧 Podcasts
-        </div>
-        <div class="rectangle" onclick="window.location.href='/hotlines'">
-            <i class="fas fa-phone-alt"></i> <br>📞 Hotlines
-        </div>
+<h1>Welcome to ClarityWave</h1>
 
-        <div class="rectangle" onclick="window.location.href='{{ url_for('main.journal_entries')}}'">
-            <i class="fas fa-pencil-alt"></i> <br>✍️ Journal
-        </div>
-        
-        <div class="rectangle" onclick="window.location.href='/events/list'">
-            <i class="fas fa-calendar-day"></i> <br>📅 Events
-        </div>
-
-        <!-- My History Square -->
-        <div class="my-history" onclick="window.location.href='{{ url_for('main.history') }}'">
-            📝 My History
-        </div>
+<div class="main-content">
+    <div class="card" onclick="window.location.href='/events'">
+        <span>Places to visit</span>
     </div>
+    <div class="card" onclick="window.location.href='/podcasts'">
+        <span>Podcasts</span>
+    </div>
+    <div class="card" onclick="window.location.href='/hotlines'">
+        <span>Hotlines</span>
+    </div>
+    <div class="card" onclick="window.location.href='{{ url_for('main.journal_entries') }}'">
+        <span>Journal</span>
+    </div>
+    <div class="card" onclick="window.location.href='/events/list'">
+        <span>Events</span>
+    </div>
+    <div class="card" onclick="window.location.href='{{ url_for('main.history') }}'">
+        <span>My History</span>
+    </div>
+</div>
 
-    <div class="footer-spacer"></div>
+{% include 'footer.html' %}
 
-    {% include 'footer.html' %}
-
-    <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

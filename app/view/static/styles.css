@@ -8,7 +8,7 @@ body {
 
 /* Header */
 header {
-    background-color: #636B2F; /*Ngjyra baze*/
+    background-color: #3C552D; /*Ngjyra baze*/
     color: white;
     padding: 20px;
     position: fixed;
@@ -50,7 +50,7 @@ header nav ul li a:hover {
 
 /* Hero Section */
 .hero {
-    background-color: #636B2F;
+    background-color: #3C552D;
     color: white;
     height: 80vh;
     display: flex;
@@ -81,7 +81,7 @@ header nav ul li a:hover {
 }
 
 .cta-button {
-    background-color: #A3B77A;
+    background-color: #3C552D;
     color: white;
     padding: 15px 30px;
     border-radius: 30px;
@@ -101,7 +101,7 @@ header nav ul li a:hover {
 
 /* Footer Section */
 footer {
-    background-color: #636B2F;
+    background-color: #3C552D;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -208,7 +208,7 @@ footer p {
 }
 
 .login-button {
-    background-color: #A3B77A;
+    background-color: #3C552D;
     color: white;
     padding: 12px;
     border: none;
@@ -220,7 +220,7 @@ footer p {
 }
 
 .login-button:hover {
-    background-color: #8A9A54;
+    background-color: #324725;
 }
 
 .signup-section {
@@ -250,7 +250,7 @@ footer p {
 
 .signup-container h2 {
     margin-bottom: 20px;
-    color: #636B2F;
+    color: #3C552D;
     text-align: center; 
 }
 
@@ -268,22 +268,22 @@ footer p {
     border-radius: 5px;
     box-sizing: border-box; 
 }
-
 .signup-button {
-    background-color: #A3B77A;
+    background-color: #3C552D;
     color: white;
-    padding: 12px;
+    padding: 8px 16px;      /* reduced vertical and horizontal padding */
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;        /* smaller font size */
     cursor: pointer;
     margin-top: 20px;
-    width: 100%; 
+    width: auto;            /* change from 100% to auto */
 }
 
 .signup-button:hover {
-    background-color: #8A9A54;
+    background-color: #314724;
 }
+
 
 .signup-container p {
     text-align: center;
@@ -294,16 +294,16 @@ footer p {
 /*survey*/
 .survey-container {
     max-width: 800px;
-    margin: 50px auto;
+    margin: 200px auto;
     padding: 20px;
-    background-color: #fff;
+    background-color: #3C552D;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .survey-container h1 {
     text-align: center;
-    color: #636B2F;
+    color: #3C552D;
 }
 
 form {
@@ -427,7 +427,7 @@ input[type="submit"]:hover {
     max-width: 800px;
     margin: 50px auto;
     padding: 30px;
-    background-color: #fff;
+    background-color: #3C552D;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }

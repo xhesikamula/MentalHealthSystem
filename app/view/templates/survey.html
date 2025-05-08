@@ -5,92 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey - ClarityWave</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background-color: #3C552D; /* Set the background color to #3C552D */
+            font-family: Arial, sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .survey-container {
+            max-width: 600px;
+            margin-top: 2rem auto;
+            padding: 2rem;
+            background: #ffffff; /* White background for the question div */
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #e3f2e1, #3c552d); /* Gradient background */
+            color: #fff;
+            flex-grow: 1; /* Ensures the form takes up available space */
+            
+        }
+        .survey-section {
+            margin-top: 150px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #3C552D; /* Color for the header */
+        }
+
+        .question-step {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-in-out;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-step.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #6c63ff;
+            outline: none;
+        }
+
+        .question-step button {
+            margin-top: 1rem;
+            margin-right: 1rem;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #3C552D; /* Primary color */
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .question-step button:hover {
+            background-color: #2d4123; /* Darker shade for hover */
+            transform: scale(1.05);
+        }
+
+        .submit-button {
+            background-color: #28a745;
+        }
+
+        .submit-button:hover {
+            background-color: #218838;
+        }
+
+        .back-btn {
+            background-color: #ff6f61;
+        }
+
+        .back-btn:hover {
+            background-color: #e95b4b;
+        }
+
+        footer {
+            background-color: #3C552D;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto; /* Push the footer to the bottom */
+        }
+    </style>
 </head>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const moodInput = document.getElementById('mood_level');
-    const stressInput = document.getElementById('stress_level');
-    
-    // Real-time intensity display
-    function updateIntensity() {
-        const mood = parseInt(moodInput.value) || 0;
-        const stress = parseInt(stressInput.value) || 0;
-        
-        if (mood <= 2 || stress >= 9) {
-            alert("You're reporting very low mood or high stress. We'll prioritize crisis support.");
-        }
-    }
-    
-    moodInput.addEventListener('change', updateIntensity);
-    stressInput.addEventListener('change', updateIntensity);
-    
-    // Form submission validation
-    form.addEventListener('submit', function(e) {
-        const mood = parseInt(moodInput.value);
-        const stress = parseInt(stressInput.value);
-        
-        if (isNaN(mood) || isNaN(stress)) {
-            alert("Please enter valid numbers for mood and stress");
-            e.preventDefault();
-        }
-    });
-});
-</script>
 <body>
     {% include 'header.html' %}
 
     <section class="survey-section">
         <div class="survey-container">
             <h2>Complete the Survey</h2>
-            <form method="POST" action="{{ url_for('main.survey') }}">
-                {{ form.hidden_tag() }} 
+            <form method="POST" action="{{ url_for('main.survey') }}" id="surveyForm">
+                {{ form.hidden_tag() }}
 
-                <div class="form-group">
+                <!-- Step 1 -->
+                <div class="question-step active">
                     <label for="mood_level">Mood Level (1-10):</label>
                     {{ form.mood_level(class="form-control", id="mood_level") }}
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 2 -->
+                <div class="question-step">
                     <label for="stress_level">Stress Level (1-10):</label>
                     {{ form.stress_level(class="form-control", id="stress_level") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 3 -->
+                <div class="question-step">
                     <label for="sleep_hours">Hours of Sleep:</label>
                     {{ form.sleep_hours(class="form-control", id="sleep_hours") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 4 -->
+                <div class="question-step">
                     <label for="energy_level">Energy Level (1-10):</label>
                     {{ form.energy_level(class="form-control", id="energy_level") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 5 -->
+                <div class="question-step">
                     <label for="diet_quality">Diet Quality (1-10):</label>
                     {{ form.diet_quality(class="form-control", id="diet_quality") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 6 -->
+                <div class="question-step">
                     <label for="physical_activity">Physical Activity (0-10):</label>
                     {{ form.physical_activity(class="form-control", id="physical_activity") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 7 -->
+                <div class="question-step">
                     <label for="spent_time_with_someone">Did you spend time with someone today?</label>
                     {{ form.spent_time_with_someone(class="form-control", id="spent_time_with_someone") }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <div class="form-group">
+                <!-- Step 8 -->
+                <div class="question-step">
                     <label for="feelings_description">How are you feeling?</label>
                     {{ form.feelings_description(class="form-control", id="feelings_description", rows=4) }}
+                    <button type="button" class="back-btn">Back</button>
+                    <button type="submit" class="submit-button">Submit Survey</button>
                 </div>
-
-                <button type="submit" class="submit-button">Submit Survey</button>
             </form>
         </div>
     </section>
 
     {% include 'footer.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const steps = document.querySelectorAll('.question-step');
+            let currentStep = 0;
+
+            function showStep(index) {
+                steps.forEach((step, i) => {
+                    step.classList.toggle('active', i === index);
+                });
+            }
+
+            function validateStep(step) {
+                const input = step.querySelector('input, select, textarea');
+                if (!input) return true;
+                if (input.type === 'number' || input.tagName === 'INPUT') {
+                    return input.value.trim() !== '' && !isNaN(parseFloat(input.value));
+                }
+                return input.value.trim() !== '';
+            }
+
+            document.querySelectorAll('.next-btn').forEach((btn, index) => {
+                btn.addEventListener('click', function () {
+                    if (validateStep(steps[currentStep])) {
+                        if (currentStep < steps.length - 1) {
+                            currentStep++;
+                            showStep(currentStep);
+                        }
+                    } else {
+                        alert("Please complete the current question before proceeding.");
+                    }
+                });
+            });
+
+            document.querySelectorAll('.back-btn').forEach((btn, index) => {
+                btn.addEventListener('click', function () {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            });
+
+            // Initial display
+            showStep(currentStep);
+        });
+    </script>
 </body>
 </html>
