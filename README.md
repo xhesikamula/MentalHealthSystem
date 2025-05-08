@@ -98,4 +98,4 @@ flask run
 ---
 ## Important Notes
 The `venv` folder, `.env` file, and other auto-generated Python files are being added automatically. They shouldn't be tracked in Git.
-
+---
