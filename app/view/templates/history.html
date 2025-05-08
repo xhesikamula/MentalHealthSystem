@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey History - ClarityWave</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Add Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+    
+        h2 {
+            color: #405d27; /* Darker Olive */
+            font-size: 2.5rem;
+            text-align: center;
+            margin: 80px 1rem 30px 1rem;
+            font-weight: 700;
+        }
+    
+        .chart-container {
+            width: 90%;
+            max-width: 900px;
+            margin: 1rem auto 3rem;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+    
+        .survey-history {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            gap: 24px;
+        }
+    
+        .survey-card {
+            background-color: #ffffff;
+            padding: 2rem;
+            width: 100%;
+            max-width: 700px;
+            border-left: 6px solid #405d27;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+    
+        .survey-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+    
+        .survey-card h3 {
+            font-size: 1.6rem;
+            color: #405d27;
+            margin-bottom: 1.2rem;
+        }
+    
+        .survey-card h3::before {
+            content: "📅 ";
+        }
+    
+        .survey-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+    
+        .survey-metrics div {
+            padding: 0.75rem 1rem;
+            background-color: #f7faf5;
+            border-left: 5px solid #a7c957;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+    
+        .survey-metrics div:hover {
+            background-color: #ecf4e9;
+        }
+    
+        /* Icons for each metric */
+        .survey-metrics div:nth-child(1)::before { content: "😊 "; }
+        .survey-metrics div:nth-child(2)::before { content: "😰 "; }
+        .survey-metrics div:nth-child(3)::before { content: "💤 "; }
+        .survey-metrics div:nth-child(4)::before { content: "⚡ "; }
+        .survey-metrics div:nth-child(5)::before { content: "🥗 "; }
+        .survey-metrics div:nth-child(6)::before { content: "🏃 "; }
+        .survey-metrics div:nth-child(7)::before { content: "👫 "; }
+        .survey-metrics div:nth-child(8)::before { content: "📝 "; }
+    
+        .recommendation {
+            background-color: #e9f1e4;
+            padding: 1.2rem;
+            border-left: 6px solid #7da05e;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    
+        .recommendation h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #405d27;
+            margin-bottom: 0.5rem;
+        }
+    
+        .recommendation p {
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.5;
+        }
+    
+        footer {
+            margin-top: auto;
+            padding: 1rem;
+            background: linear-gradient(90deg, #405d27, #7da05e);
+            color: white;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+    
+        @media (max-width: 768px) {
+            .survey-metrics {
+                grid-template-columns: 1fr;
+            }
+    
+            .chart-container {
+                padding: 1rem;
+            }
+    
+            .survey-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <h2>Your Survey History</h2>
+
+    <!-- Chart Container -->
+    <div class="chart-container">
+        <canvas id="moodChart"></canvas>
+    </div>
+
+    <!-- Existing Survey List -->
+    <div class="survey-history">
+        {% for survey in surveys %}
+        <div class="survey-card">
+            <h3>Survey from {{ survey.survey_date }}</h3>
+            <div class="survey-metrics">
+                <div><strong>Mood:</strong> {{ survey.mood_level }}/10</div>
+                <div><strong>Stress:</strong> {{ survey.stress_level }}/10</div>
+                <div><strong>Sleep Hours:</strong> {{ survey.sleep_hours }}</div>
+                <div><strong>Energy Level:</strong> {{ survey.energy_level }}/10</div>
+                <div><strong>Diet Quality:</strong> {{ survey.diet_quality }}/10</div>
+                <div><strong>Physical Activity:</strong> {{ survey.physical_activity }}/10</div>
+                <div><strong>Spent Time With Someone:</strong> {{ survey.spent_time_with_someone }}</div>
+                <div><strong>Feelings Description:</strong> {{ survey.feelings_description }}</div>
+            </div>
+            
+            <div class="recommendation">
+                <h4>Recommendation:</h4>
+                <p>{{ survey.recommendation_text }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p>No survey history found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prepare chart data from existing HTML content
+        const surveyCards = document.querySelectorAll('.survey-card');
+        const dates = [];
+        const moodLevels = [];
+        const stressLevels = [];
+        
+        surveyCards.forEach(card => {
+            dates.push(card.querySelector('h3').textContent.replace('Survey from ', ''));
+            moodLevels.push(parseInt(card.querySelector('.survey-metrics div:nth-child(1)').textContent.match(/\d+/)[0]));
+            stressLevels.push(parseInt(card.querySelector('.survey-metrics div:nth-child(2)').textContent.match(/\d+/)[0]));
+        });
+
+        // Create chart
+        const ctx = document.getElementById('moodChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Mood Level',
+                        data: moodLevels,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Stress Level',
+                        data: stressLevels,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Your Mood & Stress Trends'
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+
+    {% include 'footer.html' %}
+
+</body>
+</html>

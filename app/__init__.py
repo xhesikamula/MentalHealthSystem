@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import openai
 import pymysql
-from .db_operations import DBOperations
+from .dal.db_operations import DBOperations
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -41,12 +41,12 @@ def create_app():
     """Application factory with enhanced configuration"""
     load_environment()
     
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='view/templates',static_folder='view/static')
 
     openai.api_key = os.getenv('OPENAI_API_KEY')
     if not openai.api_key:
         raise ValueError("No OpenAI API key found. Please set OPENAI_API_KEY in .env file")
-    from app.admin_routes import admin_bp
+    from app.controllers.admin_routes import admin_bp
     app.register_blueprint(admin_bp)
     required_env_vars = ['SECRET_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']
     for var in required_env_vars:
@@ -85,10 +85,10 @@ def create_app():
             print(f"Error creating tables: {str(e)}")
 
     # Register blueprints
-    from app.routes import main as main_blueprint
+    from app.controllers.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from app.models import User
+    from app.model.models import User
     @login_manager.user_loader
     def load_user(user_id):
         try:

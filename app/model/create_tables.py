@@ -1,6 +1,6 @@
 # app/create_tables.py
 from app import create_app, db
-from app.models import User, MoodSurvey, JournalEntry, Recommendation
+from app.model.models import User, MoodSurvey, JournalEntry, Recommendation
 
 def initialize_database():
     app = create_app()
