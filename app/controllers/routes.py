@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, json, jsonify, render_template, reques
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  
-from app.controllers.services.recommendations import format_recommendations_for_display, generate_ai_recommendations
+
 from ..model.models import Notification, db, Recommendation, User, MoodSurvey
 from ..forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta, datetime
@@ -16,6 +16,8 @@ from app.dal.db_operations import DBOperations
 from app.model.models import JournalEntry
 import json
 from ..dal import db_operations 
+from app.controllers.services.recommendations import get_llama_recommendation
+
 #per api
 from dotenv import load_dotenv
 import os
@@ -197,7 +199,7 @@ def test_recommend_page():
 @limiter.limit("3 per minute") 
 def recommend():
     data = request.get_json()
-    recommendations = generate_ai_recommendations(data)
+    recommendations = get_llama_recommendation(data)
     return jsonify(recommendations)
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -242,31 +244,69 @@ def login():
 def no_permission():
     return render_template('no_permission.html')
 
+
+import json
+
 @main.route('/survey', methods=['GET', 'POST'])
 @login_required
 def survey():
-        # Check if user has completed a survey in the last 24 hours
+    # Function to format recommendations for display
+    def format_recommendations_for_display(recommendations):
+        formatted_recs = []
+        
+        for rec in recommendations:
+            # For each recommendation, split it into category, text, and rationale (if available)
+            if '•' in rec:
+                parts = rec.split('•')[1].split('(')
+                formatted_recs.append({
+                    'category': parts[0].split(']')[0].strip(' ['),
+                    'text': parts[0].split(']')[1].strip(),
+                    'rationale': parts[1].strip(')') if len(parts) > 1 else ''
+                })
+            else:
+                formatted_recs.append({
+                    'category': 'General',  # Default category if no specific one
+                    'text': rec,
+                    'rationale': ''
+                })
+        
+        return formatted_recs
+
+    # Check if user has completed a survey in the last 24 hours
     last_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id)\
                                 .order_by(MoodSurvey.survey_date.desc())\
                                 .first()
 
     if last_survey and last_survey.survey_date >= datetime.utcnow() - timedelta(hours=24):
         return redirect(url_for('main.mainpage'))
+    
     form = MoodSurveyForm()
     
     if form.validate_on_submit():
         try:
-            recommendations = generate_ai_recommendations({
-                'mood_level': form.mood_level.data,
-                'stress_level': form.stress_level.data,
-                'sleep_hours': form.sleep_hours.data,  
-                'energy_level': form.energy_level.data,
-                'diet_quality': form.diet_quality.data,
-                'physical_activity': form.physical_activity.data,
-                'spent_time_with_someone': form.spent_time_with_someone.data,
-                'feelings_description': form.feelings_description.data
-            })
+            # Prepare the user input for the recommendation system
+            user_input = f"""
+            Mood Level: {form.mood_level.data}
+            Stress Level: {form.stress_level.data}
+            Sleep Hours: {form.sleep_hours.data}
+            Energy Level: {form.energy_level.data}
+            Diet Quality: {form.diet_quality.data}
+            Physical Activity: {form.physical_activity.data}
+            Spent Time With Someone: {form.spent_time_with_someone.data}
+            Feelings Description: {form.feelings_description.data}
+            """
 
+            # Get recommendations from Ollama's TinyLLaMA model
+            recommendations = get_llama_recommendation(user_input)
+
+            # If the recommendations are returned as a single string, split them into a list
+            if isinstance(recommendations, str):
+                recommendations = recommendations.split('\n')
+
+            # Format the recommendations for display
+            formatted_recs = format_recommendations_for_display(recommendations)
+
+            # Save the survey to the database with the recommendations
             survey_id = DBOperations.create_mood_survey(
                 user_id=current_user.user_id,
                 mood_level=form.mood_level.data,
@@ -277,11 +317,11 @@ def survey():
                 physical_activity=form.physical_activity.data,
                 spent_time_with_someone=form.spent_time_with_someone.data,
                 feelings_description=form.feelings_description.data,
-                recommendation_text = format_recommendations_for_display(recommendations)  # ✅
+                recommendation_text=json.dumps(formatted_recs) # Pass formatted recommendations
             )
             
             if survey_id:
-                session['latest_recommendations'] = recommendations
+                session['latest_recommendations'] = formatted_recs
                 session.modified = True
                 return redirect(url_for('main.survey_complete')) 
             
@@ -292,6 +332,7 @@ def survey():
             flash("Error processing your survey. Please try again.", "error")
     
     return render_template('survey.html', form=form)
+
 
 @main.route('/history')
 @login_required
@@ -359,63 +400,27 @@ def user_charts(user_id):
                             user_id=user_id,
                             surveys=[])
     
+from flask import render_template, request, session
+from app.controllers.services.recommendations import get_llama_recommendation
+from app.model.models import MoodSurvey
 
-@main.route('/survey_complete')
+import json
+
+@main.route('/survey_complete', methods=['GET'])
 @login_required
 def survey_complete():
-    # Check if the user has completed the survey by checking the MoodSurvey table
-    survey_completed = bool(MoodSurvey.query.filter_by(user_id=current_user.user_id).first())
+    latest_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id).order_by(MoodSurvey.survey_date.desc()).first()
 
-    # Try to get recommendations from session first
-    recommendations = session.get('latest_recommendations')
-    source = 'ai'
+    if latest_survey:
+        try:
+            recommendations = json.loads(latest_survey.recommendation_text)
+        except Exception:
+            recommendations = []
 
-    # If not in session, get from the database
-    if not recommendations:
-        latest_survey = MoodSurvey.query.filter_by(
-            user_id=current_user.user_id
-        ).order_by(MoodSurvey.survey_date.desc()).first()
-        
-        if latest_survey:
-            rec = Recommendation.query.filter_by(
-                survey_id=latest_survey.survey_id
-            ).first()
-            
-            if rec:
-                recommendations = rec.recommendation_text.split('\n')
-                source = 'database'
-    
-    # Fallback recommendations
-    if not recommendations:
-        recommendations = [
-            "Take three deep breaths to center yourself",
-            "Drink a glass of water",
-            "Step outside for fresh air"
-        ]
-        source = 'fallback'
-        flash("We're preparing your personalized recommendations. Here are some general wellness tips.", "info")
-    
-    formatted_recs = []
-    for rec in recommendations:
-        if '•' in rec:
-            # Split by '•' if there's a category and rationale
-            parts = rec.split('•')[1].split('(')
-            formatted_recs.append({
-                'category': parts[0].split(']')[0].strip(' ['),
-                'text': parts[0].split(']')[1].strip(), 
-                'rationale': parts[1].strip(')') if len(parts) > 1 else '' 
-            })
-        else:
-            formatted_recs.append({
-                'category': 'General',  # Default category if no specific one
-                'text': rec,
-                'rationale': ''  
-            })
+        return render_template('survey_complete.html', recommendations=recommendations)
+    else:
+        return render_template('survey_complete.html', recommendations=[])
 
-    return render_template('survey_complete.html',
-                        recommendations=formatted_recs,
-                        source=source,
-                        survey_completed=survey_completed)
 
 
 @main.route('/healthcheck')

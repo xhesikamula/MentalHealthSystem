@@ -6,112 +6,144 @@
     <title>Survey Complete - ClarityWave</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #f5f5f5;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            font-family: 'Poppins', sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
         }
-        .recommendations-container {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 2rem;
-            margin-top: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        .container-sm {
+            max-width: 700px;
+            padding: 2rem 1rem;
         }
-
-        .recommendation-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 1.5rem;
+        
+        .thank-you-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .thank-you-icon {
+            color: #4f46e5;
+            font-size: 2.5rem;
             margin-bottom: 1rem;
-            border-left: 4px solid #0d6efd;
         }
-
-        .recommendation-card h4 {
-            color: #0d6efd;
+        
+        h1 {
+            color: #4f46e5;
+            font-weight: 600;
             margin-bottom: 0.5rem;
         }
-
-        .rationale {
-            color: #6c757d;
-            font-style: italic;
-            margin-top: 0.5rem;
-        }
-
-        .processing-message {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        
+        .lead-text {
+            color: #64748b;
+            font-size: 1.1rem;
             margin-bottom: 1.5rem;
         }
-
-        .fallback-recommendations {
-            background-color: #e9ecef;
-            padding: 1rem;
+        
+        .recommendations-section {
+            background: white;
             border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-
-        .btn {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background: #4e73df;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #334155;
+            font-size: 1.25rem;
+        }
+        
+        .recommendation-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .recommendation-category {
+            font-weight: 500;
+            color: #4f46e5;
+            margin-bottom: 0.25rem;
+        }
+        
+        .recommendation-text {
+            margin-bottom: 0.5rem;
+        }
+        
+        .rationale {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        .btn-primary {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            margin-top: 1.5rem;
+        }
+        
+        .no-recommendations {
+            text-align: center;
+            color: #64748b;
+            padding: 1.5rem 0;
         }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
 
-    <!-- Main Content -->
-<main class="container">
-    <div class="recommendations-container">
-        <h2>Your Personalized Suggestions</h2>
-        
-       
-        {% if recommendations %}
-        <div class="recommendations-list">
-            {% for rec in recommendations %}
-                <div class="recommendation-card">
-                    <h4>{{ rec.category }}</h4>  <!-- Use rec.category directly -->
-                    <p>{{ rec.text }}</p>  <!-- Use rec.text directly -->
-                    {% if rec.rationale %}
-                        <p class="rationale"><small>{{ rec.rationale }}</small></p>
-                    {% endif %}
-                </div>
-            {% endfor %}
+    <div class="container-sm">
+        <div class="thank-you-section">
+            <div class="thank-you-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Thank You!</h1>
+            <p class="lead-text">Your survey has been submitted successfully.</p>
         </div>
-        {% else %}
-        <div class="processing-message">
-            <p>We're preparing your personalized suggestions...</p>
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+
+        <div class="recommendations-section">
+            <h2 class="section-title">Your Recommendations</h2>
+            
+            {% if session.get('latest_recommendations') %}
+                <div class="recommendations-list">
+                    {% for rec in session['latest_recommendations'] %}
+                        <div class="recommendation-item">
+                            <div class="recommendation-category">{{ rec.category }}</div>
+                            <div class="recommendation-text">{{ rec.text }}</div>
+                            {% if rec.rationale %}
+                                <div class="rationale">Why this matters: {{ rec.rationale }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-recommendations">
+                    <p>No recommendations available at this time.</p>
+                </div>
+            {% endif %}
+            
+            <div class="text-center">
+                <a href="{{ url_for('main.mainpage') }}" class="btn btn-primary">
+                    Return to Home
+                </a>
             </div>
         </div>
-        <div class="fallback-recommendations mt-4">
-            <p class="text-muted">Try these general wellness tips while you wait:</p>
-            <ul class="list-group">
-                <li class="list-group-item">Take three deep breaths</li>
-                <li class="list-group-item">Drink a glass of water</li>
-                <li class="list-group-item">Step outside for fresh air</li>
-            </ul>
-        </div>
-        {% endif %}
     </div>
-</main>
-
-
-    <!-- Refresh meta tag for auto-reload -->
-    <meta http-equiv="refresh" content="5 ;url={{ url_for('main.survey_complete') }}">
 
     {% include 'footer.html' %}
 
-    <!-- Bootstrap JS and Font Awesome -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

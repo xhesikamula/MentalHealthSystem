@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClarityWave</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     .dashboard-container {
       max-width: 1000px;
@@ -68,48 +69,41 @@
   {% include 'header.html' %}
 
   {% block content %}
-  <div class="dashboard-container">
+  <div style="height: 70px;"></div> 
+  <div class="admin-dashboard">
     <h1>Admin Dashboard</h1>
-    <p class="welcome-msg">Welcome, <strong>{{ current_user.name }}</strong>!</p>
 
-    <div class="management-buttons">
-      <a href="{{ url_for('admin.manage_users') }}">Manage Users</a>
-      <a href="{{ url_for('admin.manage_events') }}">Manage Events</a>
-      <a href="{{ url_for('admin.manage_podcasts') }}">Manage Podcasts</a>
-      <a href="{{ url_for('admin.manage_hotlines') }}">Manage Hotlines</a>
-    </div>
-
-    <div class="dashboard-section">
-      <h2>Recent Activity</h2>
-
-      <div class="activity-block">
-        <h3>Recent Mood Surveys (Last 5)</h3>
-        <ul class="activity-list">
-          {% for survey in surveys %}
-            <li>
-              <span class="activity-date">{{ survey.created_at }}</span>
-              — {{ survey.survey_title }}
-            </li>
-          {% endfor %}
-        </ul>
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <h2><i class="fas fa-users"></i>Manage Users</h2>
+        <p>Total Users: {{ users|length }}</p>
+        <a href="{{ url_for('admin.manage_users') }}">View Users</a>
       </div>
 
-      <div class="activity-block">
-        <h3>Recent Events</h3>
-        <ul class="activity-list">
-          {% for event in events %}
-            <li>
-              <span class="activity-date">{{ event.date_time }}</span>
-              — {{ event.title }}
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="dashboard-card">
+        <h2><i class="fas fa-calendar-alt"></i>Manage Events</h2>
+        <p>Recent motivational events listed.</p>
+        <a href="{{ url_for('admin.manage_events') }}">View Events</a>
+      </div>
+
+      <div class="dashboard-card">
+        <h2><i class="fas fa-podcast"></i>Manage Podcasts</h2>
+        <p>Access uploaded mental health podcasts.</p>
+        <a href="{{ url_for('admin.manage_podcasts') }}">View Podcasts</a>
+      </div>
+
+      <div class="dashboard-card">
+        <h2><i class="fas fa-phone-alt"></i>Manage Hotlines</h2>
+        <p>Emergency and support hotlines.</p>
+        <a href="{{ url_for('admin.manage_hotlines') }}">View Hotlines</a>
       </div>
     </div>
   </div>
+
   {% endblock %}
 
   {% include 'footer.html' %}
+
 
 </body>
 </html>
