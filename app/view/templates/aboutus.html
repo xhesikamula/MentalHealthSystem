@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us | ClarityWave</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"/>
+  <style>
+    :root {
+      --primary: #3C552D;
+      --primary-light: #5A7D3E;
+      --secondary: #E8F4EA;
+      --accent: #8BB174;
+      --text: #333333;
+      --light-text: #6D6D6D;
+      --white: #FFFFFF;
+      --light-gray: #F9F9F9;
+    }
+    
+    .about-us {
+      padding: 100px 20px;
+      background-color: var(--white);
+      text-align: center;
+      position: relative;
+    }
+    
+    .about-us::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background-color: var(--accent);
+      border-radius: 2px;
+    }
+
+    .about-us h2 {
+      font-size: 2.8rem;
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+    
+    .about-us .subtitle {
+      font-size: 1.25rem;
+      color: var(--primary-light);
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-weight: 500;
+    }
+
+    .about-us p {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto 25px;
+      color: var(--text);
+    }
+    
+    .divider {
+      width: 80px;
+      height: 4px;
+      background-color: var(--accent);
+      margin: 40px auto;
+      border-radius: 2px;
+    }
+    
+    .highlight-section {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--white) 100%);
+      padding: 80px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .highlight-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      width: 320px;
+      padding: 40px 30px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .card::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: height 0.3s ease;
+      z-index: -1;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:hover::after {
+      height: 8px;
+    }
+
+
+    
+    .card h3::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 2px;
+      background-color: var(--accent);
+      transition: width 0.3s ease;
+    }
+    
+    .card:hover h3::after {
+      width: 60px;
+    }
+
+.card-img {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px; /* Reduced from 25px to 15px */
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.card h3 {
+  font-size: 1.6rem;
+  color: var(--primary);
+  margin: 0 0 15px 0; /* Changed from margin-bottom: 20px */
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+}
+    
+    .card:hover .card-img {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .card p {
+      font-size: 1.05rem;
+      color: var(--light-text);
+      line-height: 1.7;
+    }
+    
+    .mission-section {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 100px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .mission-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    
+    .mission-section p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .stats-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      max-width: 1000px;
+      margin: 60px auto 0;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 5px;
+      display: inline-block;
+      min-width: 120px;
+    }
+    
+    .stat-number .plus {
+      font-size: 2rem;
+      vertical-align: top;
+      margin-left: 5px;
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+  </style>
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+
+  <!-- About Us Section -->
+  <section class="about-us">
+    <h2>About ClarityWave</h2>
+    <p class="subtitle">Empowering your mental wellness journey</p>
+    <p>At ClarityWave, we believe mental health is just as vital as physical health. We aim to provide accessible, compassionate support to help you navigate stress, anxiety, and daily challenges.</p>
+    <p>Our tools—ranging from guided meditations to mood trackers—are built to empower and uplift your mental health journey. We're more than a platform; we're a supportive community striving for well-being and balance.</p>
+    <div class="divider"></div>
+  </section>
+
+  <!-- Mission Statement -->
+  <section class="mission-section">
+    <h2>Our Mission</h2>
+    <p>To democratize mental health support by creating innovative, accessible tools that help individuals cultivate resilience, find balance, and thrive in their daily lives.</p>
+    
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-number" id="userCount">0</div>
+        <div class="stat-label">Shared Experiences</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="programCount">0</div>
+        <div class="stat-label">Guided Programs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Support</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Our Approach Cards -->
+  <section class="highlight-section">
+    <div class="cards">
+      <div class="card">
+        <img src="{{ url_for('static', filename='images/mindfulness.png') }}" alt="Mindfulness" class="card-img" />
+  <h3>Reflective Mindfulness</h3>
+  <p>Combine mindful observation with thoughtful reflection for deeper self-understanding and growth.</p></div>
+      <div class="card">
+        <img src="{{ url_for('static', filename='images/support-tools.png') }}" alt="Supportive Tools" class="card-img" />
+        <h3>Personalized Tools</h3>
+        <p>Our adaptive platform learns with you, offering mood tracking, journaling, and daily check-ins tailored to your progress.</p>
+      </div>
+      <div class="card">
+        <img src="{{ url_for('static', filename='images/community-svgrepo-com.svg') }}" alt="Community" class="card-img" />
+        <h3>Supportive Community</h3>
+        <p>Connect with others in our safe, moderated spaces where sharing and growth happen without judgment.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us Section -->
+  <section class="about-us">
+    <h2>Why Choose ClarityWave?</h2>
+    <p>We offer a personalized mental wellness experience tailored to your evolving needs. Whether you're taking first steps or continuing your journey, ClarityWave grows with you.</p>
+    <p>By combining evidence-based techniques with compassionate technology, we're breaking stigma and creating accessible solutions for all.</p>
+  </section>
+
+    {% include 'footer.html' %}
+
+
+  <script>
+    // Animate counting numbers
+    function animateCount(id, start, end, duration, suffix = '') {
+      const element = document.getElementById(id);
+      const range = end - start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      let current = start;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        element.textContent = current.toLocaleString() + (suffix && current === end ? suffix : '');
+        
+        if (current === end) {
+          clearInterval(timer);
+        }
+      }, stepTime);
+    }
+
+    // Function to check if element is in viewport
+    function isInViewport(element) {
+      const rect = element.getBoundingClientRect();
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+    }
+
+    // Function to handle scroll event
+    function handleScroll() {
+      const userCount = document.getElementById('userCount');
+      const programCount = document.getElementById('programCount');
+      
+      if (userCount && !userCount.classList.contains('animated') && isInViewport(userCount)) {
+        userCount.classList.add('animated');
+        animateCount('userCount', 0, 1000, 2000, '+');
+      }
+      
+      if (programCount && !programCount.classList.contains('animated') && isInViewport(programCount)) {
+        programCount.classList.add('animated');
+        animateCount('programCount', 0, 50, 1500, '+');
+      }
+    }
+
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll);
+
+    // Initial check in case stats are already visible
+    document.addEventListener('DOMContentLoaded', handleScroll);
+  </script>
+
+</body>
+</html>

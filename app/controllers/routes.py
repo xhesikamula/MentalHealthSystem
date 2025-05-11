@@ -643,6 +643,10 @@ def logout():
 def events_page():
     return render_template('events.html')
 
+@main.route('/aboutus')
+def aboutus_page():
+    return render_template('aboutus.html')
+
 from flask import request, jsonify
 import requests
 import os
