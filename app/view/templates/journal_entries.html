@@ -8,7 +8,7 @@
     <style>
         body {
             background: linear-gradient(rgba(60, 85, 45, 0.4), rgba(60, 85, 45, 0.4)),
-        url('/static/images/eventsbackground.avif') no-repeat center center / cover;
+            url('/static/images/eventsbackground.avif') no-repeat center center / cover;
             background-attachment: fixed;
             background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -91,22 +91,6 @@
             background: linear-gradient(90deg, #324a26, #5f8044);
         }
 
-        footer {
-            margin-top: auto;
-            padding: 1rem;
-            color: white;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .journal-container {
-                padding: 1rem;
-            }
-
-            .entry-form button {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -120,6 +104,7 @@
         </div>
 
         <!-- Form to add a new journal entry -->
+        {% if not feedback %}
         <form action="{{ url_for('main.journal_entries') }}" method="POST" class="entry-form mb-4">
             {{ form.hidden_tag() }}
             <div class="mb-3">
@@ -129,6 +114,7 @@
 
             <button type="submit" class="btn btn-submit">Save Entry</button>
         </form>
+        {% endif %}
 
         <!-- Motivational feedback from TinyLLaMA -->
         {% if feedback %}
