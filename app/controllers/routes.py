@@ -537,10 +537,14 @@ def test_db_connection():
 from app.dal.db_operations import DBOperations
 from app.sentiment_utils import analyze_sentiment 
 
+from app.controllers.services.recommendations import get_journal_feedback
+
 @main.route('/journal', methods=['GET', 'POST'])
 @login_required
 def journal_entries():
     form = JournalEntryForm()
+    feedback_message = None
+
     if form.validate_on_submit():
         # Run sentiment analysis
         sentiment_type, confidence_score = analyze_sentiment(form.content.data)
@@ -553,13 +557,21 @@ def journal_entries():
         )
 
         if entry_id:
-            return redirect(url_for('main.mainpage'))
+            # Generate motivational feedback using TinyLLaMA
+            feedback_message = get_journal_feedback(form.content.data)
         else:
             flash("Failed to save journal entry.", "danger")
 
     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
         .order_by(JournalEntry.created_at.desc()).all()
-    return render_template('journal_entries.html', form=form, entries=entries)
+
+    return render_template(
+        'journal_entries.html',
+        form=form,
+        entries=entries,
+        feedback=feedback_message
+    )
+
 
 #tpremten jon shtu
 # from werkzeug.utils import secure_filename
