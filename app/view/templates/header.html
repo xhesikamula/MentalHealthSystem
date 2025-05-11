@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClarityWave</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
 </head>
 <body>
 
@@ -12,7 +13,7 @@
         <nav>
             <ul>
                 <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
-                <li><a href="#home">Home</a></li>
+                <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
                 <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
                 
                 {% if current_user.is_authenticated %}

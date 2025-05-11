@@ -3,127 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
     <title>Podcasts</title>
     <style>
-        /* Body Styling */
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #3C552D; /* Matching the green color */
-            color: #333;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh; /* Ensures the body takes the full viewport height */
-            display: flex;
-            flex-direction: column; /* Allows footer to stay at the bottom */
-        }
+    body {
+        font-family: 'Quicksand', sans-serif;
+        background-color: #3C552D;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: url('/static/images/journalbackground.png');
+        background-size: cover;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
 
-        /* Container Styling */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            flex: 1; /* Allows the container to expand and take available space */
-            margin-bottom: 60px; /* Adds space below content for footer */
-        }
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 60px;
+        flex: 1;
+    }
 
-        /* Heading Styling */
-        h1 {
-            font-size: 2.8rem;
-            color: #333;
-            text-align: center;
-            margin: 100px 0 20px 0;
-            font-weight: bold;
-        }
+    h1 {
+        font-size: 2.8rem;
+        color: #3C552D;
+        text-align: center;
+        margin: 100px 0 40px 0;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px #ffffff;
+    }
 
-        /* Podcast List Styling */
+    .podcast-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .podcast-card {
+        background: linear-gradient(135deg, #f7fdfc, #dff6e9);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .podcast-card::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        left: -40%;
+        width: 180%;
+        height: 180%;
+        background: radial-gradient(circle, rgba(60, 85, 45, 0.05), transparent 70%);
+        z-index: 0;
+    }
+
+    .podcast-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .podcast-card h2 {
+        font-size: 1.4rem;
+        color: #2e2e2e;
+        font-weight: bold;
+        z-index: 1;
+        position: relative;
+    }
+
+    .podcast-card p {
+        font-size: 1rem;
+        color: #4f4f4f;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        z-index: 1;
+        position: relative;
+    }
+
+    .podcast-card a {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #3C552D;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        z-index: 1;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .podcast-card a:hover {
+        background-color: #2e4024;
+        transform: scale(1.05);
+    }
+
+    .no-podcasts {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #888;
+        margin-top: 50px;
+    }
+
+    footer {
+        background-color: #3C552D;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        width: 100%;
+    }
+
+    @media screen and (max-width: 768px) {
         .podcast-list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .podcast-list {
+            grid-template-columns: 1fr;
         }
 
-        /* Individual Podcast Card */
-        .podcast-card {
-            background-color: #fafafa;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        h1 {
+            font-size: 2rem;
         }
+    }
+</style>
 
-        .podcast-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .podcast-card h2 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .podcast-card p {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 15px;
-        }
-
-        .podcast-card a {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: #2f4f4f;
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .podcast-card a:hover {
-            background-color: #1e3c3c;
-            transform: scale(1.1);
-        }
-
-        /* "No Podcasts" Message */
-        .no-podcasts {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #888;
-            margin-top: 50px;
-        }
-        
-
-        /* Footer Styling */
-        footer {
-            background-color: #3C552D; /* Green background to match */
-            color: white;
-            padding: 20px;
-            text-align: center;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        /* Responsiveness */
-        @media screen and (max-width: 768px) {
-            .podcast-list {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .podcast-list {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body style="background-image: url('/static/images/journalbackground.png');">
 
