@@ -574,29 +574,58 @@ def journal_entries():
 
 
 #tpremten jon shtu
-from werkzeug.utils import secure_filename
-import os
+# from werkzeug.utils import secure_filename
+# import os
+
+# @main.route('/upload-image', methods=['POST'])
+# @login_required
+# def upload_image():
+#     file = request.files.get('image')
+#     if file:
+#         filename = secure_filename(file.filename)
+#         upload_folder = os.path.join(current_app.root_path, 'static/uploads')
+#         os.makedirs(upload_folder, exist_ok=True)  
+
+#         file_path = os.path.join(upload_folder, filename)
+#         file.save(file_path)
+
+#         # Update user's image path 
+#         current_user.image_url = filename
+#         db.session.commit()
+
+#         flash("Profile image updated!", "success")
+#     else:
+#         flash("No file selected", "danger")
+    
+#     return redirect(url_for('main.profile'))
+
+import base64
+from flask import request, redirect, url_for, flash, current_app
+from flask_login import login_required, current_user
+from app.controllers.routes import main
+from app import db
 
 @main.route('/upload-image', methods=['POST'])
 @login_required
 def upload_image():
     file = request.files.get('image')
-    if file:
-        filename = secure_filename(file.filename)
-        upload_folder = os.path.join(current_app.root_path, 'static/uploads')
-        os.makedirs(upload_folder, exist_ok=True)  
+    if file and file.filename:
+        # Read image content and detect MIME type
+        image_data = file.read()
+        mime_type = file.mimetype  # e.g., image/jpeg, image/png, image/webp, etc.
 
-        file_path = os.path.join(upload_folder, filename)
-        file.save(file_path)
+        # Convert to base64 string
+        encoded = base64.b64encode(image_data).decode('utf-8')
+        base64_string = f"data:{mime_type};base64,{encoded}"
 
-        # Update user's image path 
-        current_user.image_url = filename
+        # Save to database
+        current_user.image_url = base64_string
         db.session.commit()
 
         flash("Profile image updated!", "success")
     else:
         flash("No file selected", "danger")
-    
+
     return redirect(url_for('main.profile'))
 
 

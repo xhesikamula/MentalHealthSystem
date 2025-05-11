@@ -7,71 +7,100 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         body {
-            background-color: #f0f4f8;
+            background: linear-gradient(rgba(60, 85, 45, 0.4), rgba(60, 85, 45, 0.4)),
+        url('/static/images/eventsbackground.avif') no-repeat center center / cover;
+            background-attachment: fixed;
+            background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            margin: 0;
         }
 
         .mb-4.text-primary {
             color: #808000; /* Olive Green */
         }
-
         .journal-container {
             flex: 1;
             margin-top: 2rem;
+            background-color: rgba(255, 248, 240, 0.9);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        h2.mb-4 {
+            color: #3C552D;
+            font-weight: 700;
+            font-size: 2.4rem;
         }
 
         .quote-box {
-            background-color: #e3f2fd;
-            border-left: 5px solid #808000;
-            padding: 1rem;
+            background-color: #fcf5ec;
+            border-left: 6px solid #3C552D;
+            padding: 1.2rem;
             margin-bottom: 2rem;
-            border-radius: 8px;
+            border-radius: 12px;
             font-style: italic;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .entry-form {
-            background-color: #ffffff;
+            background-color: #fffaf3;
             padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
         }
 
         .entry-card {
-            background-color: white;
-            border-radius: 10px;
+            background-color: #fffdf8;
+            border-radius: 14px;
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .entry-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(60, 85, 45, 0.25);
         }
 
         .entry-timestamp {
             font-size: 0.9rem;
-            color: gray;
+            color: #777;
         }
 
         .sentiment {
-            font-size: 0.85rem;
-            color: #6c757d;
+            font-size: 0.9rem;
+            color: #3C552D;
         }
 
-        .btn {
+        .btn-submit {
+            background: linear-gradient(90deg, #3C552D, #6a8d4c);
             color: white;
-            background-color: #808000;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
         }
 
-        /* Footer stays at the bottom */
+        .btn-submit:hover {
+            background: linear-gradient(90deg, #324a26, #5f8044);
+        }
+
         footer {
             margin-top: auto;
+            padding: 1rem;
+            color: white;
+            text-align: center;
         }
 
-        /* Responsiveness */
         @media (max-width: 768px) {
-            .quote-box {
-                font-size: 1.2rem;
+            .journal-container {
+                padding: 1rem;
             }
 
             .entry-form button {
@@ -84,7 +113,7 @@
     {% include 'header.html' %}
 
     <main class="container journal-container">
-        <h2 class="mb-4 text-primary">📝 Your Journal</h2>
+        <h2 class="mb-4">Your Journal</h2>
 
         <div class="quote-box">
             “Journaling is like whispering to one’s self and listening at the same time.” – Mina Murray
@@ -98,7 +127,7 @@
                 {{ form.content(class="form-control", rows="4", placeholder="Write about your day...") }}
             </div>
 
-            <button type="submit" class="btn btn-success">Save Entry</button>
+            <button type="submit" class="btn btn-submit">Save Entry</button>
         </form>
 
         <!-- Motivational feedback from TinyLLaMA -->
@@ -111,7 +140,6 @@
 
         <hr>
 
-        <!-- Filtered journal entries -->
         {% if entries %}
             {% for entry in entries %}
                 <div class="entry-card">

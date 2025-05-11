@@ -1,129 +1,158 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Events - ClarityWave</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        /* Layout */
-        body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-        background-color: #f3f6f9;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #333;
-        }
-        main {
-        flex: 1;
-        padding: 1rem 2rem;
-        margin-top: 80px;   /* offset for fixed header */
-        margin-bottom: 60px; /* offset for footer */
-        }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Events - ClarityWave</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Segoe+UI:wght@400&display=swap');
 
-        /* Heading */
-        h1.mb-4.text-primary {
-        color: #6b8e23;  /* Olive Drab */
-        text-align: center;
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #3b3b3b;
+      background: linear-gradient(rgba(60, 85, 45, 0.4), rgba(60, 85, 45, 0.4)),
+        url('/static/images/eventsbackground.avif') no-repeat center center / cover;
+    }
 
-        /* Event grid */
-        .event-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        }
+    main {
+      flex: 1;
+      padding: 2rem;
+      margin-top: 90px;
+      margin-bottom: 80px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeIn 1s ease-in-out;
+    }
 
-        .event-card {
-        background: #fff;
-        border-left: 6px solid #6b8e23;
-        border-radius: 8px;
+    h1.mb-4.text-primary {
+      color: #3C552D;
+      text-align: center;
+      font-size: 3rem;
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+    }
+
+    .event-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .event-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-left: 6px solid #3C552D;
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: slideUp 0.8s ease forwards;
+    }
+
+    .event-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
+    }
+
+    .event-card h2 {
+      margin-top: 0;
+      font-size: 1.7rem;
+      color: #2e4022;
+      margin-bottom: 0.6rem;
+    }
+
+    .event-card p {
+      margin: 0.4rem 0;
+      line-height: 1.5;
+    }
+
+    .event-location, .event-date {
+      font-weight: 600;
+      color: #4f4f4f;
+    }
+
+    .event-card a.more-info {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: #3C552D;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .event-card a.more-info:hover {
+      background: #2e4022;
+    }
+
+    .no-events {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #777;
+      margin-top: 3rem;
+    }
+
+    footer {
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      h1.mb-4.text-primary {
+        font-size: 2.2rem;
+      }
+
+      main {
         padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .event-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
+      }
+    }
 
-        .event-card h2 {
-        margin-top: 0;
-        font-size: 1.4rem;
-        color: #556b2f;
-        }
-        .event-card p {
-        margin: 0.5rem 0;
-        line-height: 1.4;
-        }
-        .event-card .event-date,
-        .event-card .event-location {
-        font-weight: 600;
-        color: #555;
-        }
-        .event-card a.more-info {
-        display: inline-block;
-        margin-top: 0.75rem;
-        padding: 0.5rem 1rem;
-        background: #6b8e23;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: background 0.2s;
-        }
-        .event-card a.more-info:hover {
-        background: #556b2f;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
-        /* "No events" message */
-        .no-events {
-        text-align: center;
-        font-size: 1.2rem;
-        color: #777;
-        margin-top: 2rem;
-        }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
 
-        /* Footer push */
-        footer {
-        margin-top: auto;
-        }
+  {% include 'header.html' %}
 
-        @media (max-width: 600px) {
-        h1.mb-4.text-primary { font-size: 2rem; }
-        }
-    </style>
-    </head>
-    <body>
+  <main>
+    <h1 class="mb-4 text-primary">Upcoming Events</h1>
 
-    {% include 'header.html' %}
-
-    <main>
-        <h1 class="mb-4 text-primary">🗓 Upcoming Events</h1>
-
-        {% if events %}
-        <div class="event-list">
-            {% for event in events %}
-            <div class="event-card">
-                <h2>{{ event.title }}</h2>
-                <p class="event-location">📍 {{ event.location }}</p>
-                <p class="event-date">📅 {{ event.date_time }}</p>
-                {% if event.description %}
-                <p>{{ event.description }}</p>
-                {% endif %}
-                <a href="{{ event.link }}" target="_blank" class="more-info">More Info</a>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="no-events">No events available at the moment.</p>
+    {% if events %}
+    <div class="event-list">
+      {% for event in events %}
+      <div class="event-card">
+        <h2>{{ event.title }}</h2>
+        <p class="event-location"> {{ event.location }}</p>
+        <p class="event-date">📅 {{ event.date_time }}</p>
+        {% if event.description %}
+        <p>{{ event.description }}</p>
         {% endif %}
-    </main>
+        <a href="{{ event.link }}" target="_blank" class="more-info">More Info</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-events">No events available at the moment.</p>
+    {% endif %}
+  </main>
 
-    {% include 'footer.html' %}
+  {% include 'footer.html' %}
 
-    </body>
-    </html>
+</body>
+</html>
