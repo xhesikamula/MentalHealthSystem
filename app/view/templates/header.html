@@ -13,13 +13,8 @@
         <nav>
             <ul>
                 <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
-<<<<<<< HEAD
                 <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
-                <li><a href="#about">About</a></li>
-=======
-                <li><a href="#home">Home</a></li>
                 <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
->>>>>>> 1885744851a3a5c31208dd13e557a5c09fe91cb5
                 
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'admin' %}
