@@ -1,43 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Access Denied - ClarityWave</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    /* Ensure full-height layout and footer at bottom */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
     html, body {
       height: 100%;
       margin: 0;
+      font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
-      font-family: 'Poppins', sans-serif;
-      background-color: #f9fbfd;
+      background-image: url('/static/images/historybackground.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      backdrop-filter: brightness(0.95);
     }
-    /* Offset content from fixed header and allow scrolling */
+
     main {
       flex: 1;
-      padding-top: 70px; /* adjust to header height */
       display: flex;
       align-items: center;
       justify-content: center;
+      padding-top: 70px;
       text-align: center;
     }
-    /* Olive text for heading and paragraph */
-    .access-denied-container h1,
-    .access-denied-container p {
-      color: olive;
+
+    .access-denied-container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
     }
+
     .access-denied-container h1 {
-      margin-bottom: 20px;
-      font-size: 2rem;
+      color: #3C552D;
+      font-size: 2.2rem;
+      margin-bottom: 15px;
     }
+
     .access-denied-container p {
+      color: #3C552D;
       font-size: 1.1rem;
       margin-bottom: 30px;
     }
-    /* Footer push to bottom */
+
+    .access-denied-container a {
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      background-color: #3C552D;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .access-denied-container a:hover {
+      background-color: #2e4022;
+    }
+
     footer {
       margin-top: auto;
     }
@@ -50,6 +77,7 @@
     <div class="access-denied-container">
       <h1>You don't have permission to view this page!</h1>
       <p>If you believe this is a mistake, please contact an admin.</p>
+      <a href="{{ url_for('main.mainpage') }}">Go back to homepage</a>
     </div>
   </main>
 
