@@ -1,13 +1,18 @@
 # app/controllers/services/recommendations.py
 
 import ollama
-
 def get_llama_recommendation(user_input):
     """
     Send user's survey answers to the local TinyLLaMA model running via Ollama
-    and get mental health recommendations.
+    and get 4 short actionable mental health recommendations.
     """
-    prompt = f"Based on this user's input, provide a mental health support recommendation:\n\n{user_input}\n\nRespond clearly and empathetically."
+    prompt = (
+        f"Based on this user's input, provide exactly 4 short and specific mental health "
+        f"recommendations to help them feel better. Format them as a numbered list (1) ..., 2) ..., etc), "
+        f"and keep each recommendation concise and actionable:\n\n"
+        f"{user_input}\n\n"
+        f"Respond clearly and empathetically."
+    )
 
     try:
         response = ollama.chat(
@@ -19,6 +24,7 @@ def get_llama_recommendation(user_input):
         return response['message']['content']
     except Exception as e:
         return f"An error occurred while generating the recommendation: {e}"
+
 
 def get_journal_feedback(entry_content):
     """
