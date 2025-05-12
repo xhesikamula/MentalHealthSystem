@@ -598,6 +598,10 @@ def journal_entries():
 #         flash("No file selected", "danger")
     
 #     return redirect(url_for('main.profile'))
+@main.route('/about')
+def aboutus_page():
+    return render_template('aboutus.html')
+
 
 import base64
 from flask import request, redirect, url_for, flash, current_app
@@ -642,10 +646,6 @@ def logout():
 @login_required
 def events_page():
     return render_template('events.html')
-
-@main.route('/aboutus')
-def aboutus_page():
-    return render_template('aboutus.html')
 
 from flask import request, jsonify
 import requests

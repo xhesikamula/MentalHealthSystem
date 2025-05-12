@@ -48,3 +48,4 @@ class Config:
         """Query Hugging Face API."""
         response = requests.post(cls.HF_API_URL, headers=cls.headers, json=payload)
         return response.json()
+

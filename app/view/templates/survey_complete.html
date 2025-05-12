@@ -17,87 +17,150 @@
             font-family: 'Quicksand', sans-serif;
             color: #1e293b;
             line-height: 1.6;
+            animation: fadeIn 1.5s ease-out;
         }
-        
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        header {
+            min-height: 100px;
+            overflow: visible;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
         .container-sm {
             max-width: 700px;
             padding: 2rem 1rem;
+            margin-top: 100px;
+            animation: slideUp 1s ease-out;
         }
-        
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         .thank-you-section {
             text-align: center;
             margin-bottom: 2.5rem;
+            animation: fadeIn 1s ease-out;
         }
-        
+
         .thank-you-icon {
-            color: #4f46e5;
-            font-size: 2.5rem;
+            color: #3C552D;
+            font-size: 3rem;
             margin-bottom: 1rem;
+            animation: bounce 1.5s ease-in-out infinite;
         }
-        
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         h1 {
-            color: #4f46e5;
+            color: #3C552D;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            animation: fadeIn 1s ease-out;
         }
-        
+
         .lead-text {
             color: #64748b;
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
+            animation: fadeIn 1s ease-out;
         }
-        
+
         .recommendations-section {
             background: white;
             border-radius: 8px;
             padding: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(60, 85, 45, 0.1);
+            animation: fadeIn 1s ease-out;
         }
-        
+
         .section-title {
             font-weight: 600;
             margin-bottom: 1.5rem;
-            color: #334155;
+            color: #2f3b26;
             font-size: 1.25rem;
+            animation: slideUp 1s ease-out;
         }
-        
+
         .recommendation-item {
             padding: 1rem 0;
             border-bottom: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+            color: #3c552d;  /* Set text color to the theme color */
         }
-        
+
+        .recommendation-item:hover {
+            transform: translateX(5px);
+        }
+
         .recommendation-item:last-child {
             border-bottom: none;
         }
-        
+
         .recommendation-category {
             font-weight: 500;
-            color: #4f46e5;
+            color: #3C552D;
             margin-bottom: 0.25rem;
         }
-        
+
         .recommendation-text {
             margin-bottom: 0.5rem;
         }
-        
+
         .rationale {
             color: #64748b;
             font-size: 0.9rem;
             font-style: italic;
         }
-        
+
         .btn-primary {
-            background-color: #4f46e5;
-            border-color: #4f46e5;
+            background-color: #3C552D;
+            border-color: #3C552D;
             padding: 0.5rem 1.5rem;
             font-weight: 500;
             margin-top: 1.5rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        
+
+        .btn-primary:hover {
+            background-color: #2e4021;
+            border-color: #2e4021;
+        }
+
         .no-recommendations {
             text-align: center;
             color: #64748b;
             padding: 1.5rem 0;
+            font-size: 1.2rem;
+            font-style: italic;
+            animation: fadeIn 1.5s ease-out;
         }
     </style>
 </head>
@@ -115,17 +178,18 @@
 
         <div class="recommendations-section">
             <h2 class="section-title">Your Recommendations</h2>
-            
+
             {% if session.get('latest_recommendations') %}
                 <div class="recommendations-list">
                     {% for rec in session['latest_recommendations'] %}
-                        <div class="recommendation-item">
-                            <div class="recommendation-category">{{ rec.category }}</div>
-                            <div class="recommendation-text">{{ rec.text }}</div>
-                            {% if rec.rationale %}
-                                <div class="rationale">Why this matters: {{ rec.rationale }}</div>
-                            {% endif %}
-                        </div>
+                        {% if loop.index != 1 %}
+                            <div class="recommendation-item">
+                                <div class="recommendation-text">{{ rec.text }}</div>
+                                {% if rec.rationale %}
+                                    <div class="rationale">Why this matters: {{ rec.rationale }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% else %}
@@ -133,7 +197,7 @@
                     <p>No recommendations available at this time.</p>
                 </div>
             {% endif %}
-            
+
             <div class="text-center">
                 <a href="{{ url_for('main.mainpage') }}" class="btn btn-primary">
                     Return to Home
