@@ -16,8 +16,12 @@
       margin: 0;
       font-family: 'Quicksand', sans-serif;
       color: #3b3b3b;
-      background: linear-gradient(rgba(60, 85, 45, 0.4), rgba(60, 85, 45, 0.4)),
-        url('/static/images/eventsbackground.avif') no-repeat center center / cover;
+      /* background: linear-gradient(rgba(60, 85, 45, 0.4), rgba(60, 85, 45, 0.4)),
+        url('/static/images/eventsbackground.avif') no-repeat center center / cover; */
+      background-image: url('/static/images/historybackground.png');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
     }
 
     main {
@@ -32,7 +36,7 @@
     }
 
     h1.mb-4.text-primary {
-      color: #3C552D;
+      color: white;
       text-align: center;
       font-size: 3rem;
       font-family: 'Quicksand', serif;
