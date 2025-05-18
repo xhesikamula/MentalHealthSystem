@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ClarityWave</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   <style>
     /* Enhanced dropdown styles only */
     .dropdown {
@@ -51,6 +51,8 @@
       display: flex;
       align-items: center;
       gap: 20px;
+      padding-left: 0;
+      margin: 0;
     }
 
     nav ul li {
@@ -75,7 +77,7 @@
   <header>
     <nav>
       <ul>
-        <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
+        <li><img src="{{ url_for('static', filename='images/logo.png') }}" width="150" alt="Logo" /></li>
 
         {% if current_user.is_authenticated %}
           <li class="dropdown">
@@ -89,10 +91,25 @@
           {% if current_user.role == 'admin' %}
             <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
           {% endif %}
-        {% endif %}
 
-        <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
-        <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
+          <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
+          <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
+
+          <li class="dropdown">
+  <a href="#" id="notificationsDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+    🔔 Notifications
+  </a>
+  <div class="dropdown-content" aria-labelledby="notificationsDropdown" style="min-width: 250px;">
+    {% if pending_notifications and pending_notifications|length > 0 %}
+      {% for notification in pending_notifications %}
+        <a href="{{ url_for('main.survey') }}">{{ notification.message }}</a>
+      {% endfor %}
+    {% else %}
+      <span style="padding:10px 14px; color: #999; display:block;">No new notifications</span>
+    {% endif %}
+  </div>
+</li>
+{% endif %}
 
         <li class="dropdown">
           <a href="#">Contact</a>

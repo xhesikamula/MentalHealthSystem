@@ -7,6 +7,8 @@ from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  
 from langdetect import detect as detect_language
+from flask_wtf.csrf import generate_csrf
+
 
 
 from ..model.models import Notification, db, Recommendation, User, MoodSurvey
@@ -247,18 +249,19 @@ def login():
 def no_permission():
     return render_template('no_permission.html')
 
-
 import json
+from datetime import datetime, timedelta
+from flask import render_template, redirect, url_for, session, flash, current_app
+from flask_login import login_required, current_user
+from app.forms import MoodSurveyForm
+from app.model.models import MoodSurvey, Notification, db
 
 @main.route('/survey', methods=['GET', 'POST'])
 @login_required
 def survey():
-    # Function to format recommendations for display
     def format_recommendations_for_display(recommendations):
         formatted_recs = []
-        
         for rec in recommendations:
-            # For each recommendation, split it into category, text, and rationale (if available)
             if '•' in rec:
                 parts = rec.split('•')[1].split('(')
                 formatted_recs.append({
@@ -268,26 +271,24 @@ def survey():
                 })
             else:
                 formatted_recs.append({
-                    'category': 'General',  # Default category if no specific one
+                    'category': 'General',
                     'text': rec,
                     'rationale': ''
                 })
-        
         return formatted_recs
 
-    # Check if user has completed a survey in the last 24 hours
+    # Prevent access if user already submitted survey in past 24h
     last_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id)\
-                                .order_by(MoodSurvey.survey_date.desc())\
-                                .first()
+                        .order_by(MoodSurvey.survey_date.desc())\
+                        .first()
 
     if last_survey and last_survey.survey_date >= datetime.utcnow() - timedelta(hours=24):
         return redirect(url_for('main.mainpage'))
-    
+
     form = MoodSurveyForm()
-    
+
     if form.validate_on_submit():
         try:
-            # Prepare the user input for the recommendation system
             user_input = f"""
             Mood Level: {form.mood_level.data}
             Stress Level: {form.stress_level.data}
@@ -299,17 +300,13 @@ def survey():
             Feelings Description: {form.feelings_description.data}
             """
 
-            # Get recommendations from Ollama's TinyLLaMA model
             recommendations = get_llama_recommendation(user_input)
-
-            # If the recommendations are returned as a single string, split them into a list
             if isinstance(recommendations, str):
                 recommendations = recommendations.split('\n')
 
-            # Format the recommendations for display
             formatted_recs = format_recommendations_for_display(recommendations)
 
-            # Save the survey to the database with the recommendations
+            # Save the survey
             survey_id = DBOperations.create_mood_survey(
                 user_id=current_user.user_id,
                 mood_level=form.mood_level.data,
@@ -320,22 +317,33 @@ def survey():
                 physical_activity=form.physical_activity.data,
                 spent_time_with_someone=form.spent_time_with_someone.data,
                 feelings_description=form.feelings_description.data,
-                recommendation_text=json.dumps(formatted_recs) # Pass formatted recommendations
+                recommendation_text=json.dumps(formatted_recs)
             )
-            
+
             if survey_id:
+                # ✅ Mark all pending survey notifications as completed
+                pending_notifications = Notification.query.filter_by(
+                    user_id=current_user.user_id,
+                    type='survey',
+                    status='pending'
+                ).all()
+
+                for notif in pending_notifications:
+                    notif.status = 'completed'
+
+                db.session.commit()
+
                 session['latest_recommendations'] = formatted_recs
                 session.modified = True
-                return redirect(url_for('main.survey_complete')) 
-            
+                return redirect(url_for('main.survey_complete'))
+
             flash("Error processing your survey. Please try again.", "error")
-            
+
         except Exception as e:
             current_app.logger.error(f"Survey submission error: {str(e)}", exc_info=True)
             flash("Error processing your survey. Please try again.", "error")
-    
-    return render_template('survey.html', form=form)
 
+    return render_template('survey.html', form=form)
 
 @main.route('/history')
 @login_required
@@ -1036,39 +1044,55 @@ def get_user_notifications(user_id):
         Notification.status == 'pending'
     ).all()
 
-from sqlalchemy import or_
+from datetime import datetime, timedelta
 
+from datetime import datetime, timedelta, date
+from sqlalchemy import or_
+from flask_wtf.csrf import generate_csrf
 @main.route('/mainpage')
 @login_required
 def mainpage():
-    # Check for incomplete survey
-    today = date.today()
-    last_survey = MoodSurvey.query.filter(
-        MoodSurvey.user_id == current_user.user_id,
-        db.func.date(MoodSurvey.survey_date) == today
-    ).first()
+    # If admin, do NOT create or fetch notifications
+    if current_user.role == 'admin':
+        pending_notifications = []
+    else:
+        # ✅ Check if a survey was submitted in the last 24 hours
+        last_24_hours = datetime.utcnow() - timedelta(hours=24)
 
-    # If no survey today, create notification
-    if not last_survey:
-        notification = Notification(
+        last_survey = MoodSurvey.query.filter(
+            MoodSurvey.user_id == current_user.user_id,
+            MoodSurvey.survey_date >= last_24_hours
+        ).first()
+
+        existing_notification = Notification.query.filter_by(
             user_id=current_user.user_id,
-            message="📝 Please complete your daily mood survey, so we can help you!",
             type='survey',
             status='pending'
-        )
-        db.session.add(notification)
-        db.session.commit()
+        ).first()
 
-    # Get all pending notifications
-    pending_notifications = Notification.query.filter(
-        or_(
-            Notification.user_id == current_user.user_id,
-            Notification.user_id == None
-        ),
-        Notification.status == 'pending'
-    ).all()
-    
-    return render_template('mainpage.html', pending_notifications=pending_notifications)
+        # ✅ If no recent survey and no pending notification, create it
+        if not last_survey and not existing_notification:
+            new_notification = Notification(
+                user_id=current_user.user_id,
+                message="Please complete your daily mood survey, so we can help you!",
+                type='survey',
+                status='pending'
+            )
+            db.session.add(new_notification)
+            db.session.commit()
+
+        # ✅ Fetch pending notifications for this user (and general)
+        pending_notifications = Notification.query.filter(
+            or_(
+                Notification.user_id == current_user.user_id,
+                Notification.user_id == None
+            ),
+            Notification.status == 'pending'
+        ).all()
+
+    csrf_token_value = generate_csrf()
+
+    return render_template('mainpage.html', pending_notifications=pending_notifications, csrf_token=csrf_token_value)
 
 
 @main.route('/notifications/create', methods=['POST'])
@@ -1107,6 +1131,10 @@ def create_notification_route():
 
 
 #per stored procedure te re
+from flask import jsonify
+
+from flask import jsonify
+
 @main.route('/notifications/check-survey', methods=['POST'])
 @login_required
 def check_survey_and_notify_route():
@@ -1114,13 +1142,17 @@ def check_survey_and_notify_route():
         success = DBOperations.check_survey_and_notify(user_id=current_user.user_id)
 
         if success:
-            flash('Survey check completed.', 'success')
+            return jsonify({'status': 'success', 'message': 'Survey check completed.'})
         else:
-            flash('Survey check failed.', 'error')
-
-        return redirect(url_for('main.profile'))
+            return jsonify({'status': 'error', 'message': 'Survey check failed.'})
 
     except Exception as e:
         current_app.logger.error(f"Survey check failed: {str(e)}")
-        flash('An error occurred while checking the survey.', 'error')
-        return redirect(url_for('main.profile'))
+        return jsonify({'status': 'error', 'message': 'An error occurred while checking the survey.'})
+
+
+@main.route('/notifications')
+@login_required
+def notifications_page():
+    notifications = DBOperations.get_pending_notifications(user_id=current_user.user_id)
+    return render_template('notifications.html', notifications=notifications)

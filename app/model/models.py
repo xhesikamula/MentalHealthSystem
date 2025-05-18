@@ -143,15 +143,30 @@ class SurveyResponse(db.Model):
     # Add other fields as necessary
 
 #tshtunen
+# class Notification(db.Model):
+#     __tablename__ = 'notifications'
+    
+#     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
+#     message = db.Column(db.Text, nullable=False)
+#     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+#     status = db.Column(db.Enum('sent', 'pending'), default='pending')
+#     type = db.Column(db.Enum('survey', 'journal', 'mindfulness'), default='survey')
+    
+#     # Relationship
+#     user = db.relationship('User', back_populates='notifications')
+
+#i shtova
+#models/notification.py
 class Notification(db.Model):
     __tablename__ = 'notifications'
-    
-    notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
-    message = db.Column(db.Text, nullable=False)
+
+    notification_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    message = db.Column(db.String(255))
     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    status = db.Column(db.Enum('sent', 'pending'), default='pending')
+    link = db.Column(db.String(255))  # e.g. '/survey'
     type = db.Column(db.Enum('survey', 'journal', 'mindfulness'), default='survey')
-    
-    # Relationship
+    status = db.Column(db.Enum('sent', 'pending'), default='pending')
+
     user = db.relationship('User', back_populates='notifications')
