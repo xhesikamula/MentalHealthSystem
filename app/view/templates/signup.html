@@ -61,9 +61,8 @@
                     </ul>
                 {% endif %}
     
-                <button type="submit" class="signup-button">{{ form.submit(class="signup-button") }}
-                </button>
-
+                {{ form.submit(class="signup-button") }}
+                
 
                 <p>Already have an account? <a href="{{ url_for('main.login') }}">Login</a></p>
             </form>

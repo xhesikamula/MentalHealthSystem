@@ -155,6 +155,57 @@
             color: red;
             font-size: 0.9rem;
         }
+        .custom-upload-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3C552D;
+    color: white;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.upload-label:hover {
+    background-color: #2e421f;
+}
+
+.upload-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 10;
+    margin-top: 8px;
+    min-width: 160px;
+    padding: 10px;
+}
+
+.upload-menu label,
+.upload-menu button {
+    display: block;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    color: #3C552D;
+    font-weight: bold;
+}
+
+.upload-menu label:hover,
+.upload-menu button:hover {
+    background-color: #f3f4e9;
+}
+
     </style>
 </head>
 <body>
@@ -162,32 +213,41 @@
 
     <section class="login-section">
         <div class="profile-wrapper">
-        
-            <!-- Profile Picture Section -->
-            <div class="profile-pic-section">
-                {% if current_user.image_url %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ current_user.image_url) }}" 
-                        alt="Profile Image" 
-                        class="profile-image">
-                {% else %}
-                    <div class="default-avatar">👤</div>
-                {% endif %}
 
-                <!-- Image Upload Form -->
-                <form method="POST" action="{{ url_for('main.upload_image') }}" enctype="multipart/form-data" class="upload-form">
-                    {{ image_form.hidden_tag() }}
-                    <label for="imageUpload">Choose Profile Image</label>
-                    {{ image_form.image(id="imageUpload") }}
-                    <br><br>
-                    {{ image_form.submit(class="upload-button") }}
-                </form>
+                    <!-- Profile Picture Section -->
+        <div class="profile-pic-section">
+            {% if current_user.image_url %}
+                <img id="preview" src="{{ url_for('static', filename='uploads/' ~ current_user.image_url) }}" 
+                    alt="Profile Image" 
+                    class="profile-image">
+            {% else %}
+                <img id="preview" src="#" alt="Profile Image" class="profile-image" style="display:none;">
+                <div class="default-avatar" id="defaultAvatar">👤</div>
+            {% endif %}
 
-                <form method="POST" action="{{ url_for('main.logout') }}" class="mt-3">
-                    <button type="submit" style="background: none; border: none; color: #3C552D; cursor: pointer; text-decoration: underline;">
-                        Logout
-                    </button>
-                </form>
+            <!-- Image Upload Form -->
+        <form enctype="multipart/form-data" class="upload-form">
+            {{ image_form.hidden_tag() }}
+            <div class="custom-upload-dropdown">
+                <button type="button" id="uploadToggle" class="upload-label">Choose Profile Image ▾</button>
+                <div class="upload-menu">
+                    <label for="imageUpload">Upload Image</label>
+                    <button type="button" onclick="removeProfileImage()">Remove Image</button>
+                </div>
+                {{ image_form.image(id="imageUpload", onchange="previewImage(this)") }}
             </div>
+        </form>
+
+
+
+
+            <!-- Logout Button -->
+            <form method="POST" action="{{ url_for('main.logout') }}" class="mt-3">
+                <button type="submit" style="background: none; border: none; color: #3C552D; cursor: pointer; text-decoration: underline;">
+                    Logout
+                </button>
+            </form>
+        </div>
 
             <!-- Profile Form Section -->
             <div class="login-container">
@@ -237,5 +297,111 @@
     </section>
 
     {% include 'footer.html' %}
+
+  <script>
+document.getElementById('imageUpload').addEventListener('change', async function () {
+    const fileInput = this;
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById('preview');
+        const defaultAvatar = document.getElementById('defaultAvatar');
+        if (defaultAvatar) defaultAvatar.style.display = 'none';
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('csrf_token', document.querySelector('[name="csrf_token"]').value);
+
+    try {
+        const response = await fetch('{{ url_for("main.upload_image") }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            alert('Failed to upload image.');
+        } else {
+            console.log('Image uploaded successfully');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading image.');
+    } finally {
+        // Hide dropdown in all cases
+        const menu = document.querySelector('.upload-menu');
+        if (menu) menu.style.display = 'none';
+    }
+});
+
+async function removeProfileImage() {
+    if (!confirm("Are you sure you want to remove your profile picture?")) return;
+
+    try {
+        const response = await fetch('{{ url_for("main.remove_profile_pic") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrf_token"]').value,
+            }
+        });
+
+        if (response.ok) {
+            // Hide the image preview
+            const preview = document.getElementById('preview');
+            preview.style.display = 'none';
+
+            // Show the default avatar
+            const defaultAvatar = document.getElementById('defaultAvatar');
+            if (defaultAvatar) {
+                defaultAvatar.style.display = 'flex';
+            }
+        } else {
+            alert('Failed to remove image.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error removing image.');
+    } finally {
+        // Hide dropdown in all cases
+        const menu = document.querySelector('.upload-menu');
+        if (menu) menu.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('uploadToggle');
+    const uploadMenu = document.querySelector('.upload-menu');
+
+    if (!toggleButton) {
+        console.warn('No element with id "uploadToggle" found. Make sure your toggle button (label) has id="uploadToggle".');
+        return;
+    }
+
+    // Toggle menu on button click
+    toggleButton.addEventListener('click', function (e) {
+        e.stopPropagation(); // Prevent bubbling
+        uploadMenu.style.display = (uploadMenu.style.display === 'block') ? 'none' : 'block';
+    });
+
+    // Close dropdown on clicking outside
+    document.addEventListener('click', function () {
+        uploadMenu.style.display = 'none';
+    });
+
+    // Prevent close when clicking inside the menu
+    uploadMenu.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+});
+</script>
+
+
 </body>
 </html>

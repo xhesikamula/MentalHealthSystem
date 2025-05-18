@@ -6,6 +6,8 @@ from flask import Blueprint, current_app, json, jsonify, render_template, reques
 from flask_limiter import Limiter
 from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  
+from langdetect import detect as detect_language
+
 
 from ..model.models import Notification, db, Recommendation, User, MoodSurvey
 from ..forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
@@ -17,6 +19,7 @@ from app.model.models import JournalEntry
 import json
 from ..dal import db_operations 
 from app.controllers.services.recommendations import get_llama_recommendation
+from app.controllers.services.recommendations import translate_to_english
 
 #per api
 from dotenv import load_dotenv
@@ -433,10 +436,10 @@ def health_check():
     except Exception as e:
         return jsonify({'status': 'unhealthy', 'database': str(e)}), 500
 
-@main.route('/mainpage')
-@login_required
-def mainpage():
-    return render_template('mainpage.html')  
+# @main.route('/mainpage')
+# @login_required
+# def mainpage():
+#     return render_template('mainpage.html')  
 
 def build_ai_prompt(analysis, survey_data):
     """Builds a prompt that definitely includes all survey factors"""
@@ -538,6 +541,40 @@ from app.dal.db_operations import DBOperations
 from app.sentiment_utils import analyze_sentiment 
 
 from app.controllers.services.recommendations import get_journal_feedback
+from langdetect import detect
+
+# @main.route('/journal', methods=['GET', 'POST'])
+# @login_required
+# def journal_entries():
+#     form = JournalEntryForm()
+#     feedback_message = None
+
+#     if form.validate_on_submit():
+#         # Run sentiment analysis
+#         sentiment_type, confidence_score = analyze_sentiment(form.content.data)
+
+#         entry_id = DBOperations.create_journal_entry(
+#             user_id=current_user.user_id,
+#             content=form.content.data,
+#             sentiment_type=sentiment_type,
+#             confidence_score=confidence_score
+#         )
+
+#         if entry_id:
+#             # Generate motivational feedback using TinyLLaMA
+#             feedback_message = get_journal_feedback(form.content.data)
+#         else:
+#             flash("Failed to save journal entry.", "danger")
+
+#     entries = JournalEntry.query.filter_by(user_id=current_user.user_id)\
+#         .order_by(JournalEntry.created_at.desc()).all()
+
+#     return render_template(
+#         'journal_entries.html',
+#         form=form,
+#         entries=entries,
+#         feedback=feedback_message
+#     )
 
 @main.route('/journal', methods=['GET', 'POST'])
 @login_required
@@ -546,19 +583,34 @@ def journal_entries():
     feedback_message = None
 
     if form.validate_on_submit():
-        # Run sentiment analysis
-        sentiment_type, confidence_score = analyze_sentiment(form.content.data)
+        original_text = form.content.data.strip()
 
+        if not original_text:
+            flash("Ju lutem shkruani diçka.", "warning")
+            return redirect(url_for('main.journal_entries'))
+
+        # Detect language
+        lang = detect_language(original_text)
+
+        # Translate to English for sentiment analysis
+        translated_text = (
+            translate_to_english(original_text) if lang == 'sq' else original_text
+        )
+
+        # Run sentiment analysis on the English version
+        sentiment_type, confidence_score = analyze_sentiment(translated_text)
+
+        # Save the original version
         entry_id = DBOperations.create_journal_entry(
             user_id=current_user.user_id,
-            content=form.content.data,
+            content=original_text,
             sentiment_type=sentiment_type,
             confidence_score=confidence_score
         )
 
         if entry_id:
-            # Generate motivational feedback using TinyLLaMA
-            feedback_message = get_journal_feedback(form.content.data)
+            # Generate motivational feedback (automatically handles translation)
+            feedback_message = get_journal_feedback(original_text)
         else:
             flash("Failed to save journal entry.", "danger")
 
@@ -572,80 +624,196 @@ def journal_entries():
         feedback=feedback_message
     )
 
-
 #tpremten jon shtu
-# from werkzeug.utils import secure_filename
-# import os
-
-# @main.route('/upload-image', methods=['POST'])
-# @login_required
-# def upload_image():
-#     file = request.files.get('image')
-#     if file:
-#         filename = secure_filename(file.filename)
-#         upload_folder = os.path.join(current_app.root_path, 'static/uploads')
-#         os.makedirs(upload_folder, exist_ok=True)  
-
-#         file_path = os.path.join(upload_folder, filename)
-#         file.save(file_path)
-
-#         # Update user's image path 
-#         current_user.image_url = filename
-#         db.session.commit()
-
-#         flash("Profile image updated!", "success")
-#     else:
-#         flash("No file selected", "danger")
-    
-#     return redirect(url_for('main.profile'))
-@main.route('/about')
-def aboutus_page():
-    return render_template('aboutus.html')
-
-
-import base64
-from flask import request, redirect, url_for, flash, current_app
-from flask_login import login_required, current_user
-from app.controllers.routes import main
-from app import db
+from werkzeug.utils import secure_filename
+import os
 
 @main.route('/upload-image', methods=['POST'])
 @login_required
 def upload_image():
     file = request.files.get('image')
-    if file and file.filename:
-        # Read image content and detect MIME type
-        image_data = file.read()
-        mime_type = file.mimetype  # e.g., image/jpeg, image/png, image/webp, etc.
+    if file:
+        filename = secure_filename(file.filename)
+        upload_folder = os.path.join(current_app.root_path, 'view/static/uploads')
+        os.makedirs(upload_folder, exist_ok=True)  
 
-        # Convert to base64 string
-        encoded = base64.b64encode(image_data).decode('utf-8')
-        base64_string = f"data:{mime_type};base64,{encoded}"
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
 
-        # Save to database
-        current_user.image_url = base64_string
+        # Update user's image path 
+        current_user.image_url = filename
         db.session.commit()
 
         flash("Profile image updated!", "success")
     else:
         flash("No file selected", "danger")
-
+    
     return redirect(url_for('main.profile'))
 
 
-from flask import Blueprint, redirect, url_for, flash
-from flask_login import logout_user
+@main.route('/remove_profile_pic', methods=['POST'])
+@login_required
+def remove_profile_pic():
+    # Path to the static uploads folder inside the 'view' directory
+    uploads_path = os.path.join(current_app.root_path, '/view/static/uploads')  # Including 'view' folder
 
-@main.route('/logout', methods=['POST'])
+    # If the user has a custom image
+    if current_user.image_url:
+        image_path = os.path.join(uploads_path, current_user.image_url)
+
+        # Delete the file if it exists
+        if os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Error deleting image: {str(e)}'}), 500
+
+        # Clear the image URL from the user model
+        current_user.image_url = None
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Profile picture removed successfully.'})
+    
+    return jsonify({'success': False, 'message': 'No profile picture to remove.'}), 400
+
+
+
+
+@main.route('/about')
+def aboutus_page():
+    return render_template('aboutus.html')
+
+
+from flask_login import logout_user
+from flask import redirect, url_for, flash
+
+@main.route('/logout')
 def logout():
     logout_user()
-    flash("You have been logged out.", "success")
+    flash('You have been logged out.', 'info')
     return redirect(url_for('main.login'))
+
+
+
+# import base64
+# from flask import request, redirect, url_for, flash, current_app
+# from flask_login import login_required, current_user
+# from app.controllers.routes import main
+# from app import db
+
+# @main.route('/upload-image', methods=['POST'])
+# @login_required
+# def upload_image():
+#     file = request.files.get('image')
+#     if file and file.filename:
+#         # Read image content and detect MIME type
+#         image_data = file.read()
+#         mime_type = file.mimetype  # e.g., image/jpeg, image/png, image/webp, etc.
+
+#         # Convert to base64 string
+#         encoded = base64.b64encode(image_data).decode('utf-8')
+#         base64_string = f"data:{mime_type};base64,{encoded}"
+
+#         # Save to database
+#         current_user.image_url = base64_string
+#         db.session.commit()
+
+#         flash("Profile image updated!", "success")
+#     else:
+#         flash("No file selected", "danger")
+
+#     return redirect(url_for('main.profile'))
+
+
+
 
 @main.route('/events')
 @login_required
 def events_page():
     return render_template('events.html')
+
+
+#Qikjo i jep me koordinata veq
+
+# from flask import request, jsonify
+# import requests
+# import os
+# from dotenv import load_dotenv
+# from flask_login import login_required
+# from app.controllers.routes import main
+
+# load_dotenv()
+
+# @main.route('/api/events', methods=['POST'])
+# @login_required
+# def api_events():
+#     data = request.get_json() or {}
+#     lat = data.get('lat')
+#     lon = data.get('lon')
+#     keyword = data.get('keyword')  # optional
+
+#     if not (lat and lon):
+#         return jsonify(error='Missing location data'), 400
+
+#     API_KEY = os.getenv('GEOAPIFY_API_KEY')
+#     url = 'https://api.geoapify.com/v2/places'
+
+#     categories = 'entertainment,leisure'
+
+#     params = {
+#         'categories': categories,
+#         'filter': f'circle:{lon},{lat},10000',
+#         'limit': 20,
+#         'apiKey': API_KEY
+#     }
+
+#     if keyword and keyword.strip():
+#         params['name'] = keyword.strip()
+
+#     try:
+#         resp = requests.get(url, params=params)
+#         resp.raise_for_status()
+#         payload = resp.json()
+#     except requests.RequestException:
+#         return jsonify(error='Failed to fetch events.'), 503
+
+#     events = []
+#     for feature in payload.get('features', []):
+#         prop = feature.get('properties', {})
+#         name = prop.get('name')
+#         if not name:
+#             continue
+
+#         website = prop.get('website', '').strip()
+#         lat_prop = prop.get('lat')
+#         lon_prop = prop.get('lon')
+
+#         # Skip if neither valid website nor location
+#         has_valid_website = False
+#         if website:
+#             try:
+#                 test_resp = requests.head(website, timeout=3)
+#                 if test_resp.status_code < 400:
+#                     has_valid_website = True
+#             except:
+#                 pass
+
+#         if not has_valid_website and (not lat_prop or not lon_prop):
+#             continue  # skip this event entirely
+
+#         # Build fallback to Google Maps if needed
+#         final_url = website if has_valid_website else f'https://www.google.com/maps?q={lat_prop},{lon_prop}'
+
+#         events.append({
+#             'name':  name,
+#             'date':  'TBD',
+#             'venue': prop.get('address_line2', 'Location TBA'),
+#             'url':   final_url,
+#             'is_map_link': not has_valid_website
+#         })
+
+#     return jsonify(events)
+#TMIRAT:
 
 from flask import request, jsonify
 import requests
@@ -716,7 +884,192 @@ def api_events():
     return jsonify(events)
 
 
+
+# from app.dal.db_operations import DBOperations
+
+# @main.route('/notifications/create', methods=['POST'])
+# @login_required
+# def create_notification_route():
+#     try:
+#         message = request.form.get('message')
+#         type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
+        
+#         if type_ not in ['survey', 'journal', 'mindfulness']:
+#             flash('Invalid notification type', 'error')
+#             return redirect(url_for('main.profile'))
+
+#         if not message or not type_:
+#             flash('Missing message or type', 'error')
+#             return redirect(url_for('main.profile'))
+
+#         success = DBOperations.create_notification(
+#             user_id=current_user.user_id,
+#             message=message,
+#             type_=type_
+#         )
+
+#         if success:
+#             flash('Notification created successfully!', 'success')
+#         else:
+#             flash('Failed to create notification.', 'error')
+
+#         return redirect(url_for('main.profile'))
+
+#     except Exception as e:
+#         current_app.logger.error(f"Notification creation failed: {str(e)}")
+#         flash('Failed to create notification', 'error')
+#         return redirect(url_for('main.profile'))
+
+
+
+#per notifications
 from app.dal.db_operations import DBOperations
+
+
+def get_user_notifications(user_id):
+    return Notification.query.filter(
+        (Notification.user_id == user_id) | (Notification.user_id == None),
+        Notification.status == 'pending'
+    ).all()
+
+
+#jon shtu 
+from flask import flash, redirect, url_for, request, current_app, render_template
+from flask_login import login_required, current_user
+from sqlalchemy import or_
+from app.dal.db_operations import DBOperations
+from app.model.models import Notification  # Make sure Notification is imported
+
+
+# @main.route('/mainpage')
+# @login_required
+# def mainpage():
+#     try:
+#         # Run survey check and notify if needed
+#         DBOperations.check_survey_and_notify(user_id=current_user.user_id)
+#     except Exception as e:
+#         current_app.logger.error(f"Survey check failed on mainpage: {str(e)}")
+#         flash('An error occurred while checking the survey.', 'error')
+
+#     # Fetch pending notifications
+#     pending_notifications = Notification.query.filter(
+#         or_(
+#             Notification.user_id == current_user.user_id,
+#             Notification.user_id == None
+#         ),
+#         Notification.status == 'pending'
+#     ).all()
+
+#     return render_template('mainpage.html', pending_notifications=pending_notifications)
+
+
+
+# @main.route('/notifications/create', methods=['POST'])
+# @login_required
+# def create_notification_route():
+#     try:
+#         message = request.form.get('message')
+#         type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
+
+#         if type_ not in ['survey', 'journal', 'mindfulness']:
+#             flash('Invalid notification type', 'error')
+#             return redirect(url_for('main.profile'))
+
+#         if not message:
+#             flash('Notification message is required', 'error')
+#             return redirect(url_for('main.profile'))
+
+#         success = DBOperations.create_notification(
+#             user_id=current_user.user_id,
+#             message=message,
+#             type_=type_
+#         )
+
+#         if success:
+#             flash('Notification created successfully!', 'success')
+#         else:
+#             flash('Failed to create notification.', 'error')
+
+#         return redirect(url_for('main.profile'))
+
+#     except Exception as e:
+#         current_app.logger.error(f"Notification creation failed: {str(e)}")
+#         flash('Failed to create notification', 'error')
+#         return redirect(url_for('main.profile'))
+
+# import logging
+# from app.model.models import SurveyResponse, Notification
+# from app import db
+
+# class DBOperations:
+#     @staticmethod
+#     def check_survey_and_notify(user_id):
+#         # Check if the user has completed the survey
+#         survey_completed = SurveyResponse.query.filter_by(user_id=user_id).first() is not None
+
+#         if not survey_completed:
+#             # Check if a pending notification already exists
+#             existing_notification = Notification.query.filter_by(
+#                 user_id=user_id,
+#                 type='survey',
+#                 status='pending'
+#             ).first()
+
+#             if not existing_notification:
+#                 # Create a new notification
+#                 notification = Notification(
+#                     user_id=user_id,
+#                     message='Please complete your survey.',
+#                     type='survey',
+#                     status='pending'
+#                 )
+#                 db.session.add(notification)
+#                 db.session.commit()
+#                 return True
+#         return False
+
+
+#u shtun tshtunen
+def get_user_notifications(user_id):
+    return Notification.query.filter(
+        (Notification.user_id == user_id) | (Notification.user_id == None),
+        Notification.status == 'pending'
+    ).all()
+
+from sqlalchemy import or_
+
+@main.route('/mainpage')
+@login_required
+def mainpage():
+    # Check for incomplete survey
+    today = date.today()
+    last_survey = MoodSurvey.query.filter(
+        MoodSurvey.user_id == current_user.user_id,
+        db.func.date(MoodSurvey.survey_date) == today
+    ).first()
+
+    # If no survey today, create notification
+    if not last_survey:
+        notification = Notification(
+            user_id=current_user.user_id,
+            message="📝 Please complete your daily mood survey, so we can help you!",
+            type='survey',
+            status='pending'
+        )
+        db.session.add(notification)
+        db.session.commit()
+
+    # Get all pending notifications
+    pending_notifications = Notification.query.filter(
+        or_(
+            Notification.user_id == current_user.user_id,
+            Notification.user_id == None
+        ),
+        Notification.status == 'pending'
+    ).all()
+    
+    return render_template('mainpage.html', pending_notifications=pending_notifications)
+
 
 @main.route('/notifications/create', methods=['POST'])
 @login_required
@@ -749,4 +1102,25 @@ def create_notification_route():
     except Exception as e:
         current_app.logger.error(f"Notification creation failed: {str(e)}")
         flash('Failed to create notification', 'error')
+        return redirect(url_for('main.profile'))
+
+
+
+#per stored procedure te re
+@main.route('/notifications/check-survey', methods=['POST'])
+@login_required
+def check_survey_and_notify_route():
+    try:
+        success = DBOperations.check_survey_and_notify(user_id=current_user.user_id)
+
+        if success:
+            flash('Survey check completed.', 'success')
+        else:
+            flash('Survey check failed.', 'error')
+
+        return redirect(url_for('main.profile'))
+
+    except Exception as e:
+        current_app.logger.error(f"Survey check failed: {str(e)}")
+        flash('An error occurred while checking the survey.', 'error')
         return redirect(url_for('main.profile'))

@@ -1,4 +1,3 @@
-
 from app import create_app
 from dotenv import load_dotenv
 import os
@@ -8,7 +7,7 @@ load_dotenv()
 
 # Initialize the Flask app
 app = create_app()
- # Register Blueprints
+# Register Blueprints
 from app.controllers.routes import main
 app.register_blueprint(main, url_prefix='/main')
 

@@ -113,11 +113,41 @@ class SentimentAnalysis(db.Model):
     # Relationship
     journal_entry = db.relationship('JournalEntry', back_populates='sentiment_analyses')
 
+# #edhe qita
+# class Notification(db.Model):
+#     __tablename__ = 'notifications'
+    
+#     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
+#     message = db.Column(db.Text, nullable=False)
+#     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+#     status = db.Column(db.Enum('sent', 'pending'), default='pending')
+#     type = db.Column(db.Enum('survey', 'journal', 'mindfulness'), default='survey')
+    
+#     # Relationship
+#     user = db.relationship('User', back_populates='notifications')
+
+class UserEvents(db.Model):
+    __tablename__ = 'userevents'
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.event_id'), primary_key=True)
+
+
+#me fshi
+class SurveyResponse(db.Model):
+    __tablename__ = 'survey_response'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=False)
+    # Add other fields as necessary
+
+#tshtunen
 class Notification(db.Model):
     __tablename__ = 'notifications'
     
     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
     message = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     status = db.Column(db.Enum('sent', 'pending'), default='pending')
@@ -125,9 +155,3 @@ class Notification(db.Model):
     
     # Relationship
     user = db.relationship('User', back_populates='notifications')
-
-class UserEvents(db.Model):
-    __tablename__ = 'userevents'
-    
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    event_id = db.Column(db.Integer, db.ForeignKey('events.event_id'), primary_key=True)

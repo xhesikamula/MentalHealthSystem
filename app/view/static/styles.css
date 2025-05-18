@@ -268,7 +268,7 @@ footer p {
     box-sizing: border-box; 
 }
 .signup-button {
-    background-color: #3C552D;
+    background-color: #3C552D !important;
     color: white;
     padding: 8px 16px;      /* reduced vertical and horizontal padding */
     border: none;

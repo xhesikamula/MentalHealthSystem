@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #3C552D; /* Set the background color to #3C552D */
+            background-color: #3C552D;
             font-family: 'Quicksand', sans-serif;
             color: #fff;
             margin: 0;
@@ -20,41 +20,30 @@
 
         .survey-container {
             max-width: 600px;
-            margin-top: 2rem auto;
+            margin: 2rem auto;
             padding: 2rem;
-            background: #ffffff; /* White background for the question div */
+            background-color: #3C552D;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            background-color:  #3c552d; /* Gradient background */
             color: #fff;
-            flex-grow: 1; /* Ensures the form takes up available space */
-            
+            flex-grow: 1;
         }
+
         .survey-section {
             margin-top: 150px;
         }
 
         h2 {
             text-align: center;
-            color: white; /* Color for the header */
+            color: white !important;
         }
 
-        .question-step {
-            display: none;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease-in-out;
+        .question {
             padding: 1rem;
             background-color: #ffffff;
+            color: #000;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-        }
-
-        .question-step.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .form-control {
@@ -72,38 +61,21 @@
             outline: none;
         }
 
-        .question-step button {
+        .submit-button {
             margin-top: 1rem;
-            margin-right: 1rem;
             padding: 10px 20px;
             font-size: 1rem;
             border: none;
             border-radius: 8px;
-            background-color: #3C552D; /* Primary color */
+            background-color: #2b3f1e !important;
             color: #fff;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .question-step button:hover {
-            background-color: #2d4123; /* Darker shade for hover */
-            transform: scale(1.05);
-        }
-
-        .submit-button {
-            background-color: #28a745;
-        }
-
         .submit-button:hover {
-            background-color: #218838;
-        }
-
-        .back-btn {
-            background-color: #ff6f61;
-        }
-
-        .back-btn:hover {
-            background-color: #e95b4b;
+            background-color: #273d1b;
+            transform: scale(1.05);
         }
 
         footer {
@@ -111,7 +83,7 @@
             color: white;
             text-align: center;
             padding: 1rem;
-            margin-top: auto; /* Push the footer to the bottom */
+            margin-top: auto;
         }
     </style>
 </head>
@@ -124,119 +96,51 @@
             <form method="POST" action="{{ url_for('main.survey') }}" id="surveyForm">
                 {{ form.hidden_tag() }}
 
-                <!-- Step 1 -->
-                <div class="question-step active">
+                <div class="question">
                     <label for="mood_level">Mood Level (1-10):</label>
                     {{ form.mood_level(class="form-control", id="mood_level") }}
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 2 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="stress_level">Stress Level (1-10):</label>
                     {{ form.stress_level(class="form-control", id="stress_level") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 3 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="sleep_hours">Hours of Sleep:</label>
                     {{ form.sleep_hours(class="form-control", id="sleep_hours") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 4 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="energy_level">Energy Level (1-10):</label>
                     {{ form.energy_level(class="form-control", id="energy_level") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 5 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="diet_quality">Diet Quality (1-10):</label>
                     {{ form.diet_quality(class="form-control", id="diet_quality") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 6 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="physical_activity">Physical Activity (0-10):</label>
                     {{ form.physical_activity(class="form-control", id="physical_activity") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 7 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="spent_time_with_someone">Did you spend time with someone today?</label>
                     {{ form.spent_time_with_someone(class="form-control", id="spent_time_with_someone") }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="button" class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 8 -->
-                <div class="question-step">
+                <div class="question">
                     <label for="feelings_description">How are you feeling?</label>
                     {{ form.feelings_description(class="form-control", id="feelings_description", rows=4) }}
-                    <button type="button" class="back-btn">Back</button>
-                    <button type="submit" class="submit-button">Submit Survey</button>
                 </div>
+
+                <button type="submit" class="submit-button">Submit Survey</button>
             </form>
         </div>
     </section>
 
     {% include 'footer.html' %}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const steps = document.querySelectorAll('.question-step');
-            let currentStep = 0;
-
-            function showStep(index) {
-                steps.forEach((step, i) => {
-                    step.classList.toggle('active', i === index);
-                });
-            }
-
-            function validateStep(step) {
-                const input = step.querySelector('input, select, textarea');
-                if (!input) return true;
-                if (input.type === 'number' || input.tagName === 'INPUT') {
-                    return input.value.trim() !== '' && !isNaN(parseFloat(input.value));
-                }
-                return input.value.trim() !== '';
-            }
-
-            document.querySelectorAll('.next-btn').forEach((btn, index) => {
-                btn.addEventListener('click', function () {
-                    if (validateStep(steps[currentStep])) {
-                        if (currentStep < steps.length - 1) {
-                            currentStep++;
-                            showStep(currentStep);
-                        }
-                    } else {
-                        alert("Please complete the current question before proceeding.");
-                    }
-                });
-            });
-
-            document.querySelectorAll('.back-btn').forEach((btn, index) => {
-                btn.addEventListener('click', function () {
-                    if (currentStep > 0) {
-                        currentStep--;
-                        showStep(currentStep);
-                    }
-                });
-            });
-
-            // Initial display
-            showStep(currentStep);
-        });
-    </script>
 </body>
 </html>

@@ -6,15 +6,14 @@
     <title>Mental-Health Events Near You</title>
     <style>
         body {
-        margin: 0;
-        padding-top: 100px;
-        padding-bottom: 100px;
-        font-family: 'Quicksand', sans-serif;
-        background-image: url('/static/images/historybackground.png');
-        background-size: cover;
-        color: #000;
-}
-
+            margin: 0;
+            padding-top: 100px;
+            padding-bottom: 100px;
+            font-family: 'Quicksand', sans-serif;
+            background-image: url('/static/images/historybackground.png');
+            background-size: cover;
+            color: #000;
+        }
 
         header, footer {
             position: fixed;
@@ -177,12 +176,9 @@
                 d.className = 'event';
 
                 d.innerHTML = `
-                    <strong>${e.name}</strong>
-                    📅 ${new Date(e.date).toLocaleDateString()}<br>
+                    <strong>${e.name}</strong><br>
                     📍 ${e.venue}<br>
-                    <button onclick="window.open('${e.url}', '_blank')">
-                        View
-                    </button>
+                    <button onclick="window.open('${e.url}', '_blank')">View</button>
                 `;
                 c.appendChild(d);
             });

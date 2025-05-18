@@ -3,60 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
     <title>Hotlines</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        /* Body Styling */
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             font-family: 'Quicksand', sans-serif;
             background-image: url('/static/images/historybackground.png');
+            background-size: cover;
+            background-repeat: no-repeat;
             color: #333;
             margin: 0;
             padding: 0;
         }
 
-        /* Container Styling */
         .container {
             flex: 1;
             max-width: 1000px;
-            margin: 0 auto;
-            padding: 80px 30px 30px 30px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 8rem auto 50px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
-        /* Heading Styling */
         h1 {
             font-size: 2.5rem;
-            color: #3C552D;
+            color: #3C552D !important;
             text-align: center;
-            margin: 100px 0 20px;
+            margin: 50px 0;
         }
 
-        /* Hotline List Styling */
         .hotline-list {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
         }
 
-        /* Individual Hotline Card */
         .hotline-card {
-            background-color: #f9fafb;
+            background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            border-left: 5px solid #3C552D;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeInUp 0.6s ease;
         }
 
         .hotline-card h2 {
             font-size: 1.5rem;
             color: #333;
             margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+
+        .hotline-card h2:hover {
+            color: #3C552D;
+            text-decoration: underline;
+            cursor: pointer;
         }
 
         .hotline-card p {
@@ -71,13 +82,26 @@
             color: #3C552D;
         }
 
-        /* Hover Effects */
-        .hotline-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .call-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #3C552D;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s ease;
         }
 
-        /* "No Hotlines" Message */
+        .call-button:hover {
+            background-color: #2c3e1f;
+        }
+
+        .hotline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        }
+
         .no-hotlines {
             text-align: center;
             font-size: 1.2rem;
@@ -85,17 +109,33 @@
             margin-top: 50px;
         }
 
-        /* Footer Styling */
         footer {
-            background-color: olivedrab;
+            background: linear-gradient(270deg, olivedrab, #3C552D);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
             color: white;
             text-align: center;
             padding: 15px 0;
             flex-shrink: 0;
-            margin-top: auto;
         }
 
-        /* Responsiveness */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media screen and (max-width: 768px) {
             .hotline-list {
                 grid-template-columns: 1fr 1fr;
@@ -107,8 +147,17 @@
                 grid-template-columns: 1fr;
             }
 
+            .container {
+                margin: 2rem 1rem;
+                padding: 20px;
+            }
+
             h1 {
                 font-size: 2rem;
+            }
+
+            .hotline-card {
+                padding: 15px;
             }
         }
     </style>
@@ -118,15 +167,16 @@
     {% include 'header.html' %}
 
     <div class="container">
-        <h1 class="mb-4 text-primary">Mental Health Hotlines 📞</h1>
+        <h1>Mental Health Hotlines 📞</h1>
 
         {% if hotlines %}
             <div class="hotline-list">
                 {% for hotline in hotlines %}
                     <div class="hotline-card">
-                        <h2>{{ hotline.title }}</h2>
+                        <h2><i class="fas fa-heartbeat"></i> {{ hotline.title }}</h2>
                         <p><strong>Description:</strong> {{ hotline.description }}</p>
                         <p class="phone-number"><strong>Phone:</strong> {{ hotline.phone_number }}</p>
+                        <a href="tel:{{ hotline.phone_number }}" class="call-button"><i class="fas fa-phone-alt"></i> Call Now</a>
                     </div>
                 {% endfor %}
             </div>

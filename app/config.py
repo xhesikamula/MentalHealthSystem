@@ -28,13 +28,13 @@ class Config:
 
     SECRET_KEY = os.getenv('SECRET_KEY')
 
-    @classmethod
-    def validate_config(cls):
-        """Validate that required config variables exist"""
-        required = ['SECRET_KEY', 'OPENAI_API_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'HF_TOKEN']
-        missing = [var for var in required if not os.getenv(var)]
-        if missing:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+@classmethod
+def validate_config(cls):
+    """Validate that required config variables exist"""
+    required = ['SECRET_KEY', 'OPENAI_API_KEY', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'HF_TOKEN']
+    missing = [var for var in required if os.getenv(var) is None]
+    if missing:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
     
     @classmethod
     def get_openai_key(cls):

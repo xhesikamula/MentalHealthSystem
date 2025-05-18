@@ -1,36 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClarityWave</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClarityWave</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Enhanced dropdown styles only */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 150px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      border-radius: 5px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .dropdown-content a {
+      color: #3c552d;
+      padding: 10px 14px;
+      text-decoration: none;
+      display: block;
+      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #eee;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #f2f2f2;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    nav ul li {
+      position: relative;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 12px;
+      transition: background-color 0.3s;
+      border-radius: 4px;
+    }
+
+    nav a:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <nav>
-            <ul>
-                <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
-                <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
-                <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
-                
-                {% if current_user.is_authenticated %}
-                    {% if current_user.role == 'admin' %}
-                        <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>  <!-- Admin Dashboard link -->
-                    {% else %}
-                        <li><a href="{{ url_for('main.no_permission') }}">Dashboard</a></li>  <!-- Regular user "no permission" page -->
-                    {% endif %}
-                    <li><a href="{{ url_for('main.profile') }}">Profile</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('main.login') }}">Login</a></li>
-                {% endif %}
-                
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    
+  <header>
+    <nav>
+      <ul>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" width="150px">
+
+        {% if current_user.is_authenticated %}
+          <li class="dropdown">
+            <a href="#">{{ current_user.name }}</a>
+            <div class="dropdown-content">
+              <a href="{{ url_for('main.profile') }}">Profile</a>
+              <a href="{{ url_for('main.logout') }}">Logout</a>
+            </div>
+          </li>
+
+          {% if current_user.role == 'admin' %}
+            <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+          {% endif %}
+        {% endif %}
+
+        <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
+        <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
+
+        <li class="dropdown">
+          <a href="#">Contact</a>
+          <div class="dropdown-content">
+            <a href="https://facebook.com" target="_blank">Facebook</a>
+            <a href="https://instagram.com" target="_blank">Instagram</a>
+            <a href="https://twitter.com" target="_blank">Twitter</a>
+          </div>
+        </li>
+
+        {% if not current_user.is_authenticated and request.endpoint != 'main.login' %}
+          <li><a href="{{ url_for('main.login') }}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
 </body>
 </html>

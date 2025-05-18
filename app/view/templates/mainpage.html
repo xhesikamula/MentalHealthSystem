@@ -23,13 +23,6 @@
         background-repeat: no-repeat;
     }
 
-    h1 {
-        color: #3C552D;
-        font-size: 2.5rem;
-        font-weight: 600;
-        text-align: center;
-        margin-top: 1rem;
-    }
 
     .main-content {
         display: grid;
@@ -39,6 +32,7 @@
         justify-items: center;
         align-items: start;
         overflow: visible; 
+        margin-top: 6rem;
     }
 
     .card {
@@ -126,13 +120,34 @@
             grid-template-columns: 1fr;
         }
     }
+.notification-box {
+    background-color: #fff3cd;
+    border-left: 6px solid #ffeeba;
+    padding: 15px 20px;
+    margin: 10px 0;
+    color: #856404;
+    font-weight: 600;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1000;
+}
+
 </style>
 </head>
 <body>
 
 {% include 'header.html' %}
+{% if pending_notifications %}
+    <ul>
+    {% for notification in pending_notifications %}
+    <li>{{ notification.message }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No notifications</p>
+{% endif %}
 
-<h1>Welcome to ClarityWave</h1>
 
 <div class="main-content">
     <div class="card" onclick="window.location.href='/events'">
