@@ -18,6 +18,7 @@ class Event(db.Model):
     type = db.Column(db.Enum('event', 'hotline', 'article', 'podcast', 'video'), nullable=False, default='event')
     link = db.Column(db.String(255))
     phone_number = db.Column(db.String(20))  # Added phone number field
+    image_url = db.Column(db.String(255)) # also added this one
     users = db.relationship('User', secondary='userevents', backref='events', lazy='dynamic')
 
 class User(db.Model, UserMixin):
@@ -134,13 +135,6 @@ class UserEvents(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('events.event_id'), primary_key=True)
 
 
-#me fshi
-class SurveyResponse(db.Model):
-    __tablename__ = 'survey_response'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    completed_at = db.Column(db.DateTime, nullable=False)
-    # Add other fields as necessary
 
 #tshtunen
 # class Notification(db.Model):

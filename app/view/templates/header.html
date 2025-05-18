@@ -71,6 +71,10 @@
       background-color: rgba(255, 255, 255, 0.2);
     }
   </style>
+ <script
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>
 </head>
 <body>
 
@@ -81,7 +85,14 @@
 
         {% if current_user.is_authenticated %}
           <li class="dropdown">
-            <a href="#">{{ current_user.name }}</a>
+            <a href="#"><dotlottie-player
+  src="https://lottie.host/669a6a4d-aee9-429f-8bf7-d67e38c9fa1e/0GRKWwf3Qf.lottie"
+  background="transparent"
+  speed="1"
+   style="width: 35px; height: 35px; display: inline-block; vertical-align: middle; margin-right: 3px;"
+  loop
+  autoplay
+></dotlottie-player>{{ current_user.name }}</a>
             <div class="dropdown-content">
               <a href="{{ url_for('main.profile') }}">Profile</a>
               <a href="{{ url_for('main.logout') }}">Logout</a>

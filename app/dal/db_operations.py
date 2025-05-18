@@ -260,3 +260,45 @@ def add_new_event(event):
 
 def get_recent_surveys(limit=5):
     return MoodSurvey.query.order_by(MoodSurvey.created_at.desc()).limit(limit).all()
+
+def update_event_by_id(event_id, title, location, description, date_time, link, image_url=None):
+    try:
+        event = Event.query.get_or_404(event_id)
+        event.title = title
+        event.location = location
+        event.description = description
+        event.date_time = date_time
+        event.link = link
+        if image_url is not None:
+            event.image_url = image_url
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+
+def update_podcast_by_id(event_id, title, description, link):
+    try:
+        podcast = Event.query.get_or_404(event_id)
+        podcast.title = title
+        podcast.description = description
+        podcast.link = link
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+
+def update_hotline_by_id(event_id, title, description, phone_number):
+    try:
+        hotline = Event.query.get_or_404(event_id)
+        hotline.title = title
+        hotline.description = description
+        hotline.phone_number = phone_number
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+
+

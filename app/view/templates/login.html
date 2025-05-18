@@ -14,12 +14,23 @@
         margin-top: 90px;
     }
     </style>
+    <script
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>
 </head>
 <body>
     {% include 'header.html' %}
 
     <section class="login-section">
-        <img src="{{ url_for('static', filename='images/loginn.svg') }}" class="login-image">
+        <dotlottie-player
+  src="https://lottie.host/509d0e5a-b23e-45b5-9ad4-45fb7fdbc5e6/vX1R9qjxQE.lottie"
+  background="transparent"
+  speed="1"
+  style="width: 600px; height: 600px; margin-top: 100px;"
+  loop
+  autoplay
+></dotlottie-player>
         
         <div class="login-container">
             <h2>Log In to Unlock Calm and Clarity!</h2>

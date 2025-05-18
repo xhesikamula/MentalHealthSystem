@@ -8,7 +8,7 @@ from app.dal.db_operations import (
     get_all_users, delete_user_and_surveys,
     get_recent_events, get_events_by_type,
     delete_event_by_id, add_new_event,
-    get_recent_surveys
+    get_recent_surveys, update_event_by_id, update_hotline_by_id, update_podcast_by_id
 )
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -97,6 +97,34 @@ def delete_event(event_id):
     return redirect(url_for('admin.manage_events'))
 
 
+
+@admin_bp.route('/event/edit/<int:event_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    form = EventForm(obj=event)
+
+    if form.validate_on_submit():
+        result = update_event_by_id(
+            event_id,
+            form.title.data,
+            form.location.data,
+            form.description.data,
+            form.date_time.data,
+            form.link.data,
+            form.image_url.data 
+        )
+        if result is True:
+            flash('Event updated successfully.', 'success')
+        else:
+            flash(f'Error updating event: {result}', 'danger')
+        return redirect(url_for('admin.manage_events'))
+
+    return render_template('admin/edit_event.html', form=form, resource_type='event')
+
+
+
+
 # --- MANAGE PODCASTS ---
 @admin_bp.route('/podcasts')
 @admin_required
@@ -110,6 +138,27 @@ def delete_podcast(event_id):
     delete_event_by_id(event_id)
     flash('Podcast deleted successfully.', 'success')
     return redirect(url_for('admin.manage_podcasts'))
+
+@admin_bp.route('/podcast/edit/<int:event_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_podcast(event_id):
+    podcast = Event.query.get_or_404(event_id)
+    form = PodcastForm(obj=podcast)
+
+    if form.validate_on_submit():
+        result = update_podcast_by_id(
+            event_id,
+            form.title.data,
+            form.description.data,
+            form.link.data
+        )
+        if result is True:
+            flash('Podcast updated successfully.', 'success')
+        else:
+            flash(f'Error updating podcast: {result}', 'danger')
+        return redirect(url_for('admin.manage_podcasts'))
+
+    return render_template('admin/edit_podcast.html', form=form, resource_type='podcast')
 
 
 # --- MANAGE HOTLINES ---
@@ -125,6 +174,28 @@ def delete_hotline(event_id):
     delete_event_by_id(event_id)
     flash('Hotline deleted successfully.', 'success')
     return redirect(url_for('admin.manage_hotlines'))
+
+
+@admin_bp.route('/hotline/edit/<int:event_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_hotline(event_id):
+    hotline = Event.query.get_or_404(event_id)
+    form = HotlineForm(obj=hotline)
+
+    if form.validate_on_submit():
+        result = update_hotline_by_id(
+            event_id,
+            form.title.data,
+            form.description.data,
+            form.phone_number.data
+        )
+        if result is True:
+            flash('Hotline updated successfully.', 'success')
+        else:
+            flash(f'Error updating hotline: {result}', 'danger')
+        return redirect(url_for('admin.manage_hotlines'))
+
+    return render_template('admin/edit_hotline.html', form=form, resource_type='hotline')
 
 
 # --- ADD Resource (dynamic for event, podcast, hotline) ---
@@ -151,7 +222,9 @@ def add_resource(resource_type):
                 description=form.description.data,
                 date_time=form.date_time.data,
                 type=resource_type,
-                link=form.link.data
+                link=form.link.data,
+                image_url=form.image_url.data 
+               
             )
         elif resource_type == 'podcast':
             new_resource = Event(
@@ -159,6 +232,7 @@ def add_resource(resource_type):
                 description=form.description.data,
                 type=resource_type,
                 link=form.link.data
+                
             )
         elif resource_type == 'hotline':
             new_resource = Event(
@@ -166,6 +240,7 @@ def add_resource(resource_type):
                 phone_number=form.phone_number.data,
                 description=form.description.data,
                 type=resource_type
+                
             )
 
         add_new_event(new_resource)

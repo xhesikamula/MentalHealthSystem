@@ -50,16 +50,47 @@
       gap: 2rem;
     }
 
-    .event-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-left: 6px solid #3C552D;
-      border-radius: 20px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      animation: slideUp 0.8s ease forwards;
-    }
+   .event-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-left: 6px solid #3C552D;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: slideUp 0.8s ease forwards;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.event-content {
+  flex: 1; /* takes available space */
+}
+
+.event-image img {
+  max-width: 150px; /* or any size that fits your design */
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 700px) {
+  .event-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .event-image img {
+    max-width: 100%;
+    margin-top: 1rem;
+  }
+}
+
 
     .event-card:hover {
       transform: translateY(-10px) scale(1.02);
@@ -142,14 +173,22 @@
     <div class="event-list">
       {% for event in events %}
       <div class="event-card">
-        <h2>{{ event.title }}</h2>
-        <p class="event-location"> {{ event.location }}</p>
-        <p class="event-date">📅 {{ event.date_time }}</p>
-        {% if event.description %}
-        <p>{{ event.description }}</p>
-        {% endif %}
-        <a href="{{ event.link }}" target="_blank" class="more-info">More Info</a>
-      </div>
+  <div class="event-content">
+    <h2>{{ event.title }}</h2>
+    <p class="event-location">{{ event.location }}</p>
+    <p class="event-date">📅 {{ event.date_time }}</p>
+    {% if event.description %}
+      <p>{{ event.description }}</p>
+    {% endif %}
+    <a href="{{ event.link }}" target="_blank" class="more-info">More Info</a>
+  </div>
+  {% if event.image_url %}
+  <div class="event-image">
+    <img src="{{ event.image_url }}" alt="{{ event.title }} image" />
+  </div>
+  {% endif %}
+</div>
+
       {% endfor %}
     </div>
     {% else %}

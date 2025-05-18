@@ -170,15 +170,15 @@ footer p {
     justify-content: center;
     gap: 40px; 
     max-width: 900px;
-    margin: 100px auto;
+    margin: 20px auto;
 }
 
-.login-image {
+/* .login-image {
     width: 50%;
     max-width: 300px;
     margin-right: 60px;
     
-}
+} */
 
 .login-container {
     width: 50%;
@@ -228,17 +228,17 @@ footer p {
     justify-content: center;
     gap: 40px;
     max-width: 900px;
-    margin: 100px auto;
+    margin: 20px auto;
 }
 
-.signup-image {
+/* .signup-image {
     width: 40%;  
     max-width: 400px;
     margin-right: 60px;
-}
+} */
 
 .signup-container {
-    width: 60%;  
+    width: 90%;  
     padding: 20px;
     background: white;
     border-radius: 8px;
@@ -342,8 +342,6 @@ input[type="submit"]:hover {
 }
 
 
-
-
 .survey-history {
     margin-top: 2rem;
 }
@@ -420,6 +418,21 @@ input[type="submit"]:hover {
 .delete-button:hover {
     background-color: #d32f2f;
 }
+
+a.edit-button {
+  background-color: #0d335c;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer; /* Makes it clear it's clickable */
+  text-decoration: none;
+}
+
+a.edit-button:hover {
+  background-color: #031931;
+}
+
 /* Per survey */
 /* Survey Form Container */
 .survey-container {

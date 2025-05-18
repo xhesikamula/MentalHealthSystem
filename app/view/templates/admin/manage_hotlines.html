@@ -62,6 +62,8 @@
             background-color: white;
             margin-bottom: 20px;
             padding: 20px;
+           position: relative;
+           padding-right: 160px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -87,21 +89,14 @@
             color: olive;
         }
 
-        button.delete-button {
-            background-color: #ad2d1f;
-            border: none;
-            padding: 8px 16px;
-            color: white;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
-        }
-
-        button.delete-button:hover {
-            background-color: #8f1a0d;
-        }
+/* Container for edit/delete buttons */
+.action-buttons {
+    position: absolute;
+    top: 50px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+}
 
         @media (max-width: 768px) {
             h1 { font-size: 28px; }
@@ -136,9 +131,13 @@
                     <strong>{{ hotline.title }}</strong>
                     <p>{{ hotline.description }}</p>
                     <span class="phone">Phone: {{ hotline.phone_number }}</span>
-                    <form method="POST" action="{{ url_for('admin.delete_hotline', event_id=hotline.event_id) }}">
-                        <button type="submit" class="delete-button">Delete</button>
-                    </form>
+                  <div class="action-buttons">
+  <a href="{{ url_for('admin.edit_hotline', event_id=hotline.event_id) }}" class="edit-button">Edit</a>
+  <form method="POST" action="{{ url_for('admin.delete_hotline', event_id=hotline.event_id) }}">
+      <button type="submit" class="delete-button">Delete</button>
+  </form>
+</div>
+
                 </li>
             {% else %}
                 <li>No hotlines found.</li>

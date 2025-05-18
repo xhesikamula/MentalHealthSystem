@@ -6,14 +6,25 @@
     <title>Sign Up - ClarityWave</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+    <script
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>
 </head>
 <body>
     {% include 'header.html' %}
     
     <section class="signup-section">
-        <img src="{{ url_for('static', filename='images/signup.svg') }}" alt="Signup Image" class="signup-image">
+        <dotlottie-player
+  src="https://lottie.host/f97f943a-2916-4472-90a7-54785c8b1a19/AoCL8k8u6Y.lottie"
+  background="transparent"
+  speed="1"
+  style="width: 600px; height: 600px; margin-top: 10px;"
+  loop
+  autoplay
+></dotlottie-player>
     
-        <div class="signup-container">
+        <div class="signup-container" style=" margin-left: 20px;">
             <h2>Become Part of Our Wellness Family!</h2>
             
             <!-- Update the form to use Flask-WTF form handling -->
@@ -22,7 +33,7 @@
                 {{ form.hidden_tag() }}
                 
                 <label for="name">Full Name:</label>
-                {{ form.name(class="form-control", id="name") }}  <!-- ✅ Use form.username -->
+                {{ form.name(class="form-control", id="name") }}  
                 {% if form.name.errors %}
                     <ul class="errors">
                         {% for error in form.name.errors %}

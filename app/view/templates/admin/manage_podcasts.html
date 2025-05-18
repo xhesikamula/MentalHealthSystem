@@ -101,6 +101,8 @@
         background-color: #8b1b0e;
         }
 
+      
+
         @media (max-width: 768px) {
         h1 { font-size: 28px; }
         ul.podcast-list { width: 95%; }
@@ -135,6 +137,7 @@
             <strong>{{ podcast.title }}</strong>
             <p>{{ podcast.description }}</p>
             <a href="{{ podcast.link }}" target="_blank" class="listen-link">Listen</a>
+            <a href="{{ url_for('admin.edit_podcast', event_id=podcast.event_id) }}" class="edit-button">Edit</a>
             <form method="POST" action="{{ url_for('admin.delete_podcast', event_id=podcast.event_id) }}" style="display:inline;">
             <button type="submit" class="delete-button">Delete</button>
             </form>

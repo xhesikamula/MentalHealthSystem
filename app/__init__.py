@@ -105,6 +105,8 @@ def create_app():
     
     app = Flask(__name__, template_folder='view/templates', static_folder='view/static')
 
+  
+
     # OpenAI API key validation
     openai.api_key = os.getenv('OPENAI_API_KEY')
     if not openai.api_key:

@@ -1,3 +1,4 @@
+from wtforms.validators import DataRequired, URL, Optional
 from flask_wtf import FlaskForm
 from wtforms import (IntegerField, TextAreaField, SelectField, FloatField,
                     StringField, PasswordField, SubmitField)
@@ -5,6 +6,7 @@ from wtforms.validators import (DataRequired, NumberRange, Email, Length,
                             EqualTo, ValidationError)
 from app.model.models import User
 from flask_wtf.file import FileField, FileAllowed
+
 
 
 #Same form can be used for multiple pages
@@ -137,13 +139,14 @@ class EventForm(FlaskForm):
     date_time = DateTimeField('Date and Time', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
     link = StringField('Link')
     submit = SubmitField('Submit')
-
+    image_url = StringField('Image URL', validators=[Optional(), URL()])
 
 class PodcastForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     link = StringField('Link', validators=[DataRequired()])
     submit = SubmitField('Add Podcast')
+    
 
 
 class HotlineForm(FlaskForm):
@@ -151,4 +154,4 @@ class HotlineForm(FlaskForm):
     phone_number = StringField('Phone Number', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Add Hotline')
-
+    
