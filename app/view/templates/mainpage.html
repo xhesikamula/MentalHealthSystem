@@ -109,39 +109,27 @@
 }
 
 
-    @media (max-width: 1000px) {
-        .main-content {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
+   .btn-transparent-shadow {
+  background-color: rgba(255, 255, 255, 0.15); /* white with 15% opacity */
+  color: rgb(191, 190, 190); /* text color */
+  
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* subtle shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
 
-    @media (max-width: 600px) {
-        .main-content {
-            grid-template-columns: 1fr;
-        }
-    }
+.btn-transparent-shadow:hover {
+  background-color: rgba(255, 255, 255, 0.35); /* more visible on hover */
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  color: rgb(227, 225, 225);
+}
 
-    .notification-box {
-        background-color: #fff3cd;
-        border-left: 6px solid #ffeeba;
-        padding: 15px 20px;
-        margin: 10px 20px;
-        color: #856404;
-        font-weight: 600;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        max-width: 300px;
-        animation: fadeIn 0.5s ease;
-    }
 
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
+
+
 </style>
 </head>
 <body>
@@ -168,19 +156,29 @@
     <div class="card" onclick="window.location.href='{{ url_for('main.history') }}'">
         <span>My History</span>
     </div>
+
     {% if current_user.role != 'admin' %}
+</div>
+<div style="display: flex; justify-content: center; margin: 2rem 0;">
+    <button
+  class="btn btn-transparent-shadow"
+  onclick="window.location.href='{{ url_for('main.survey') }}'">
+  Back to Survey
+</button>
+
 </div>
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
     {% if pending_notifications and pending_notifications|length > 0 %}
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000" style="cursor:pointer" onclick="window.location.href='{{ pending_notifications[0].link }}'">
-        <div class="toast-header">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+    <div class="toast-header">
         <strong class="me-auto">Notification</strong>
         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-        {{ pending_notifications[0].message }}
-        </div>
     </div>
+    <div class="toast-body" onclick="window.location.href='{{ pending_notifications[0].link }}'">
+        {{ pending_notifications[0].message }}
+    </div>
+</div>
+
     {% endif %}
     </div>
     {% endif %}
