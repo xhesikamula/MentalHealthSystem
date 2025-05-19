@@ -21,37 +21,30 @@ def translate_to_albanian(text):
 
 
 def get_llama_recommendation(user_input):
-    """
-    Send user's survey answers to the local TinyLLaMA model running via Ollama
-    and get 4 short actionable mental health recommendations.
-    Responds in Albanian if input is Albanian.
-    """
     lang = detect_language(user_input)
 
-    # Translate Albanian input to English
+    # Translate Albanian input to English for processing
     if lang == 'sq':
         user_input_translated = translate_to_english(user_input)
     else:
         user_input_translated = user_input
 
     prompt = (
-        f"Based on this user's input, provide exactly 4 short and specific mental health "
-        f"recommendations to help them feel better. Format them as a numbered list (1) ..., 2) ..., etc), "
-        f"and keep each recommendation concise and actionable:\n\n"
+        "Based on this user's input, provide exactly 4 short and specific mental health "
+        "recommendations to help them feel better. Format them as a numbered list (1) ..., 2) ..., etc). "
+        "Keep each recommendation concise, actionable, and empathetic.\n\n"
         f"{user_input_translated}\n\n"
-        f"Respond clearly and empathetically."
+        "Respond clearly and kindly."
     )
 
     try:
         response = ollama.chat(
             model='tinyllama',
-            messages=[
-                {'role': 'user', 'content': prompt}
-            ]
+            messages=[{'role': 'user', 'content': prompt}]
         )
         result = response['message']['content']
 
-        # Translate back to Albanian if input was in Albanian
+        # Translate output back to Albanian if input was Albanian
         if lang == 'sq':
             result = translate_to_albanian(result)
 
@@ -61,21 +54,12 @@ def get_llama_recommendation(user_input):
         return f"An error occurred while generating the recommendation: {e}"
 
 
+
 def clean_signoffs(text):
-    # Remove typical sign-offs like "Warmly, [Your name]", "Sincerely", etc.
     return re.sub(r"(Warmly|Sincerely|Best regards|With love|Respectfully|Ngrohtësisht|Me respekt|Your friend|[Yy]our name)[^\n]*", "", text).strip()
 
 
-# def is_positive_sentiment(text):
-#     """
-#     Detects if the sentiment of the given text is positive.
-#     Returns True if polarity is above 0.2 (tweak as needed).
-#     """
-#     try:
-#         blob = TextBlob(text)
-#         return blob.sentiment.polarity > 0.2
-#     except:
-#         return False
+
 def is_positive_sentiment(text):
     """
     Detects if the sentiment of the given text is positive.
