@@ -174,7 +174,7 @@
             <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
           {% else %}
             <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
-            <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
+            <li><a href="{{ url_for('main.about') }}">About</a></li>
             <li class="dropdown">
               <a href="#" id="notificationsDropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications</a>
               <div class="dropdown-content" aria-labelledby="notificationsDropdown" style="min-width: 180px;">
@@ -200,38 +200,7 @@
         {% else %}
           <!-- Logged out menu -->
           <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
-<<<<<<< Updated upstream
-          <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
-=======
           <li><a href="{{ url_for('main.about') }}">About</a></li>
-
-          <li class="dropdown">
-  <a href="#" id="notificationsDropdown" role="button" aria-haspopup="true" aria-expanded="false">
-  Notifications
-  </a>
-  <div class="dropdown-content" aria-labelledby="notificationsDropdown" style="min-width: 250px;">
-    {% if pending_notifications and pending_notifications|length > 0 %}
-      {% for notification in pending_notifications %}
-        <a href="{{ url_for('main.survey') }}">{{ notification.message }}</a>
-      {% endfor %}
-    {% else %}
-      <span style="padding:10px 14px; color: #999; display:block;">No new notifications</span>
-    {% endif %}
-  </div>
-</li>
-{% endif %}
-
-        <li class="dropdown">
-          <a href="#">Contact</a>
-          <div class="dropdown-content">
-            <a href="https://facebook.com" target="_blank">Facebook</a>
-            <a href="https://instagram.com" target="_blank">Instagram</a>
-            <a href="https://twitter.com" target="_blank">Twitter</a>
-          </div>
-        </li>
-
-        {% if not current_user.is_authenticated and request.endpoint != 'main.login' %}
->>>>>>> Stashed changes
           <li><a href="{{ url_for('main.login') }}">Login</a></li>
           <li class="dropdown">
             <a href="#">Contact</a>
