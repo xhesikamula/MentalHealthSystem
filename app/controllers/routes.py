@@ -8,9 +8,6 @@ from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy  
 from langdetect import detect as detect_language
 from flask_wtf.csrf import generate_csrf
-
-
-
 from ..model.models import Notification, db, Recommendation, User, MoodSurvey
 from ..forms import ChangePasswordForm, MoodSurveyForm, LoginForm, SignupForm
 from datetime import date, timedelta, datetime
@@ -122,6 +119,8 @@ def update_profile():
 from ..forms import ProfileForm, ImageUploadForm
 from app.dal.db_operations import DBOperations
 
+from sqlalchemy import or_, case
+
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -155,13 +154,33 @@ def profile():
         else:
             flash('Failed to update profile. Please try again.', 'error')
 
-    from sqlalchemy import case
+    # All user notifications (for the profile page itself)
     user_notifications = Notification.query.filter_by(user_id=current_user.user_id).order_by(
         case((Notification.sent_at == None, 1), else_=0),
         Notification.sent_at.desc()
     ).all()
 
-    return render_template('profile.html', form=form, image_form=image_form, notifications=user_notifications, survey_completed=False)
+    # ✅ Pending notifications for header
+    if current_user.role == 'admin':
+        pending_notifications = []
+    else:
+        pending_notifications = Notification.query.filter(
+            or_(
+                Notification.user_id == current_user.user_id,
+                Notification.user_id == None
+            ),
+            Notification.status == 'pending'
+        ).all()
+
+    return render_template(
+        'profile.html',
+        form=form,
+        image_form=image_form,
+        notifications=user_notifications,
+        survey_completed=False,
+        pending_notifications=pending_notifications  # ✅ Add this line
+    )
+
 
 
 from app.forms import ProfileForm 
@@ -209,6 +228,7 @@ def recommend():
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
+    session['login_time'] = datetime.utcnow().isoformat()
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -220,6 +240,8 @@ def login():
 
             if user and check_password_hash(user.password_hash, password):
                 login_user(user)  
+
+                session['login_time'] = datetime.utcnow().isoformat()
 
                 # Check user role first - admin should go to admin dashboard
                 if user.role == 'admin':
@@ -321,7 +343,7 @@ def survey():
             )
 
             if survey_id:
-                # ✅ Mark all pending survey notifications as completed
+                #  Mark all pending survey notifications as completed
                 pending_notifications = Notification.query.filter_by(
                     user_id=current_user.user_id,
                     type='survey',
@@ -687,9 +709,24 @@ def remove_profile_pic():
 
 
 
+from sqlalchemy import or_
+
 @main.route('/about')
-def aboutus_page():
-    return render_template('aboutus.html')
+@login_required
+def about():
+    if current_user.role == 'admin':
+        pending_notifications = []
+    else:
+        pending_notifications = Notification.query.filter(
+            or_(
+                Notification.user_id == current_user.user_id,
+                Notification.user_id == None
+            ),
+            Notification.status == 'pending'
+        ).all()
+
+    return render_template('aboutus.html', pending_notifications=pending_notifications)
+
 
 
 from flask_login import logout_user
@@ -949,94 +986,6 @@ from app.dal.db_operations import DBOperations
 from app.model.models import Notification  # Make sure Notification is imported
 
 
-# @main.route('/mainpage')
-# @login_required
-# def mainpage():
-#     try:
-#         # Run survey check and notify if needed
-#         DBOperations.check_survey_and_notify(user_id=current_user.user_id)
-#     except Exception as e:
-#         current_app.logger.error(f"Survey check failed on mainpage: {str(e)}")
-#         flash('An error occurred while checking the survey.', 'error')
-
-#     # Fetch pending notifications
-#     pending_notifications = Notification.query.filter(
-#         or_(
-#             Notification.user_id == current_user.user_id,
-#             Notification.user_id == None
-#         ),
-#         Notification.status == 'pending'
-#     ).all()
-
-#     return render_template('mainpage.html', pending_notifications=pending_notifications)
-
-
-
-# @main.route('/notifications/create', methods=['POST'])
-# @login_required
-# def create_notification_route():
-#     try:
-#         message = request.form.get('message')
-#         type_ = request.form.get('type')  # 'survey', 'journal', or 'mindfulness'
-
-#         if type_ not in ['survey', 'journal', 'mindfulness']:
-#             flash('Invalid notification type', 'error')
-#             return redirect(url_for('main.profile'))
-
-#         if not message:
-#             flash('Notification message is required', 'error')
-#             return redirect(url_for('main.profile'))
-
-#         success = DBOperations.create_notification(
-#             user_id=current_user.user_id,
-#             message=message,
-#             type_=type_
-#         )
-
-#         if success:
-#             flash('Notification created successfully!', 'success')
-#         else:
-#             flash('Failed to create notification.', 'error')
-
-#         return redirect(url_for('main.profile'))
-
-#     except Exception as e:
-#         current_app.logger.error(f"Notification creation failed: {str(e)}")
-#         flash('Failed to create notification', 'error')
-#         return redirect(url_for('main.profile'))
-
-# import logging
-# from app.model.models import SurveyResponse, Notification
-# from app import db
-
-# class DBOperations:
-#     @staticmethod
-#     def check_survey_and_notify(user_id):
-#         # Check if the user has completed the survey
-#         survey_completed = SurveyResponse.query.filter_by(user_id=user_id).first() is not None
-
-#         if not survey_completed:
-#             # Check if a pending notification already exists
-#             existing_notification = Notification.query.filter_by(
-#                 user_id=user_id,
-#                 type='survey',
-#                 status='pending'
-#             ).first()
-
-#             if not existing_notification:
-#                 # Create a new notification
-#                 notification = Notification(
-#                     user_id=user_id,
-#                     message='Please complete your survey.',
-#                     type='survey',
-#                     status='pending'
-#                 )
-#                 db.session.add(notification)
-#                 db.session.commit()
-#                 return True
-#         return False
-
-
 #u shtun tshtunen
 def get_user_notifications(user_id):
     return Notification.query.filter(
@@ -1044,14 +993,15 @@ def get_user_notifications(user_id):
         Notification.status == 'pending'
     ).all()
 
-from datetime import datetime, timedelta
 
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from sqlalchemy import or_
 from flask_wtf.csrf import generate_csrf
+
 @main.route('/mainpage')
 @login_required
 def mainpage():
+   
     # If admin, do NOT create or fetch notifications
     if current_user.role == 'admin':
         pending_notifications = []
@@ -1059,19 +1009,22 @@ def mainpage():
         # ✅ Check if a survey was submitted in the last 24 hours
         last_24_hours = datetime.utcnow() - timedelta(hours=24)
 
-        last_survey = MoodSurvey.query.filter(
-            MoodSurvey.user_id == current_user.user_id,
-            MoodSurvey.survey_date >= last_24_hours
-        ).first()
+        last_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id)\
+            .order_by(MoodSurvey.survey_date.desc()).first()
+
+        has_recent_survey = last_survey and last_survey.survey_date >= last_24_hours
+
 
         existing_notification = Notification.query.filter_by(
             user_id=current_user.user_id,
             type='survey',
             status='pending'
         ).first()
+        
+
 
         # ✅ If no recent survey and no pending notification, create it
-        if not last_survey and not existing_notification:
+        if not has_recent_survey and not existing_notification:
             new_notification = Notification(
                 user_id=current_user.user_id,
                 message="Please complete your daily mood survey, so we can help you!",
@@ -1079,7 +1032,18 @@ def mainpage():
                 status='pending'
             )
             db.session.add(new_notification)
+            # Create journal notification if needed
+        # if not has_recent_journal and not existing_journal_notif:
+        #     new_journal_notif = Notification(
+        #         user_id=current_user.user_id,
+        #         message="It's time to write in your journal. Express yourself!",
+        #         type='journal',
+        #         status='pending',
+        #         link='/journal'  # your journaling page route
+        #     )
+        #     db.session.add(new_journal_notif)
             db.session.commit()
+
 
         # ✅ Fetch pending notifications for this user (and general)
         pending_notifications = Notification.query.filter(
@@ -1092,7 +1056,12 @@ def mainpage():
 
     csrf_token_value = generate_csrf()
 
-    return render_template('mainpage.html', pending_notifications=pending_notifications, csrf_token=csrf_token_value)
+    login_time = session.get('login_time') 
+
+    return render_template('mainpage.html', 
+                           pending_notifications=pending_notifications, 
+                           csrf_token=csrf_token_value,
+                           login_time=login_time)
 
 
 @main.route('/notifications/create', methods=['POST'])
@@ -1133,22 +1102,20 @@ def create_notification_route():
 #per stored procedure te re
 from flask import jsonify
 
-from flask import jsonify
+# @main.route('/notifications/check-survey', methods=['POST'])
+# @login_required
+# def check_survey_and_notify_route():
+#     try:
+#         success = DBOperations.check_survey_and_notify(user_id=current_user.user_id)
 
-@main.route('/notifications/check-survey', methods=['POST'])
-@login_required
-def check_survey_and_notify_route():
-    try:
-        success = DBOperations.check_survey_and_notify(user_id=current_user.user_id)
+#         if success:
+#             return jsonify({'status': 'success', 'message': 'Survey check completed.'})
+#         else:
+#             return jsonify({'status': 'error', 'message': 'Survey check failed.'})
 
-        if success:
-            return jsonify({'status': 'success', 'message': 'Survey check completed.'})
-        else:
-            return jsonify({'status': 'error', 'message': 'Survey check failed.'})
-
-    except Exception as e:
-        current_app.logger.error(f"Survey check failed: {str(e)}")
-        return jsonify({'status': 'error', 'message': 'An error occurred while checking the survey.'})
+#     except Exception as e:
+#         current_app.logger.error(f"Survey check failed: {str(e)}")
+#         return jsonify({'status': 'error', 'message': 'An error occurred while checking the survey.'})
 
 
 @main.route('/notifications')

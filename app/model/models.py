@@ -42,19 +42,6 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.user_id)  
     
-    #i bona koment se i kom te db_operations.py tash stored procedures
-    # def set_password(self, password):
-    #     self.password_hash = generate_password_hash(password)
-    
-    # def check_password(self, password):
-    #     return check_password_hash(self.password_hash, password)
-    
-    # def update_profile(self, name, email, preferences):
-    #     """Helper method to update profile"""
-    #     self.name = name
-    #     self.email = email
-    #     self.preferences = preferences
-    #     db.session.commit()
 
 class MoodSurvey(db.Model):
     __tablename__ = 'moodsurvey'
@@ -114,19 +101,7 @@ class SentimentAnalysis(db.Model):
     # Relationship
     journal_entry = db.relationship('JournalEntry', back_populates='sentiment_analyses')
 
-# #edhe qita
-# class Notification(db.Model):
-#     __tablename__ = 'notifications'
-    
-#     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
-#     message = db.Column(db.Text, nullable=False)
-#     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-#     status = db.Column(db.Enum('sent', 'pending'), default='pending')
-#     type = db.Column(db.Enum('survey', 'journal', 'mindfulness'), default='survey')
-    
-#     # Relationship
-#     user = db.relationship('User', back_populates='notifications')
+
 
 class UserEvents(db.Model):
     __tablename__ = 'userevents'
@@ -136,19 +111,7 @@ class UserEvents(db.Model):
 
 
 
-#tshtunen
-# class Notification(db.Model):
-#     __tablename__ = 'notifications'
-    
-#     notification_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
-#     message = db.Column(db.Text, nullable=False)
-#     sent_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-#     status = db.Column(db.Enum('sent', 'pending'), default='pending')
-#     type = db.Column(db.Enum('survey', 'journal', 'mindfulness'), default='survey')
-    
-#     # Relationship
-#     user = db.relationship('User', back_populates='notifications')
+
 
 #i shtova
 #models/notification.py
