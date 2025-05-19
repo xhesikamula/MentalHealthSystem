@@ -146,6 +146,7 @@ class PodcastForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     link = StringField('Link', validators=[DataRequired()])
     submit = SubmitField('Add Podcast')
+    image_url = StringField('Image URL', validators=[Optional(), URL()])
     
 
 

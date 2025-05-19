@@ -150,7 +150,8 @@ def edit_podcast(event_id):
             event_id,
             form.title.data,
             form.description.data,
-            form.link.data
+            form.link.data,
+            form.image_url.data
         )
         if result is True:
             flash('Podcast updated successfully.', 'success')

@@ -277,12 +277,13 @@ def update_event_by_id(event_id, title, location, description, date_time, link, 
         db.session.rollback()
         return str(e)
 
-def update_podcast_by_id(event_id, title, description, link):
+def update_podcast_by_id(event_id, title, description, link, image_url):
     try:
         podcast = Event.query.get_or_404(event_id)
         podcast.title = title
         podcast.description = description
         podcast.link = link
+        podcast.image_url = image_url
         db.session.commit()
         return True
     except Exception as e:

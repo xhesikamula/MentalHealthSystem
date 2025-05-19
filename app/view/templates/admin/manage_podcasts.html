@@ -1,32 +1,32 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Podcasts</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        html, body {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manage Podcasts</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+    html, body {
         height: 100%;
         margin: 0;
         display: flex;
         flex-direction: column;
         font-family: 'Quicksand', sans-serif;
         background-color: #f9fbfd;
-        }
+    }
 
-        main {
+    main {
         flex: 1;
-        }
+    }
 
-        h1 {
+    h1 {
         text-align: center;
         margin: 100px 0 20px 0;
         color: #333;
-        }
+    }
 
-        .add-button {
+    .add-button {
         display: block;
         width: fit-content;
         margin: 0 auto 20px auto;
@@ -38,55 +38,73 @@
         border-radius: 6px;
         text-decoration: none;
         transition: background-color 0.3s ease;
-        }
+    }
 
-        .add-button:hover {
+    .add-button:hover {
         background-color: #29421b;
-        }
+    }
 
-        h2 {
+    h2 {
         text-align: center;
         color: #555;
         margin-bottom: 20px;
-        }
+    }
 
-        ul.podcast-list {
+    ul.podcast-list {
         max-width: 90%;
         margin: 0 auto 40px auto;
         padding: 0;
         list-style: none;
-        }
+    }
 
-        .podcast-list li {
+    .podcast-list li {
         background-color: white;
         margin-bottom: 20px;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        .podcast-list li:hover {
+    .podcast-list li:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
+    }
 
-        .podcast-list strong {
+    .podcast-info {
+        flex: 1;
+        padding-right: 20px;
+    }
+
+    .podcast-list strong {
         font-size: 20px;
         color: #333;
-        }
+        display: block;
+        margin-bottom: 10px;
+    }
 
-        .podcast-list a.listen-link {
+    .podcast-list p {
+        margin: 0 0 10px 0;
+        color: #555;
+    }
+
+    .podcast-list a.listen-link,
+    .edit-button {
         color: #3c552d;
         font-weight: 600;
         text-decoration: none;
-        }
+        margin-right: 10px;
+    }
 
-        .podcast-list a.listen-link:hover {
+    .podcast-list a.listen-link:hover,
+    .edit-button:hover {
         text-decoration: underline;
-        }
+    }
 
-        button.delete-button {
+    button.delete-button {
         background-color: #bd2717;
         border: none;
         padding: 8px 16px;
@@ -95,60 +113,82 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.3s ease;
-        }
+    }
 
-        button.delete-button:hover {
+    button.delete-button:hover {
         background-color: #8b1b0e;
-        }
+    }
 
-      
+    .podcast-thumbnail {
+        max-width: 180px;
+        max-height: 120px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
 
-        @media (max-width: 768px) {
+    @media (max-width: 768px) {
         h1 { font-size: 28px; }
         ul.podcast-list { width: 95%; }
-        .podcast-list li { padding: 15px; }
+        .podcast-list li { 
+            flex-direction: column;
+            align-items: flex-start;
         }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        .podcast-info {
+            padding-right: 0;
+            margin-bottom: 10px;
+        }
+        .podcast-thumbnail {
+            max-width: 100%;
+            max-height: none;
+            align-self: center;
+        }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         const deleteButtons = document.querySelectorAll('.delete-button');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this podcast?')) {
-                e.preventDefault();
-            }
+                if (!confirm('Are you sure you want to delete this podcast?')) {
+                    e.preventDefault();
+                }
             });
         });
-        });
-    </script>
-    </head>
-    <body>
-    {% include 'header.html' %}
+    });
+</script>
+</head>
+<body>
+{% include 'header.html' %}
 
-    <main>
-        {% block content %}
-        <h1>Manage Podcasts</h1>
-        <a href="{{ url_for('admin.add_resource', resource_type='podcast') }}" class="add-button">➕ Add New Podcast</a>
+<main>
+    {% block content %}
+    <h1>Manage Podcasts</h1>
+    <a href="{{ url_for('admin.add_resource', resource_type='podcast') }}" class="add-button">➕ Add New Podcast</a>
 
-        <h2>All Podcasts</h2>
-        <ul class="podcast-list">
+    <h2>All Podcasts</h2>
+    <ul class="podcast-list">
         {% for podcast in podcasts %}
         <li>
-            <strong>{{ podcast.title }}</strong>
-            <p>{{ podcast.description }}</p>
-            <a href="{{ podcast.link }}" target="_blank" class="listen-link">Listen</a>
-            <a href="{{ url_for('admin.edit_podcast', event_id=podcast.event_id) }}" class="edit-button">Edit</a>
-            <form method="POST" action="{{ url_for('admin.delete_podcast', event_id=podcast.event_id) }}" style="display:inline;">
-            <button type="submit" class="delete-button">Delete</button>
-            </form>
+            <div class="podcast-info">
+                <strong>{{ podcast.title }}</strong>
+                <p>{{ podcast.description }}</p>
+                <a href="{{ podcast.link }}" target="_blank" class="listen-link">Listen</a>
+                <a href="{{ url_for('admin.edit_podcast', event_id=podcast.event_id) }}" class="edit-button">Edit</a>
+                <form method="POST" action="{{ url_for('admin.delete_podcast', event_id=podcast.event_id) }}" style="display:inline;">
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
+            </div>
+            {% if podcast.image_url %}
+                <img src="{{ podcast.image_url }}" alt="Podcast Image" class="podcast-thumbnail" />
+            {% endif %}
         </li>
         {% else %}
         <li>No podcasts found.</li>
         {% endfor %}
-        </ul>
-        {% endblock %}
-    </main>
+    </ul>
+    {% endblock %}
+</main>
 
-    {% include 'footer.html' %}
-    </body>
-    </html>
+{% include 'footer.html' %}
+</body>
+</html>

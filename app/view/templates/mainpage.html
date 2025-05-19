@@ -211,24 +211,26 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-    fetch('/notifications/check-survey', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status !== 'success') {  // Only show if NOT completed
-            showToast("⚠️ " + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Survey check error:', error);
+        fetch('/notifications/check-survey', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast("✅ " + data.message);
+            } else {
+                showToast("⚠️ " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Survey check error:', error);
+        });
     });
-});
 </script>
 
 </body>

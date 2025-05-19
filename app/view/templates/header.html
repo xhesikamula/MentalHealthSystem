@@ -6,7 +6,7 @@
   <title>ClarityWave</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   <style>
-    /* Enhanced dropdown styles only */
+    /* Dropdown styles */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -16,7 +16,8 @@
       display: none;
       position: absolute;
       background-color: white;
-      min-width: 150px;
+      min-width: 140px;
+      max-width: 200px;
       box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
       z-index: 1;
       border-radius: 5px;
@@ -24,6 +25,8 @@
       opacity: 0;
       transform: translateY(10px);
       pointer-events: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .dropdown:hover .dropdown-content {
@@ -35,64 +38,127 @@
 
     .dropdown-content a {
       color: #3c552d;
-      padding: 10px 14px;
+      padding: 8px 12px;
       text-decoration: none;
       display: block;
       transition: background-color 0.2s ease;
       border-bottom: 1px solid #eee;
+      white-space: nowrap;
     }
 
     .dropdown-content a:hover {
       background-color: #f2f2f2;
     }
 
-    nav ul {
-      list-style: none;
+    /* Navbar styles */
+    header nav {
+      height: 60px; /* fixed height */
       display: flex;
-      align-items: center;
-      gap: 20px;
+      align-items: center; /* vertical center */
+      padding: 0 20px;
+      background-color: #3c552d;
+    }
+
+    nav ul {
+      display: flex;
+      align-items: center; /* vertical center of li */
+      gap: 12px;
       padding-left: 0;
       margin: 0;
+      list-style: none;
+      width: 100%;
     }
 
     nav ul li {
-      position: relative;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    nav ul li:first-child img {
+      height: 40px; /* fixed height */
+      width: auto;
+      display: block;
+      margin: 0;
     }
 
     nav a {
+      display: flex;
+      align-items: center;
       color: white;
       text-decoration: none;
-      padding: 8px 12px;
-      transition: background-color 0.3s;
+      padding: 8px 10px;
+      font-size: 0.9rem;
       border-radius: 4px;
+      white-space: nowrap;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1;
+      height: 40px;
+      box-sizing: border-box;
+      transition: background-color 0.3s;
     }
 
     nav a:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
+
+    .dotlottie-player {
+      margin-bottom: -3px; /* nudge icon down for better alignment */
+    }
+
+    /* Align last dropdown (Contact) to right */
+    nav ul li.dropdown:last-child .dropdown-content {
+      right: 10px;
+      left: auto;
+      min-width: 140px;
+      max-width: 180px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      nav ul {
+        gap: 8px;
+      }
+      nav a {
+        padding: 5px 6px;
+        font-size: 0.85rem;
+        max-width: 120px;
+      }
+      nav ul li:first-child img {
+        height: 30px;
+      }
+    }
   </style>
- <script
-  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
-  type="module"
-></script>
+
+  <script
+    src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+    type="module"
+  ></script>
 </head>
 <body>
 
   <header>
     <nav>
       <ul>
-        <li><img src="{{ url_for('static', filename='images/logo.png') }}" width="150" alt="Logo" /></li>
+        <li>
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" />
+        </li>
 
         {% if current_user.is_authenticated %}
           <li class="dropdown">
-            <a href="#"><dotlottie-player
-  src="https://lottie.host/669a6a4d-aee9-429f-8bf7-d67e38c9fa1e/0GRKWwf3Qf.lottie"
-  background="transparent"
-  speed="1"
-   style="width: 35px; height: 35px; display: inline-block; vertical-align: middle; margin-right: 3px;"
-  loop
-  autoplay
-></dotlottie-player>{{ current_user.name }}</a>
+            <a href="#" style="gap: 6px; max-width: 140px;">
+              <dotlottie-player
+                src="https://lottie.host/669a6a4d-aee9-429f-8bf7-d67e38c9fa1e/0GRKWwf3Qf.lottie"
+                background="transparent"
+                speed="1"
+                style="width: 24px; height: 24px;"
+                loop
+                autoplay
+              ></dotlottie-player>
+              {{ current_user.name }}
+            </a>
             <div class="dropdown-content">
               <a href="{{ url_for('main.profile') }}">Profile</a>
               <a href="{{ url_for('main.logout') }}">Logout</a>
@@ -101,38 +167,44 @@
 
           {% if current_user.role == 'admin' %}
             <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+          {% else %}
+            <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
+            <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
+            <li class="dropdown">
+              <a href="#" id="notificationsDropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications</a>
+              <div class="dropdown-content" aria-labelledby="notificationsDropdown" style="min-width: 180px;">
+                {% if pending_notifications and pending_notifications|length > 0 %}
+                  {% for notification in pending_notifications %}
+                    <a href="{{ url_for('main.survey') }}">{{ notification.message }}</a>
+                  {% endfor %}
+                {% else %}
+                  <span style="padding:8px 12px; color: #999; display:block;">No new notifications</span>
+                {% endif %}
+              </div>
+            </li>
+            <li class="dropdown">
+              <a href="#">Contact</a>
+              <div class="dropdown-content">
+                <a href="https://facebook.com" target="_blank">Facebook</a>
+                <a href="https://instagram.com" target="_blank">Instagram</a>
+                <a href="https://twitter.com" target="_blank">Twitter</a>
+              </div>
+            </li>
           {% endif %}
 
+        {% else %}
+          <!-- Logged out menu -->
           <li><a href="{{ url_for('main.mainpage') }}">Home</a></li>
           <li><a href="{{ url_for('main.aboutus_page') }}">About</a></li>
-
-          <li class="dropdown">
-  <a href="#" id="notificationsDropdown" role="button" aria-haspopup="true" aria-expanded="false">
-    🔔 Notifications
-  </a>
-  <div class="dropdown-content" aria-labelledby="notificationsDropdown" style="min-width: 250px;">
-    {% if pending_notifications and pending_notifications|length > 0 %}
-      {% for notification in pending_notifications %}
-        <a href="{{ url_for('main.survey') }}">{{ notification.message }}</a>
-      {% endfor %}
-    {% else %}
-      <span style="padding:10px 14px; color: #999; display:block;">No new notifications</span>
-    {% endif %}
-  </div>
-</li>
-{% endif %}
-
-        <li class="dropdown">
-          <a href="#">Contact</a>
-          <div class="dropdown-content">
-            <a href="https://facebook.com" target="_blank">Facebook</a>
-            <a href="https://instagram.com" target="_blank">Instagram</a>
-            <a href="https://twitter.com" target="_blank">Twitter</a>
-          </div>
-        </li>
-
-        {% if not current_user.is_authenticated and request.endpoint != 'main.login' %}
           <li><a href="{{ url_for('main.login') }}">Login</a></li>
+          <li class="dropdown">
+            <a href="#">Contact</a>
+            <div class="dropdown-content">
+              <a href="https://facebook.com" target="_blank">Facebook</a>
+              <a href="https://instagram.com" target="_blank">Instagram</a>
+              <a href="https://twitter.com" target="_blank">Twitter</a>
+            </div>
+          </li>
         {% endif %}
       </ul>
     </nav>
