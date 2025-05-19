@@ -1006,7 +1006,7 @@ def mainpage():
     if current_user.role == 'admin':
         pending_notifications = []
     else:
-        # ✅ Check if a survey was submitted in the last 24 hours
+        # Check if a survey was submitted in the last 24 hours
         last_24_hours = datetime.utcnow() - timedelta(hours=24)
 
         last_survey = MoodSurvey.query.filter_by(user_id=current_user.user_id)\
@@ -1023,7 +1023,7 @@ def mainpage():
         
 
 
-        # ✅ If no recent survey and no pending notification, create it
+        # If no recent survey and no pending notification, create it
         if not has_recent_survey and not existing_notification:
             new_notification = Notification(
                 user_id=current_user.user_id,
@@ -1045,7 +1045,7 @@ def mainpage():
             db.session.commit()
 
 
-        # ✅ Fetch pending notifications for this user (and general)
+        # Fetch pending notifications for this user (and general)
         pending_notifications = Notification.query.filter(
             or_(
                 Notification.user_id == current_user.user_id,
@@ -1059,9 +1059,9 @@ def mainpage():
     login_time = session.get('login_time') 
 
     return render_template('mainpage.html', 
-                           pending_notifications=pending_notifications, 
-                           csrf_token=csrf_token_value,
-                           login_time=login_time)
+                        pending_notifications=pending_notifications, 
+                        csrf_token=csrf_token_value,
+                        login_time=login_time)
 
 
 @main.route('/notifications/create', methods=['POST'])
