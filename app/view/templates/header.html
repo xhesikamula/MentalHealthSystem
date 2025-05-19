@@ -108,10 +108,15 @@
       margin-bottom: -3px; /* nudge icon down for better alignment */
     }
 
-    /* Align last dropdown (Contact) to right */
+    /* Align last dropdown (Contact) to center below its parent */
+    nav ul li.dropdown:last-child {
+      position: relative; /* ensure parent is positioned */
+    }
+
     nav ul li.dropdown:last-child .dropdown-content {
-      right: 10px;
-      left: auto;
+      left: 50%;             /* position left at 50% of parent */
+      transform: translateX(-50%); /* shift left by 50% of dropdown width */
+      right: auto;           /* unset right */
       min-width: 140px;
       max-width: 180px;
     }

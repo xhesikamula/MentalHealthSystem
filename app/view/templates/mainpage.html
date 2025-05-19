@@ -30,6 +30,11 @@
         background-position: center;
         background-repeat: no-repeat;
     }
+    header {
+            min-height: 100px;
+            overflow: visible;
+            z-index: 999;
+        }
 
     .main-content {
         display: grid;
@@ -97,8 +102,12 @@
     }
 
     footer {
-        margin-top: auto;
-    }
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
 
     @media (max-width: 1000px) {
         .main-content {
@@ -136,6 +145,7 @@
 </style>
 </head>
 <body>
+    <div class="template3">
 
 {% include 'header.html' %}
 
@@ -233,5 +243,6 @@
     });
 </script>
 
+</div>
 </body>
 </html>
