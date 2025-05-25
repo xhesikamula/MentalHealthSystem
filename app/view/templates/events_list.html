@@ -44,88 +44,79 @@
 
     .event-list {
       display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      flex-wrap: wrap;
       gap: 2rem;
-      padding-bottom: 1rem;
-      scroll-snap-type: x mandatory;
-    }
-
-    .event-list::-webkit-scrollbar {
-      display: none;
-    }
-
-    .event-list {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;     /* Firefox */
+      justify-content: center;
     }
 
     .event-card {
-      flex: 0 0 auto;
-      min-width: 360px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-left: 6px solid #3C552D;
+      flex: 1 1 100%;
+      max-width: 1000px;
+      background: rgba(255, 255, 255, 0.9);
+      border-left: 8px solid #3C552D;
       border-radius: 20px;
-      padding: 1.5rem;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       animation: slideUp 0.8s ease forwards;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1.5rem;
-      scroll-snap-align: start;
+    }
+
+    .event-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .event-image {
+      flex-shrink: 0;
+      margin-right: 1.5rem;
+    }
+
+    .event-image img {
+      width: 220px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .event-content {
       flex: 1;
     }
 
-    .event-image img {
-      max-width: 180px;
-      height: 140px;
-      border-radius: 12px;
-      object-fit: cover;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .event-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
-    }
-
-    .event-card h2 {
+    .event-content h2 {
       margin-top: 0;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
       color: #2e4022;
       margin-bottom: 0.6rem;
     }
 
-    .event-card p {
+    .event-content p {
       margin: 0.4rem 0;
       line-height: 1.5;
     }
 
-    .event-location, .event-date {
+    .event-location,
+    .event-date {
       font-weight: 600;
       color: #4f4f4f;
     }
 
-    .event-card a.more-info {
+    .more-info {
       display: inline-block;
       margin-top: 1rem;
-      padding: 0.6rem 1.2rem;
-      background: #3C552D;
+      padding: 0.5rem 1rem;
+      background-color: #3C552D;
       color: white;
       text-decoration: none;
       border-radius: 8px;
-      font-weight: 500;
       transition: background 0.3s ease;
+      font-weight: 500;
     }
 
-    .event-card a.more-info:hover {
-      background: #2e4022;
+    .more-info:hover {
+      background-color: #2e4022;
     }
 
     .no-events {
@@ -139,15 +130,27 @@
       margin-top: auto;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 768px) {
       .event-card {
-        flex-direction: row;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.2rem;
+      }
+
+      .event-image {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        width: 100%;
+        text-align: center;
       }
 
       .event-image img {
-        max-width: 100%;
-        margin-top: 0;
+        width: 100%;
+        height: auto;
+      }
+
+      .event-content h2 {
+        font-size: 1.6rem;
       }
     }
 
@@ -183,6 +186,11 @@
     <div class="event-list">
       {% for event in events %}
       <div class="event-card">
+        {% if event.image_url %}
+        <div class="event-image">
+          <img src="{{ event.image_url }}" alt="{{ event.title }} image" />
+        </div>
+        {% endif %}
         <div class="event-content">
           <h2>{{ event.title }}</h2>
           <p class="event-location">{{ event.location }}</p>
@@ -192,11 +200,6 @@
           {% endif %}
           <a href="{{ event.link }}" target="_blank" class="more-info">More Info</a>
         </div>
-        {% if event.image_url %}
-        <div class="event-image">
-          <img src="{{ event.image_url }}" alt="{{ event.title }} image" />
-        </div>
-        {% endif %}
       </div>
       {% endfor %}
     </div>

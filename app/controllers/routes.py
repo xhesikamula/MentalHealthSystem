@@ -58,7 +58,7 @@ from app.model.models import Event
 @login_required
 def list_events():
     #I bon fetch veq eventet te tipit event
-    events = Event.query.filter_by(type='event').all()
+    events = Event.query.filter_by(type ='event').all()
     return render_template('events_list.html', events=events)
 
 @main.route('/podcasts')

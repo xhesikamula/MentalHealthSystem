@@ -228,7 +228,7 @@ footer p {
     justify-content: center;
     gap: 40px;
     max-width: 900px;
-    margin: 20px auto;
+    margin: 60px auto;
 }
 
 /* .signup-image {
@@ -244,7 +244,7 @@ footer p {
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     margin-top: 40px;
-    margin-bottom: -30px;
+    margin-bottom: 60px;
 }
 
 .signup-container h2 {
