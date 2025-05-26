@@ -260,5 +260,105 @@ document.addEventListener('DOMContentLoaded', function() {
 
     {% include 'footer.html' %}
 
+
+
+    
+  <!-- Help Button -->
+<div style="
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 9999;
+">
+  <button id="helpBtn" style="
+      background-color: var(--accent);
+      color: rgb(155, 159, 154);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  ">Help</button>
+</div>
+
+<!-- Help Modal Overlay -->
+<div id="helpModalOverlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+"></div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;         /* Limit height */
+    overflow-y: auto;  
+    width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+">
+    <h2 style="margin-bottom: 0.5rem; color: black; margin-top: 10px; text-shadow: none;">Help: History Page</h2>
+    <p>Welcome to the Survey History and Mood Tracking section of ClarityWave!</p>
+  <ul>
+    <p>This guide will help you understand how to read your survey results, track your mood and stress trends, and make the most of the personalized recommendations provided.</p>
+          <strong>Overview of Your Survey History:</strong> 
+          <li>The Survey History section displays all your past surveys in chronological order, starting from the most recent.</li>
+          <li>Each survey card contains detailed metrics about your mood, stress level, sleep hours, energy, diet quality, physical activity, social time, and your personal feelings description.</li>
+          <li>Use this section to review how you have been feeling over time and identify patterns.</li>
+          <strong>Understanding the Mood & Stress Trends Chart:</strong>
+          <li>The Mood & Stress Trends line chart visualizes your mood and stress levels over time.</li>
+          <li>The green line represents your Mood Level, while the orange line shows your Stress Level.</li>
+          <li>This graph helps you see changes and trends across all your recorded surveys, making it easier to track improvements or notice when additional care might be needed.</li>
+        </ul>
+        <p>Your survey data is stored securely and used solely to provide you with personalized insights and recommendations.</p>
+        <p>ClarityWave respects your privacy and complies with data protection regulations.</p>
+         <img src="{{ url_for('static', filename='images/historyhelp1.png') }}" 
+         alt="Screenshot of History Page" 
+         style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 1.5rem;" />
+         <p>Example of the survey data:</p>
+         <img src="{{ url_for('static', filename='images/historyhelp2.png') }}" 
+         alt="Screenshot of History Page" 
+         style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 1.5rem;" />
+        <p>Thank you for using ClarityWave to support your mental health journey!</p>
+        
+      
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+      document.getElementById('helpModalOverlay').style.display = 'block';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('helpModalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpModalOverlay').addEventListener('click', closeHelpModal);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'F1') {
+        event.preventDefault();
+        openHelpModal();
+      }
+    });
+  });
+</script>
+
+
 </body>
 </html>

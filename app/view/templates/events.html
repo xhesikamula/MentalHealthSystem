@@ -152,6 +152,92 @@
     {% include 'footer.html' %}
 </footer>
 
+
+  <!-- Help Button -->
+<div style="
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 9999;
+">
+  <button id="helpBtn" style="
+      background-color: var(--accent);
+      color: rgb(155, 159, 154);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+     
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  ">Help</button>
+</div>
+
+<!-- Help Modal Overlay -->
+<div id="helpModalOverlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+"></div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;         /* Limit height */
+    overflow-y: auto;  
+    width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+">
+    <h2 style="margin-bottom: 0.5rem;">Help: Places To Visit Page</h2>
+     <p>To find mental health events near you:</p>
+        <ul>
+            <li><strong>Use My Location</strong>: Automatically detects your location and fetches nearby events.</li>
+            <li><strong>Submit Location</strong>: Enter your <em>latitude</em> and <em>longitude</em> manually.</li>
+            <li>Ensure browser location permission is enabled if using automatic detection.</li>
+        </ul>
+         <img src="{{ url_for('static', filename='images/placestovisit.png') }}" 
+         alt="Screenshot of Places to visit Page" 
+         style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 1.5rem;" />
+        <p>Need more help? Contact support or check your notifications for updates.</p>
+        
+      
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+      document.getElementById('helpModalOverlay').style.display = 'block';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('helpModalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpModalOverlay').addEventListener('click', closeHelpModal);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'F1') {
+        event.preventDefault();
+        openHelpModal();
+      }
+    });
+  });
+</script>
+
 <script>
     function fetchEvents(lat, lon) {
         document.getElementById('loading').style.display = 'block';

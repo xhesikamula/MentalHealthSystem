@@ -183,5 +183,94 @@
 
     {% include 'footer.html' %}
 
+
+      <!-- Help Button -->
+<div style="
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 9999;
+">
+  <button id="helpBtn" style="
+      background-color: var(--accent);
+      color: rgb(155, 159, 154);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+     
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  ">Help</button>
+</div>
+
+<!-- Help Modal Overlay -->
+<div id="helpModalOverlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+"></div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;         /* Limit height */
+    overflow-y: auto;  
+    width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+">
+    <h2 style="margin-bottom: 0.5rem;">Help: Hotlines Page</h2>
+    <p>These hotlines connect you directly to trained professionals who can help with emotional distress, mental health crises, or urgent advice.</p>
+  <ul>
+          <li><strong>View the list of hotlines:</strong> Each hotline is displayed as a card with the hotline’s name, a brief description of the services offered, and the phone number.</li>
+          <li><strong>Call a hotline:</strong> Click the “Call Now” button on any hotline card to directly dial the number from your device. This works on smartphones and devices with calling capabilities.</li>
+          <li><strong>Learn about each hotline:</strong> Read the description under each hotline’s title to understand what type of help or support they provide.</li>
+          <br><strong>Important note !</strong> 
+          <p><strong>Confidential and Free:</strong> Most hotlines provide free, confidential support 24/7. You can call anonymously if you prefer.</p>
+        </ul>
+        <p>Please, find a quiet and private place before calling.</p>
+         <img src="{{ url_for('static', filename='images/hotlineshelp.png') }}" 
+         alt="Screenshot of hotlines Page" 
+         style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 1.5rem;" />
+        <p>Need more help? Contact support or check your notifications for updates.</p>
+        
+      
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+      document.getElementById('helpModalOverlay').style.display = 'block';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('helpModalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpModalOverlay').addEventListener('click', closeHelpModal);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'F1') {
+        event.preventDefault();
+        openHelpModal();
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

@@ -210,5 +210,93 @@
 
   {% include 'footer.html' %}
 
+
+    <!-- Help Button -->
+<div style="
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 9999;
+">
+  <button id="helpBtn" style="
+      background-color: var(--accent);
+      color: rgb(155, 159, 154);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+     
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  ">Help</button>
+</div>
+
+<!-- Help Modal Overlay -->
+<div id="helpModalOverlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+"></div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;         /* Limit height */
+    overflow-y: auto;  
+    width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+">
+    <h2 style="margin-bottom: 0.5rem;">Help: Events Page</h2>
+    <p>Welcome to the ClarityWave Events page! Here's a quick guide:</p>
+  <ul>
+          <li><strong>View Upcoming Events:</strong> Browse a list of events with details like title, location, date, and description.</li>
+          <li><strong>More Info: </strong> Click the “More Info” button on any event card to visit the event's official page for registration or additional details.</li>
+        </ul>
+        <p>If events are not loading, please check your internet connection.</p>
+        <p>Clear your browser cache and refresh the page.</p>
+        <p>Contact support if the problem persists.</p>
+         <img src="{{ url_for('static', filename='images/eventshelp.png') }}" 
+         alt="Screenshot of Events Page" 
+         style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 1.5rem;" />
+        <p>Need more help? Contact support or check your notifications for updates.</p>
+        
+      
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+      document.getElementById('helpModalOverlay').style.display = 'block';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('helpModalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpModalOverlay').addEventListener('click', closeHelpModal);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'F1') {
+        event.preventDefault();
+        openHelpModal();
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

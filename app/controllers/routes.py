@@ -455,6 +455,11 @@ def survey_complete():
         return render_template('survey_complete.html', recommendations=[])
 
 
+@main.route('/help_index')
+def help_index():
+    return render_template('help_index.html')
+
+
 
 @main.route('/healthcheck')
 def health_check():

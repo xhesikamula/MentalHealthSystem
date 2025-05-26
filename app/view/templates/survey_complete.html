@@ -208,6 +208,88 @@
     </div>
 
     {% include 'footer.html' %}
+    <!-- Help Button -->
+<div style="
+    position: fixed;
+    top: 110px;
+    right: 20px;
+    z-index: 9999;
+">
+  <button id="helpBtn" style="
+      background-color: var(--accent);
+      color: rgb(155, 159, 154);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+     
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  ">Help</button>
+</div>
+
+<!-- Help Modal Overlay -->
+<div id="helpModalOverlay" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+"></div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+">
+    <h2 style="margin-bottom: 0.5rem; color: black;">Help: Recommendations Page</h2>
+    <p style="font-size: 0.95rem; color: #555; margin-bottom: 1.5rem;">
+        This page offers personalized recommendations to improve your well-being based on your survey responses.
+    </p>
+    <ul style="text-align: left; font-size: 0.95rem; color: #333; line-height: 1.6;">
+        <li><strong>Recommendations:</strong> Tailored suggestions based on your mood, stress, sleep, and activity levels.</li>
+        <li><strong>Icons and Categories:</strong> Easily identify areas of focus like sleep, nutrition, or social wellness.</li>
+        <li><strong>Priority Tips:</strong> Top suggestions are based on the most pressing needs from your survey.</li>
+        <li><strong>Next Steps:</strong> Use the guidance here to set small goals or habits to try today.</li>
+    </ul>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+      document.getElementById('helpModalOverlay').style.display = 'block';
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('helpModalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+    document.getElementById('helpModalOverlay').addEventListener('click', closeHelpModal);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'F1') {
+        event.preventDefault();
+        openHelpModal();
+      }
+    });
+  });
+</script>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
