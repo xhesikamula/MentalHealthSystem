@@ -85,7 +85,7 @@ Create a comprehensive, user-friendly mental health platform that offers persona
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/xhesikamula/claritywave.git
+git clone https://github.com/xhesikamula/MentalHealthSystem.git
 
 # 2. Install dependencies (Flask, MySQL connector, etc.)
 pip install -r requirements.txt
